@@ -1,0 +1,39 @@
+################################################################################
+# task configuration file
+################################################################################
+
+defaultwidth=80
+defaultheight=30
+
+xterm.title=no
+
+########################################
+
+debug=no
+exit.on.missing.db=yes
+verbose=yes
+
+########################################
+
+data.location=/.g/_data/zactive/_pim/tasks
+
+include /usr/share/task/rc/dark-red-256.theme
+
+################################################################################
+
+default.command=next
+
+search.case.sensitive=no
+
+########################################
+
+weekstart=Monday
+
+dateformat=Y-M-D
+dateformat.annotation=YMD
+dateformat.holiday=YMD
+dateformat.report=Y-M-D
+
+################################################################################
+# end of file
+################################################################################
