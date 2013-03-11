@@ -221,36 +221,40 @@ sub export_files {
 	$mech->get("${URL}/users/\@me/lists"
 		. "?maxResults=1000000"
 	);
-	if (${EXPORT_JSON}) {
-		print JSON "\n" . ("#" x 10) . "[ LISTS ]" . ("#" x 10) . "\n\n";
-		print JSON $mech->content();
-	};
 	$output = decode_json($mech->content());
+	if (${EXPORT_JSON}) {
+		print JSON ("#" x 5) . "[ LISTS ]" . ("#" x 5) . "\n\n";
+		print JSON $mech->content();
+		print JSON "\n";
+	};
 
 #>>> BUG IN PERL!
 #>>> http://www.perlmonks.org/?node_id=490213
 	my @array = @{$output->{"items"}};
-	foreach my $task (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
+	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
 #>>>
-		&export_files_item(${task}, "-", "-");
-
-		$mech->get("${URL}/lists/$task->{'id'}/tasks"
+		$mech->get("${URL}/lists/$tasklist->{'id'}/tasks"
 			. "?maxResults=1000000"
 			. "&showCompleted=true"
 			. "&showDeleted=true"
 			. "&showHidden=true"
 		);
-		if (${EXPORT_JSON}) {
-			print JSON "\n" . ("#" x 10) . "[ $task->{'title'} ]" . ("#" x 10) . "\n\n";
-			print JSON $mech->content();
-		};
 		$output = decode_json($mech->content());
+		$tasklist->{"title"} .= " (" . ($#{$output->{"items"}} + 1) . ")";
+		if (${EXPORT_JSON}) {
+			print JSON ("#" x 5) . "[ $tasklist->{'title'} ]" . ("#" x 5) . "\n\n";
+			print JSON $mech->content();
+			print JSON "\n";
+		};
 
+		&export_files_item(${tasklist}, "-", "-");
 		&export_files_list(${output});
+
+		print TXT  "\n";
 	};
 
-	(${EXPORT_JSON}) && print JSON "\n" . ("#" x 10) . "[ END OF FILE ]" . ("#" x 10) . "\n";
-	(${EXPORT_TXT})  && print TXT  "\n" . ("#" x 10) . "[ END OF FILE ]" . ("#" x 10) . "\n";
+	(${EXPORT_JSON}) && print JSON ("#" x 5) . "[ END OF FILE ]" . ("#" x 5) . "\n";
+	(${EXPORT_TXT})  && print TXT  ("=" x 5) . "[ END OF FILE ]" . ("=" x 5) . "\n";
 
 	(${EXPORT_JSON}) && (close(JSON) || die());
 	(${EXPORT_CSV})  && (close(CSV)  || die());
@@ -336,10 +340,11 @@ sub export_files_item {
 
 	if (${EXPORT_TXT}) {
 		if (${indent} !~ /\d+/) {
-			print TXT "\n" . ("#" x 10) . "[ $task->{'title'} ]" . ("#" x 10) . "\n\n";
+			print TXT ("=" x 5) . "[ $task->{'title'} ]" . ("=" x 5) . "\n";
 		} else {
-			my $tabs = ("\t" x (${indent} + 2));
-			print TXT ("\t" x ${indent});
+			print TXT  ("\t" x (${indent} + 1));
+			my $note = ("\t" x (${indent} + 2)) . ("-" x 5);
+			my $tabs = ("\t" x (${indent} + 3));
 
 			if ($task->{"completed"}) {
 				print TXT "x";
@@ -363,7 +368,7 @@ sub export_files_item {
 					if (${field} eq "notes") {
 						$output =~ s|^([ ]+)|("\t" x (length(${1}) / 2))|egm;
 						$output =~ s/^/${tabs}/gm;
-						$output =~ s/^/\n/;
+						$output =~ s/^/\n${note}\n/;
 					};
 					if (${field} ne "notes") {
 						print TXT " ";
