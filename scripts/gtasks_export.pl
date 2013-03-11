@@ -34,9 +34,15 @@ use JSON::PP;
 ################################################################################
 
 my $FILE		= "tasks";
+my $DEFAULT_LIST	= "0.GTD";
 
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
+
+########################################
+
+my $MANAGE_CRUFT	= "1";
+my $MANAGE_CRUFT_ALL	= "1";
 
 my $EXPORT_JSON		= "1";
 my $EXPORT_CSV		= "1";
@@ -141,11 +147,37 @@ sub refresh_tokens {
 ########################################
 
 sub manage_cruft {
+	(!${MANAGE_CRUFT}) && (return(0));
 	my $output;
 
-	print "\nManaging cruft...\n";
+	print "\n";
 
-	$mech->get("${URL}/lists/\@default/tasks"
+	$mech->get("${URL}/users/\@me/lists"
+		. "?maxResults=1000000"
+	) && $API_REQUEST_COUNT++;
+	$output = decode_json($mech->content());
+
+#>>> BUG IN PERL!
+#>>> http://www.perlmonks.org/?node_id=490213
+	my @array = @{$output->{"items"}};
+	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
+#>>>
+		if (${MANAGE_CRUFT_ALL} || $tasklist->{"title"} eq ${DEFAULT_LIST}) {
+			printf("%-10.10s %-50.50s %s\n", (("-" x 9) . ">"), $tasklist->{"id"}, $tasklist->{"title"} || "-");
+			&manage_cruft_list($tasklist->{"id"});
+		};
+	};
+
+	return(0);
+};
+
+########################################
+
+sub manage_cruft_list {
+	my $listid	= shift;
+	my $output;
+
+	$mech->get("${URL}/lists/${listid}/tasks"
 		. "?maxResults=1000000"
 		. "&showCompleted=true"
 		. "&showDeleted=true"
@@ -159,34 +191,34 @@ sub manage_cruft {
 #>>> SHOULD JUST BE ABLE TO MOVE THEM TO A "PURGE" LIST FOR MANUAL DELETION
 		if ($task->{"title"} =~ "\n") {
 			$task->{"title"} =~ s/\n//g;
-			print "rescuing $task->{'id'} $task->{'title'}\n";
+			printf("%-10.10s %-50.50s %s\n", "rescuing:", $task->{"id"}, $task->{"title"} || "-");
 		};
 
-		if (	!$task->{"completed"}	&&
+		if (	$task->{"title"} ne "0"	&&
 			!$task->{"title"}	&&
 			!$task->{"notes"}	&&
 			!$task->{"due"}
 		) {
-			print "clearing $task->{'id'} $task->{'title'}\n";
+			printf("%-10.10s %-50.50s %s\n", "clearing:", $task->{"id"}, $task->{"title"} || "-");
 			$mech->request(HTTP::Request->new(
 				"PATCH", $task->{"selfLink"}, ["Content-Type", "application/json"], encode_json({
 					"title"		=> "0",
-					"status"	=> "completed",
+					"status"	=> "needsAction",
+					"completed"	=> undef,
 					"deleted"	=> "0",
 				})
 			));
 		};
 
-		if ((	$task->{"completed"}	||
-			$task->{"deleted"}	) && (
-			$task->{"title"}	||
+		if ((	!$task->{"title"}	&& (
 			$task->{"notes"}	||
 			$task->{"due"}		)
-		) {
-			print "reviving $task->{'id'} $task->{'title'}\n";
+			$task->{"deleted"}
+		)) {
+			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
 			$mech->request(HTTP::Request->new(
 				"PATCH", $task->{"selfLink"}, ["Content-Type", "application/json"], encode_json({
-					"title"		=> "[" . sprintf("%03d", int(rand(10**3))) . "]:[$task->{'title'}]",
+					"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[$task->{'title'}]",
 					"status"	=> "needsAction",
 					"completed"	=> undef,
 					"deleted"	=> "0",
@@ -195,8 +227,6 @@ sub manage_cruft {
 		};
 #>>>
 	};
-
-	$mech->post("${URL}/lists/\@default/clear");
 
 	return(0);
 };
