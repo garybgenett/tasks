@@ -90,24 +90,34 @@ do(".token");
 
 ################################################################################
 
+my $API_REQUEST_COUNT = "0";
+
+sub EXIT {
+	my $status = shift || "0";
+	print "\nAPI Requests: ${API_REQUEST_COUNT}\n";
+	exit(${status});
+};
+
+########################################
+
 sub refresh_tokens {
 	if (!${CODE} || !${REFRESH}) {
-		$mech->get("https://accounts.google.com/ServiceLogin");
+		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
 		$mech->form_id("gaia_loginform");
 		$mech->field("Email",	${USERNAME});
 		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit();
+		$mech->submit() && $API_REQUEST_COUNT++;
 
 		$mech->get("https://accounts.google.com/o/oauth2/auth"
 			. "?client_id=${CLIENTID}"
 			. "&redirect_uri=${REDIRECT}"
 			. "&scope=${SCOPE}"
 			. "&response_type=code"
-		);
+		) && $API_REQUEST_COUNT++;
 		$mech->submit_form(
 			"form_id"	=> "submit_access_form",
 			"fields"	=> {"submit_access" => "true"},
-		);
+		) && $API_REQUEST_COUNT++;
 		$CODE = $mech->content();
 		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
 		$CODE =~ s|".*$||s;
@@ -118,7 +128,7 @@ sub refresh_tokens {
 			"client_secret"		=> ${CLSECRET},
 			"redirect_uri"		=> ${REDIRECT},
 			"grant_type"		=> "authorization_code",
-		});
+		}) && $API_REQUEST_COUNT++;
 		$REFRESH = decode_json($mech->content());
 		$REFRESH = $REFRESH->{"refresh_token"};
 	};
@@ -128,7 +138,7 @@ sub refresh_tokens {
 		"client_id"		=> ${CLIENTID},
 		"client_secret"		=> ${CLSECRET},
 		"grant_type"		=> "refresh_token",
-	});
+	}) && $API_REQUEST_COUNT++;
 	$ACCESS = decode_json($mech->content());
 	$ACCESS = $ACCESS->{"access_token"};
 
@@ -184,7 +194,7 @@ sub manage_cruft_list {
 		. "&showCompleted=true"
 		. "&showDeleted=true"
 		. "&showHidden=true"
-	);
+	) && $API_REQUEST_COUNT++;
 	$output = decode_json($mech->content());
 
 	foreach my $task (@{$output->{"items"}}) {
@@ -209,12 +219,13 @@ sub manage_cruft_list {
 					"completed"	=> undef,
 					"deleted"	=> "0",
 				})
-			));
+			)) && $API_REQUEST_COUNT++;
 		};
 
 		if ((	!$task->{"title"}	&& (
 			$task->{"notes"}	||
 			$task->{"due"}		)
+		) || (
 			$task->{"deleted"}
 		)) {
 			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
@@ -225,7 +236,7 @@ sub manage_cruft_list {
 					"completed"	=> undef,
 					"deleted"	=> "0",
 				})
-			));
+			)) && $API_REQUEST_COUNT++;
 		};
 #>>>
 	};
@@ -252,7 +263,7 @@ sub export_files {
 
 	$mech->get("${URL}/users/\@me/lists"
 		. "?maxResults=1000000"
-	);
+	) && $API_REQUEST_COUNT++;
 	$output = decode_json($mech->content());
 	if (${EXPORT_JSON}) {
 		print JSON ("#" x 5) . "[ LISTS ]" . ("#" x 5) . "\n\n";
@@ -270,7 +281,7 @@ sub export_files {
 			. "&showCompleted=true"
 			. "&showDeleted=true"
 			. "&showHidden=true"
-		);
+		) && $API_REQUEST_COUNT++;
 		$output = decode_json($mech->content());
 		$tasklist->{"title"} .= " (" . ($#{$output->{"items"}} + 1) . ")";
 		if (${EXPORT_JSON}) {
@@ -433,7 +444,8 @@ if (${EXPORT_TXT} && ${CAT_TEXT}) {
 
 ########################################
 
-exit(0);
+&EXIT(0);
+
 ################################################################################
 # end of file
 ################################################################################
