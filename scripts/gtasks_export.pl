@@ -72,6 +72,8 @@ my $CSV_FIELDS = [
 my $HIDE_COMPLETED	= "0";
 my $HIDE_DELETED	= "0";
 
+my $CAT_TEXT		= "0";
+
 ########################################
 
 our $USERNAME;
@@ -422,8 +424,9 @@ sub export_files_item {
 
 ########################################
 
-if (${EXPORT_TXT}) {
+if (${EXPORT_TXT} && ${CAT_TEXT}) {
 	open(TXT, "<", "${FILE}.txt") || die();
+	print "\n";
 	print <TXT>;
 	close(TXT) || die();
 };
