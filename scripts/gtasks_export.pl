@@ -31,6 +31,8 @@ my $mech = WWW::Mechanize->new(
 use HTTP::Request;
 use JSON::PP;
 
+use File::Temp qw(tempfile);
+
 ################################################################################
 
 my $FILE		= "tasks";
@@ -96,6 +98,85 @@ sub EXIT {
 	my $status = shift || "0";
 	print "\nAPI Requests: ${API_REQUEST_COUNT}\n";
 	exit(${status});
+};
+
+########################################
+
+if (@{ARGV}) {
+	(${ARGV[0]}) ? (my $argv_list = ${ARGV[0]}) : &EXIT(1);
+	(${ARGV[1]}) ? (my $argv_name = ${ARGV[1]}) : &EXIT(1);
+	my $selflink;
+	my $output;
+
+	&refresh_tokens();
+
+	$mech->get("${URL}/users/\@me/lists"
+		. "?maxResults=1000000"
+	) && $API_REQUEST_COUNT++;
+	$output = decode_json($mech->content());
+
+	foreach my $tasklist (@{$output->{"items"}}) {
+		if ($tasklist->{"title"} eq ${argv_list}) {
+			$mech->get("${URL}/lists/$tasklist->{'id'}/tasks"
+				. "?maxResults=1000000"
+				. "&showCompleted=true"
+				. "&showDeleted=true"
+				. "&showHidden=true"
+			) && $API_REQUEST_COUNT++;
+			$output = decode_json($mech->content());
+
+			foreach my $task (@{$output->{"items"}}) {
+				if ($task->{"title"} eq ${argv_name}) {
+					$selflink = $task->{"selfLink"};
+					last;
+				};
+			};
+
+			last;
+		};
+	};
+
+	if (!${selflink}) {
+		print STDERR "\n";
+		print STDERR "DOES NOT EXIST!\n";
+		&EXIT(1);
+	} else {
+		$mech->get("${selflink}") && $API_REQUEST_COUNT++;
+		$output = decode_json($mech->content());
+
+		$output = &edit_notes($output->{"notes"});
+
+		$mech->request(HTTP::Request->new(
+			"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json({
+				"notes"		=> ${output},
+			})
+		)) && $API_REQUEST_COUNT++;
+	};
+
+	&EXIT(0);
+};
+
+########################################
+
+sub edit_notes {
+	my $notes = shift;
+
+	$notes =~ s|^([ ]+)|("\t" x (length(${1}) / 2))|egm;
+
+	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "0");
+	print ${TEMPFILE} ${notes};
+	close(${TEMPFILE}) || die();
+
+	system("${ENV{EDITOR}} ${tempfile}");
+
+	open(${TEMPFILE}, "<", "${tempfile}") || die();
+	$notes = do { local $/; <$TEMPFILE> };
+	close(${TEMPFILE}) || die();
+
+	$notes =~ s|^(\t+)|("  " x length(${1}))|egm;
+	$notes =~ s/\n+$//;
+
+	return(${notes});
 };
 
 ########################################
