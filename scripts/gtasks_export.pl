@@ -223,10 +223,10 @@ sub refresh_tokens {
 	$ACCESS = decode_json($mech->content());
 	$ACCESS = $ACCESS->{"access_token"};
 
-	open(OUTPUT, ">", ".token");
+	open(OUTPUT, ">", ".token") || die();
 	print OUTPUT "our \$CODE    = '${CODE}';\n";
 	print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
-	close(OUTPUT);
+	close(OUTPUT) || die();
 
 	print "CODE:    ${CODE}\n";
 	print "REFRESH: ${REFRESH}\n";
@@ -240,7 +240,7 @@ sub refresh_tokens {
 ########################################
 
 sub manage_cruft {
-	(!${MANAGE_CRUFT}) && (return(0));
+	(!${MANAGE_CRUFT}) && return(0);
 	my $output;
 
 	print "\n";
