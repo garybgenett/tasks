@@ -453,8 +453,7 @@ sub export_files_item {
 		foreach my $field (@{$CSV_FIELDS}) {
 			if(exists($task->{$field})) {
 				my $output = $task->{$field};
-				$output =~ s/^"//g;
-				$output =~ s/"$//g;
+				$output =~ s/"/""/g;
 				print CSV "\"${output}\",";
 			} else {
 				print CSV "\"${empty}\",";
