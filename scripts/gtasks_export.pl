@@ -84,12 +84,12 @@ our $PASSWORD;
 our $CLIENTID;
 our $CLSECRET;
 our $REDIRECT;
-do(".auth");
+do(".auth") || die();
 
 our $CODE;
 our $REFRESH;
 our $ACCESS;
-do(".token");
+do(".token") || die();
 
 ################################################################################
 
