@@ -8,7 +8,8 @@ use warnings;
 # http://search.cpan.org/~jesse/WWW-Mechanize-1.72/lib/WWW/Mechanize.pm
 # http://search.cpan.org/~gaas/libwww-perl-6.04/lib/LWP/UserAgent.pm
 # http://search.cpan.org/~gaas/HTTP-Message-6.06/lib/HTTP/Request.pm
-# http://search.cpan.org/~makamaka/JSON-2.53/lib/JSON.pm
+# http://search.cpan.org/~makamaka/JSON-PP-2.27201/lib/JSON/PP.pm
+# http://search.cpan.org/~tjenness/File-Temp-0.22/Temp.pm
 ################################################################################
 
 use Data::Dumper;
