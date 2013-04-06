@@ -44,7 +44,7 @@ my $URL			= "https://www.googleapis.com/tasks/v1";
 
 ########################################
 
-my $MANAGE_CRUFT	= "1";
+my $MANAGE_CRUFT	= "0"; if (@ARGV && ${ARGV[0]} eq "cruft") {shift; $MANAGE_CRUFT = "1";};
 my $MANAGE_CRUFT_ALL	= "1";
 
 my $EXPORT_JSON		= "1";
@@ -243,7 +243,6 @@ sub refresh_tokens {
 ########################################
 
 sub manage_cruft {
-	(!${MANAGE_CRUFT}) && return(0);
 	my $output;
 
 	print "\n";
@@ -513,16 +512,19 @@ sub export_files_item {
 ################################################################################
 
 &refresh_tokens();
-&manage_cruft();
-&export_files();
 
 ########################################
 
-if (${EXPORT_TXT} && ${CAT_TEXT}) {
-	open(TXT, "<", "${FILE}.txt") || die();
-	print "\n";
-	print <TXT>;
-	close(TXT) || die();
+if (${MANAGE_CRUFT}) {
+	&manage_cruft();
+} else {
+	&export_files();
+	if (${EXPORT_TXT} && ${CAT_TEXT}) {
+		open(TXT, "<", "${FILE}.txt") || die();
+		print "\n";
+		print <TXT>;
+		close(TXT) || die();
+	};
 };
 
 ########################################
