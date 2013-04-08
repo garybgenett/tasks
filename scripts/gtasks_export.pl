@@ -147,13 +147,15 @@ if (@{ARGV}) {
 
 		$output = &edit_notes($output->{"notes"});
 
-		&refresh_tokens();
+		if ($output) {
+			&refresh_tokens();
 
-		$mech->request(HTTP::Request->new(
-			"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json({
-				"notes"		=> ${output},
-			})
-		)) && $API_REQUEST_COUNT++;
+			$mech->request(HTTP::Request->new(
+				"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json({
+					"notes"		=> ${output},
+				})
+			)) && $API_REQUEST_COUNT++;
+		};
 	};
 
 	&EXIT(0);
