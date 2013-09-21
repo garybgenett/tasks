@@ -18,12 +18,16 @@ verbose=yes
 data.location=/.g/_data/zactive/_pim/tasks
 
 include /usr/share/task/rc/dark-red-256.theme
+include /usr/share/task/rc/holidays.en-US.rc
 
 ################################################################################
 
 default.command=next
 
 search.case.sensitive=no
+
+list.all.projects=on
+list.all.tags=on
 
 ########################################
 
