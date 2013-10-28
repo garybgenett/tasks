@@ -38,6 +38,7 @@ use File::Temp qw(tempfile);
 
 my $FILE		= "tasks";
 my $DEFAULT_LIST	= "0.GTD";
+my $PROJECT_LIST	= "0.Projects";
 
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
@@ -104,10 +105,14 @@ sub EXIT {
 ########################################
 
 if (@{ARGV}) {
-	(${ARGV[0]}) ? (my $argv_list = ${ARGV[0]}) : &EXIT(1);
-	(${ARGV[1]}) ? (my $argv_name = ${ARGV[1]}) : &EXIT(1);
+	(defined(${ARGV[0]})) ? (my $argv_list = ${ARGV[0]}) : &EXIT(1);
+	(defined(${ARGV[1]})) ? (my $argv_name = ${ARGV[1]}) : &EXIT(1);
 	my $selflink;
 	my $output;
+
+	if (${argv_list} eq "0") {
+		$argv_list = ${PROJECT_LIST};
+	};
 
 	&refresh_tokens();
 
