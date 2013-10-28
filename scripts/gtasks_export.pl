@@ -217,6 +217,11 @@ sub refresh_tokens {
 		}) && $API_REQUEST_COUNT++;
 		$REFRESH = decode_json($mech->content());
 		$REFRESH = $REFRESH->{"refresh_token"};
+
+		open(OUTPUT, ">", ".token") || die();
+		print OUTPUT "our \$CODE    = '${CODE}';\n";
+		print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
+		close(OUTPUT) || die();
 	};
 
 	$mech->post("https://accounts.google.com/o/oauth2/token", {
@@ -227,11 +232,6 @@ sub refresh_tokens {
 	}) && $API_REQUEST_COUNT++;
 	$ACCESS = decode_json($mech->content());
 	$ACCESS = $ACCESS->{"access_token"};
-
-	open(OUTPUT, ">", ".token") || die();
-	print OUTPUT "our \$CODE    = '${CODE}';\n";
-	print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
-	close(OUTPUT) || die();
 
 	print "CODE:    ${CODE}\n";
 	print "REFRESH: ${REFRESH}\n";
