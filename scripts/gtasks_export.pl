@@ -40,10 +40,19 @@ my $FILE		= "tasks";
 my $DEFAULT_LIST	= "0.GTD";
 my $PROJECT_LIST	= "0.Projects";
 
+my $PROJ_LINK_OPEN	= "=";
+my $PROJ_LINK_CLOSED	= "x";
+my $PROJ_LINK_SEPARATE	= ": ";
+
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
 
 ########################################
+
+my $MANAGE_LINKS	= "0"; if (@ARGV && ${ARGV[0]} eq "links") {shift; $MANAGE_LINKS = "1";};
+my $MANAGE_LINKS_ALL	= "0";
+my $MLINK_SRC		= "PARENTS";
+my $MLINK_DST		= "CHILDREN";
 
 my $MANAGE_CRUFT	= "0"; if (@ARGV && ${ARGV[0]} eq "cruft") {shift; $MANAGE_CRUFT = "1";};
 my $MANAGE_CRUFT_ALL	= "1";
@@ -245,6 +254,112 @@ sub refresh_tokens {
 	$mech->add_header("Authorization" => "Bearer ${ACCESS}");
 
 	return(0);
+};
+
+########################################
+
+sub manage_links {
+	my $links	= {};
+	my $output;
+
+	print "\n";
+
+	$mech->get("${URL}/users/\@me/lists"
+		. "?maxResults=1000000"
+	) && $API_REQUEST_COUNT++;
+	$output = decode_json($mech->content());
+
+#>>> BUG IN PERL!
+#>>> http://www.perlmonks.org/?node_id=490213
+	my @array = @{$output->{"items"}};
+	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
+#>>>
+		if ($tasklist->{"title"} ne ${DEFAULT_LIST}) {
+			printf("%-10.10s %-50.50s %s\n", (("-" x 9) . ">"), $tasklist->{"id"}, $tasklist->{"title"} || "-");
+			my $out = &manage_links_list($tasklist->{"id"});
+			if ($tasklist->{"title"} eq ${PROJECT_LIST}) {
+				#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
+				@{ $links->{$MLINK_SRC} }{keys(%{ $out->{$MLINK_SRC} })} = values(%{ $out->{$MLINK_SRC} });
+			} else {
+				#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
+				@{ $links->{$MLINK_DST} }{keys(%{ $out->{$MLINK_DST} })} = values(%{ $out->{$MLINK_DST} });
+			};
+		};
+	};
+
+	foreach my $key (sort({$a cmp $b} keys($links->{$MLINK_SRC}))) {
+		foreach my $val (@{$links->{$MLINK_SRC}->{ $key }}) {
+			my $match = 0;
+			foreach my $cmp (@{$links->{$MLINK_DST}->{ $key }}) {
+				if ($val eq $cmp) {
+					$match = 1;
+				};
+			};
+			if (!${match}) {
+				push(@{$links->{"NONE_$MLINK_DST"}->{ $key }}, $val);
+			};
+		};
+	};
+	foreach my $key (sort({$a cmp $b} keys($links->{$MLINK_DST}))) {
+		foreach my $val (@{$links->{$MLINK_DST}->{ $key }}) {
+			my $match = 0;
+			foreach my $cmp (@{$links->{$MLINK_SRC}->{ $key }}) {
+				if ($val eq $cmp) {
+					$match = 1;
+				};
+			};
+			if (!${match}) {
+				push(@{$links->{"NONE_$MLINK_SRC"}->{ $key }}, $val);
+			};
+		};
+	};
+
+	print "\n";
+	print "NO ${MLINK_DST}\n";
+	foreach my $key (sort({$a cmp $b} keys($links->{"NONE_$MLINK_DST"}))) {
+		print "\t${key}\n";
+		foreach my $val (@{$links->{"NONE_$MLINK_DST"}->{ $key }}) {
+			print "\t\t${val}\n";
+		};
+	};
+	print "NO ${MLINK_SRC}\n";
+	foreach my $key (sort({$a cmp $b} keys($links->{"NONE_$MLINK_SRC"}))) {
+		foreach my $val (@{$links->{"NONE_$MLINK_SRC"}->{ $key }}) {
+			print "\t${key}${PROJ_LINK_SEPARATE}${val}\n";
+		};
+	};
+
+	return(0);
+};
+
+########################################
+
+sub manage_links_list {
+	my $listid	= shift;
+	my $output;
+
+	$mech->get("${URL}/lists/${listid}/tasks"
+		. "?maxResults=1000000"
+		. "&showCompleted=true"
+		. "&showDeleted=true"
+		. "&showHidden=true"
+	) && $API_REQUEST_COUNT++;
+	$output = decode_json($mech->content());
+
+	foreach my $task (@{$output->{"items"}}) {
+		while ($task->{"notes"} && $task->{"notes"} =~ m|^\s*([${PROJ_LINK_OPEN}${PROJ_LINK_CLOSED}])[ ](.+)$|gm) {
+			if (${MANAGE_LINKS_ALL} || (!$task->{"completed"} && $1 ne ${PROJ_LINK_CLOSED})) {
+				push(@{$output->{$MLINK_SRC}->{ $task->{"title"} }}, $2);
+			};
+		};
+		while ($task->{"title"} && $task->{"title"} =~ m|^(.+)${PROJ_LINK_SEPARATE}(.+)$|gm) {
+			if (${MANAGE_LINKS_ALL} || !$task->{"completed"}) {
+				push(@{$output->{$MLINK_DST}->{ $1 }}, $2);
+			};
+		};
+	};
+
+	return(${output});
 };
 
 ########################################
@@ -522,9 +637,13 @@ sub export_files_item {
 
 ########################################
 
-if (${MANAGE_CRUFT}) {
+if (${MANAGE_LINKS}) {
+	&manage_links();
+}
+elsif (${MANAGE_CRUFT}) {
 	&manage_cruft();
-} else {
+}
+else {
 	&export_files();
 	if (${EXPORT_TXT} && ${CAT_TEXT}) {
 		open(TXT, "<", "${FILE}.txt") || die();
