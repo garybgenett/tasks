@@ -226,7 +226,7 @@ sub edit_notes {
 
 	foreach my $tasklist (@{$output->{"items"}}) {
 		if ($tasklist->{"title"} eq ${argv_list}) {
-			$output = &api_fetch_tasks($tasklist->{'id'});
+			$output = &api_fetch_tasks($tasklist->{"id"});
 
 			foreach my $task (@{$output->{"items"}}) {
 				if ($task->{"title"} eq ${argv_name}) {
@@ -443,7 +443,7 @@ sub manage_cruft_list {
 		)) {
 			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
 			&api_patch($task->{"selfLink"}, {
-				"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[$task->{'title'}]",
+				"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[" . $task->{"title"} . "]",
 				"status"	=> "needsAction",
 				"completed"	=> undef,
 				"deleted"	=> "0",
@@ -485,12 +485,12 @@ sub export_files {
 	my @array = @{$output->{"items"}};
 	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
 #>>>
-		$output = &api_fetch_tasks($tasklist->{'id'});
+		$output = &api_fetch_tasks($tasklist->{"id"});
 
 		$tasklist->{"title"} .= " (" . ($#{$output->{"items"}} + 1) . ")";
 
 		if (${EXPORT_JSON}) {
-			print JSON ("#" x 5) . "[ $tasklist->{'title'} ]" . ("#" x 5) . "\n\n";
+			print JSON ("#" x 5) . "[ " . $tasklist->{"title"} . " ]" . ("#" x 5) . "\n\n";
 			print JSON $mech->content();
 			print JSON "\n";
 		};
@@ -594,7 +594,7 @@ sub export_files_item {
 
 	if (${EXPORT_TXT}) {
 		if (${indent} !~ /\d+/) {
-			print TXT ("=" x 5) . "[ $task->{'title'} ]" . ("=" x 5) . "\n";
+			print TXT ("=" x 5) . "[ " . $task->{"title"} . " ]" . ("=" x 5) . "\n";
 		} else {
 			print TXT  ("\t" x (${indent} + 1));
 			my $note = ("\t" x (${indent} + 2)) . ("-" x 5);
