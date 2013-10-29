@@ -51,12 +51,10 @@ my $URL			= "https://www.googleapis.com/tasks/v1";
 
 ########################################
 
-my $MANAGE_LINKS	= "0"; if (@ARGV && ${ARGV[0]} eq "links") {shift; $MANAGE_LINKS = "1";};
 my $MANAGE_LINKS_ALL	= "0";
 my $MLINK_SRC		= "PARENTS";
 my $MLINK_DST		= "CHILDREN";
 
-my $MANAGE_CRUFT	= "0"; if (@ARGV && ${ARGV[0]} eq "cruft") {shift; $MANAGE_CRUFT = "1";};
 my $MANAGE_CRUFT_ALL	= "1";
 
 my $EXPORT_JSON		= "1";
@@ -111,14 +109,6 @@ sub EXIT {
 	my $status = shift || "0";
 	print "\nAPI Requests: ${API_REQUEST_COUNT}\n";
 	exit(${status});
-};
-
-########################################
-
-if (@{ARGV}) {
-	&refresh_tokens();
-	&edit_notes(@{ARGV});
-	&EXIT(0);
 };
 
 ########################################
@@ -182,8 +172,8 @@ sub refresh_tokens {
 ################################################################################
 
 sub edit_notes {
-	defined(my $argv_list	= shift) || &EXIT(1);
-	defined(my $argv_name	= shift) || &EXIT(1);
+	my $argv_list	= shift;
+	my $argv_name	= shift;
 	my $selflink;
 	my $output;
 
@@ -238,13 +228,13 @@ sub edit_notes {
 		};
 	};
 
-	&EXIT(0);
+	return(0);
 };
 
 ########################################
 
 sub edit_notes_text {
-	my $notes = shift;
+	my $notes	= shift;
 
 	$notes =~ s|^(${INDENT}+)|("\t" x (length($1) / 2))|egm;
 
@@ -648,17 +638,33 @@ sub export_files_item {
 
 ################################################################################
 
-if (${MANAGE_LINKS}) {
-	&refresh_tokens();
-	&manage_links();
+if (@{ARGV}) {
+	if (${ARGV[0]} eq "links") {
+		shift;
+		&refresh_tokens();
+		&manage_links(@{ARGV});
+	}
+	elsif (${ARGV[0]} eq "cruft") {
+		shift;
+		&refresh_tokens();
+		&manage_cruft(@{ARGV});
+	}
+	elsif (defined(${ARGV[0]}) && defined(${ARGV[1]})) {
+		&refresh_tokens();
+		&edit_notes(@{ARGV});
+	}
+	else {
+		print STDERR "\n";
+		print STDERR "INVALID ARGUMENTS!\n";
+		&EXIT(1);
+	};
 }
-elsif (${MANAGE_CRUFT}) {
-	&refresh_tokens();
-	&manage_cruft();
-}
+
+########################################
+
 else {
 	&refresh_tokens();
-	&export_files();
+	&export_files(@{ARGV});
 };
 
 ########################################
