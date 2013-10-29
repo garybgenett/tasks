@@ -116,11 +116,70 @@ sub EXIT {
 ########################################
 
 if (@{ARGV}) {
+	&refresh_tokens();
 	&edit_notes(@{ARGV});
 	&EXIT(0);
 };
 
 ########################################
+
+sub refresh_tokens {
+	if (!${CODE} || !${REFRESH}) {
+		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
+		$mech->form_id("gaia_loginform");
+		$mech->field("Email",	${USERNAME});
+		$mech->field("Passwd",	${PASSWORD});
+		$mech->submit() && $API_REQUEST_COUNT++;
+
+		$mech->get("https://accounts.google.com/o/oauth2/auth"
+			. "?client_id=${CLIENTID}"
+			. "&redirect_uri=${REDIRECT}"
+			. "&scope=${SCOPE}"
+			. "&response_type=code"
+		) && $API_REQUEST_COUNT++;
+		$mech->submit_form(
+			"form_id"	=> "submit_access_form",
+			"fields"	=> {"submit_access" => "true"},
+		) && $API_REQUEST_COUNT++;
+		$CODE = $mech->content();
+		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
+		$CODE =~ s|".*$||s;
+
+		$mech->post("https://accounts.google.com/o/oauth2/token", {
+			"code"			=> ${CODE},
+			"client_id"		=> ${CLIENTID},
+			"client_secret"		=> ${CLSECRET},
+			"redirect_uri"		=> ${REDIRECT},
+			"grant_type"		=> "authorization_code",
+		}) && $API_REQUEST_COUNT++;
+		$REFRESH = decode_json($mech->content());
+		$REFRESH = $REFRESH->{"refresh_token"};
+
+		open(OUTPUT, ">", ".token") || die();
+		print OUTPUT "our \$CODE    = '${CODE}';\n";
+		print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
+		close(OUTPUT) || die();
+	};
+
+	$mech->post("https://accounts.google.com/o/oauth2/token", {
+		"refresh_token"		=> ${REFRESH},
+		"client_id"		=> ${CLIENTID},
+		"client_secret"		=> ${CLSECRET},
+		"grant_type"		=> "refresh_token",
+	}) && $API_REQUEST_COUNT++;
+	$ACCESS = decode_json($mech->content());
+	$ACCESS = $ACCESS->{"access_token"};
+
+	print "CODE:    ${CODE}\n";
+	print "REFRESH: ${REFRESH}\n";
+	print "ACCESS:  ${ACCESS}\n";
+
+	$mech->add_header("Authorization" => "Bearer ${ACCESS}");
+
+	return(0);
+};
+
+################################################################################
 
 sub edit_notes {
 	defined(my $argv_list	= shift) || &EXIT(1);
@@ -131,8 +190,6 @@ sub edit_notes {
 	if (${argv_list} eq "0") {
 		$argv_list = ${PROJECT_LIST};
 	};
-
-	&refresh_tokens();
 
 	$mech->get("${URL}/users/\@me/lists"
 		. "?maxResults=1000000"
@@ -205,64 +262,6 @@ sub edit_notes_text {
 	$notes =~ s/\n+$//;
 
 	return(${notes});
-};
-
-########################################
-
-sub refresh_tokens {
-	if (!${CODE} || !${REFRESH}) {
-		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
-		$mech->form_id("gaia_loginform");
-		$mech->field("Email",	${USERNAME});
-		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit() && $API_REQUEST_COUNT++;
-
-		$mech->get("https://accounts.google.com/o/oauth2/auth"
-			. "?client_id=${CLIENTID}"
-			. "&redirect_uri=${REDIRECT}"
-			. "&scope=${SCOPE}"
-			. "&response_type=code"
-		) && $API_REQUEST_COUNT++;
-		$mech->submit_form(
-			"form_id"	=> "submit_access_form",
-			"fields"	=> {"submit_access" => "true"},
-		) && $API_REQUEST_COUNT++;
-		$CODE = $mech->content();
-		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
-		$CODE =~ s|".*$||s;
-
-		$mech->post("https://accounts.google.com/o/oauth2/token", {
-			"code"			=> ${CODE},
-			"client_id"		=> ${CLIENTID},
-			"client_secret"		=> ${CLSECRET},
-			"redirect_uri"		=> ${REDIRECT},
-			"grant_type"		=> "authorization_code",
-		}) && $API_REQUEST_COUNT++;
-		$REFRESH = decode_json($mech->content());
-		$REFRESH = $REFRESH->{"refresh_token"};
-
-		open(OUTPUT, ">", ".token") || die();
-		print OUTPUT "our \$CODE    = '${CODE}';\n";
-		print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
-		close(OUTPUT) || die();
-	};
-
-	$mech->post("https://accounts.google.com/o/oauth2/token", {
-		"refresh_token"		=> ${REFRESH},
-		"client_id"		=> ${CLIENTID},
-		"client_secret"		=> ${CLSECRET},
-		"grant_type"		=> "refresh_token",
-	}) && $API_REQUEST_COUNT++;
-	$ACCESS = decode_json($mech->content());
-	$ACCESS = $ACCESS->{"access_token"};
-
-	print "CODE:    ${CODE}\n";
-	print "REFRESH: ${REFRESH}\n";
-	print "ACCESS:  ${ACCESS}\n";
-
-	$mech->add_header("Authorization" => "Bearer ${ACCESS}");
-
-	return(0);
 };
 
 ########################################
@@ -649,17 +648,16 @@ sub export_files_item {
 
 ################################################################################
 
-&refresh_tokens();
-
-########################################
-
 if (${MANAGE_LINKS}) {
+	&refresh_tokens();
 	&manage_links();
 }
 elsif (${MANAGE_CRUFT}) {
+	&refresh_tokens();
 	&manage_cruft();
 }
 else {
+	&refresh_tokens();
 	&export_files();
 };
 
