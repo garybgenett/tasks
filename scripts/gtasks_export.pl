@@ -171,6 +171,47 @@ sub refresh_tokens {
 
 ################################################################################
 
+sub api_fetch_lists {
+	$mech->get("${URL}/users/\@me/lists"
+		. "?maxResults=1000000"
+	) && $API_REQUEST_COUNT++;
+	return(decode_json($mech->content()));
+};
+
+########################################
+
+sub api_fetch_tasks {
+	my $listid	= shift;
+	$mech->get("${URL}/lists/${listid}/tasks"
+		. "?maxResults=1000000"
+		. "&showCompleted=true"
+		. "&showDeleted=true"
+		. "&showHidden=true"
+	) && $API_REQUEST_COUNT++;
+	return(decode_json($mech->content()));
+};
+
+########################################
+
+sub api_get {
+	my $selflink	= shift;
+	$mech->get(${selflink}) && $API_REQUEST_COUNT++;
+	return(decode_json($mech->content()));
+};
+
+########################################
+
+sub api_patch {
+	my $selflink	= shift;
+	my $fields	= shift;
+	$mech->request(HTTP::Request->new(
+		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+	)) && $API_REQUEST_COUNT++;
+	return(0);
+};
+
+################################################################################
+
 sub edit_notes {
 	my $argv_list	= shift;
 	my $argv_name	= shift;
@@ -181,20 +222,11 @@ sub edit_notes {
 		$argv_list = ${PROJECT_LIST};
 	};
 
-	$mech->get("${URL}/users/\@me/lists"
-		. "?maxResults=1000000"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_lists();
 
 	foreach my $tasklist (@{$output->{"items"}}) {
 		if ($tasklist->{"title"} eq ${argv_list}) {
-			$mech->get("${URL}/lists/$tasklist->{'id'}/tasks"
-				. "?maxResults=1000000"
-				. "&showCompleted=true"
-				. "&showDeleted=true"
-				. "&showHidden=true"
-			) && $API_REQUEST_COUNT++;
-			$output = decode_json($mech->content());
+			$output = &api_fetch_tasks($tasklist->{'id'});
 
 			foreach my $task (@{$output->{"items"}}) {
 				if ($task->{"title"} eq ${argv_name}) {
@@ -212,19 +244,14 @@ sub edit_notes {
 		print STDERR "DOES NOT EXIST!\n";
 		&EXIT(1);
 	} else {
-		$mech->get("${selflink}") && $API_REQUEST_COUNT++;
-		$output = decode_json($mech->content());
-
+		$output = &api_get(${selflink});
 		$output = &edit_notes_text($output->{"notes"});
 
 		if ($output) {
 			&refresh_tokens();
-
-			$mech->request(HTTP::Request->new(
-				"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json({
-					"notes"		=> ${output},
-				})
-			)) && $API_REQUEST_COUNT++;
+			&api_patch(${selflink}, {
+				"notes"		=> ${output},
+			});
 		};
 	};
 
@@ -262,10 +289,7 @@ sub manage_links {
 
 	print "\n";
 
-	$mech->get("${URL}/users/\@me/lists"
-		. "?maxResults=1000000"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_lists();
 
 #>>> BUG IN PERL!
 #>>> http://www.perlmonks.org/?node_id=490213
@@ -336,13 +360,7 @@ sub manage_links_list {
 	my $listid	= shift;
 	my $output;
 
-	$mech->get("${URL}/lists/${listid}/tasks"
-		. "?maxResults=1000000"
-		. "&showCompleted=true"
-		. "&showDeleted=true"
-		. "&showHidden=true"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_tasks(${listid});
 
 	foreach my $task (@{$output->{"items"}}) {
 		while ($task->{"notes"} && $task->{"notes"} =~ m|^\s*([${PROJ_LINK_OPEN}${PROJ_LINK_CLOSED}])[ ](.+)$|gm) {
@@ -367,10 +385,7 @@ sub manage_cruft {
 
 	print "\n";
 
-	$mech->get("${URL}/users/\@me/lists"
-		. "?maxResults=1000000"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_lists();
 
 #>>> BUG IN PERL!
 #>>> http://www.perlmonks.org/?node_id=490213
@@ -392,13 +407,7 @@ sub manage_cruft_list {
 	my $listid	= shift;
 	my $output;
 
-	$mech->get("${URL}/lists/${listid}/tasks"
-		. "?maxResults=1000000"
-		. "&showCompleted=true"
-		. "&showDeleted=true"
-		. "&showHidden=true"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_tasks(${listid});
 
 	foreach my $task (@{$output->{"items"}}) {
 #>>> BUG IN GOOGLE TASKS API!
@@ -415,14 +424,12 @@ sub manage_cruft_list {
 			!$task->{"due"}
 		) {
 			printf("%-10.10s %-50.50s %s\n", "clearing:", $task->{"id"}, $task->{"title"} || "-");
-			$mech->request(HTTP::Request->new(
-				"PATCH", $task->{"selfLink"}, ["Content-Type", "application/json"], encode_json({
-					"title"		=> "0",
-					"status"	=> "needsAction",
-					"completed"	=> undef,
-					"deleted"	=> "0",
-				})
-			)) && $API_REQUEST_COUNT++;
+			&api_patch($task->{"selfLink"}, {
+				"title"		=> "0",
+				"status"	=> "needsAction",
+				"completed"	=> undef,
+				"deleted"	=> "0",
+			});
 		};
 
 		if ((	!$task->{"title"}	&& (
@@ -432,14 +439,12 @@ sub manage_cruft_list {
 			$task->{"deleted"}
 		)) {
 			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
-			$mech->request(HTTP::Request->new(
-				"PATCH", $task->{"selfLink"}, ["Content-Type", "application/json"], encode_json({
-					"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[$task->{'title'}]",
-					"status"	=> "needsAction",
-					"completed"	=> undef,
-					"deleted"	=> "0",
-				})
-			)) && $API_REQUEST_COUNT++;
+			&api_patch($task->{"selfLink"}, {
+				"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[$task->{'title'}]",
+				"status"	=> "needsAction",
+				"completed"	=> undef,
+				"deleted"	=> "0",
+			});
 		};
 #>>>
 	};
@@ -464,10 +469,8 @@ sub export_files {
 		print CSV "\n";
 	};
 
-	$mech->get("${URL}/users/\@me/lists"
-		. "?maxResults=1000000"
-	) && $API_REQUEST_COUNT++;
-	$output = decode_json($mech->content());
+	$output = &api_fetch_lists();
+
 	if (${EXPORT_JSON}) {
 		print JSON ("#" x 5) . "[ LISTS ]" . ("#" x 5) . "\n\n";
 		print JSON $mech->content();
@@ -479,14 +482,10 @@ sub export_files {
 	my @array = @{$output->{"items"}};
 	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
 #>>>
-		$mech->get("${URL}/lists/$tasklist->{'id'}/tasks"
-			. "?maxResults=1000000"
-			. "&showCompleted=true"
-			. "&showDeleted=true"
-			. "&showHidden=true"
-		) && $API_REQUEST_COUNT++;
-		$output = decode_json($mech->content());
+		$output = &api_fetch_tasks($tasklist->{'id'});
+
 		$tasklist->{"title"} .= " (" . ($#{$output->{"items"}} + 1) . ")";
+
 		if (${EXPORT_JSON}) {
 			print JSON ("#" x 5) . "[ $tasklist->{'title'} ]" . ("#" x 5) . "\n\n";
 			print JSON $mech->content();
