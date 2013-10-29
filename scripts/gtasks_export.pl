@@ -517,6 +517,13 @@ sub export_files {
 	(${EXPORT_CSV})  && (close(CSV)  || die());
 	(${EXPORT_TXT})  && (close(TXT)  || die());
 
+	if (${EXPORT_TXT} && ${CAT_TEXT}) {
+		open(TXT, "<", "${FILE}.txt") || die();
+		print "\n";
+		print <TXT>;
+		close(TXT) || die();
+	};
+
 	return(0);
 };
 
@@ -654,12 +661,6 @@ elsif (${MANAGE_CRUFT}) {
 }
 else {
 	&export_files();
-	if (${EXPORT_TXT} && ${CAT_TEXT}) {
-		open(TXT, "<", "${FILE}.txt") || die();
-		print "\n";
-		print <TXT>;
-		close(TXT) || die();
-	};
 };
 
 ########################################
