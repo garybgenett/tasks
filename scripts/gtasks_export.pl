@@ -44,6 +44,8 @@ my $PROJ_LINK_OPEN	= "=";
 my $PROJ_LINK_CLOSED	= "x";
 my $PROJ_LINK_SEPARATE	= ": ";
 
+my $INDENT		= " ";
+
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
 
@@ -114,8 +116,15 @@ sub EXIT {
 ########################################
 
 if (@{ARGV}) {
-	(defined(${ARGV[0]})) ? (my $argv_list = ${ARGV[0]}) : &EXIT(1);
-	(defined(${ARGV[1]})) ? (my $argv_name = ${ARGV[1]}) : &EXIT(1);
+	&edit_notes(@{ARGV});
+	&EXIT(0);
+};
+
+########################################
+
+sub edit_notes {
+	defined(my $argv_list	= shift) || &EXIT(1);
+	defined(my $argv_name	= shift) || &EXIT(1);
 	my $selflink;
 	my $output;
 
@@ -159,7 +168,7 @@ if (@{ARGV}) {
 		$mech->get("${selflink}") && $API_REQUEST_COUNT++;
 		$output = decode_json($mech->content());
 
-		$output = &edit_notes($output->{"notes"});
+		$output = &edit_notes_text($output->{"notes"});
 
 		if ($output) {
 			&refresh_tokens();
@@ -177,10 +186,10 @@ if (@{ARGV}) {
 
 ########################################
 
-sub edit_notes {
+sub edit_notes_text {
 	my $notes = shift;
 
-	$notes =~ s|^([ ]+)|("\t" x (length(${1}) / 2))|egm;
+	$notes =~ s|^(${INDENT}+)|("\t" x (length($1) / 2))|egm;
 
 	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "0");
 	print ${TEMPFILE} ${notes};
@@ -192,7 +201,7 @@ sub edit_notes {
 	$notes = do { local $/; <$TEMPFILE> };
 	close(${TEMPFILE}) || die();
 
-	$notes =~ s|^(\t+)|("  " x length(${1}))|egm;
+	$notes =~ s|^(\t+)|(${INDENT} x (length($1) * 2))|egm;
 	$notes =~ s/\n+$//;
 
 	return(${notes});
@@ -613,7 +622,7 @@ sub export_files_item {
 						$output =~ s/T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9A-Z]{4}$//g;
 					};
 					if (${field} eq "notes") {
-						$output =~ s|^([ ]+)|("\t" x (length(${1}) / 2))|egm;
+						$output =~ s|^(${INDENT}+)|("\t" x (length($1) / 2))|egm;
 						$output =~ s/^/${tabs}/gm;
 						$output =~ s/^/\n${note}\n/;
 					};
