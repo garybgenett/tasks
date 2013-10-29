@@ -416,6 +416,9 @@ sub manage_cruft_list {
 		if ($task->{"title"} =~ "\n") {
 			$task->{"title"} =~ s/\n//g;
 			printf("%-10.10s %-50.50s %s\n", "rescuing:", $task->{"id"}, $task->{"title"} || "-");
+			&api_patch($task->{"selfLink"}, {
+				"title"		=> $task->{"title"},
+			});
 		};
 
 		if (	$task->{"title"} ne "0"	&&
