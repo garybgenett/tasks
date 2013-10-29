@@ -51,6 +51,12 @@ my $URL			= "https://www.googleapis.com/tasks/v1";
 
 ########################################
 
+my $SEARCH_FIELDS = [
+	"title",
+	"due",
+	"notes",
+];
+
 my $MANAGE_LINKS_ALL	= "0";
 my $MLINK_SRC		= "PARENTS";
 my $MLINK_DST		= "CHILDREN";
@@ -211,6 +217,56 @@ sub api_patch {
 };
 
 ################################################################################
+
+sub search_regex {
+	my $regex	= shift;
+	my $output;
+
+	print "\n";
+
+	$output = &api_fetch_lists();
+
+#>>> BUG IN PERL!
+#>>> http://www.perlmonks.org/?node_id=490213
+	my @array = @{$output->{"items"}};
+	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
+#>>>
+		if ($tasklist->{"title"} ne ${DEFAULT_LIST}) {
+			printf("%-10.10s %-50.50s %s\n", (("-" x 9) . ">"), $tasklist->{"id"}, $tasklist->{"title"} || "-");
+
+			$output = &api_fetch_tasks($tasklist->{"id"});
+
+			foreach my $task (@{$output->{"items"}}) {
+				my $match;
+				foreach my $field (@{$SEARCH_FIELDS}) {
+					if (
+						!$task->{"completed"} && !$task->{"deleted"} &&
+						$task->{$field} && $task->{$field} =~ m|${regex}|gm
+					) {
+						push(@{$match}, ${field});
+					};
+				};
+				if (${match}) {
+					print "\t" . $task->{"title"} . "\n";
+					foreach my $field (@{$match}) {
+						print "\t\t<" . ${field} . ">\n";
+						if (${field} eq "title") {
+							next();
+						};
+						my $test = $task->{$field};
+						while (${test} =~ m|^\s*(.*${regex}.*)$|gm) {
+							print "\t\t\t" . $1 . "\n";
+						};
+					};
+				};
+			};
+		};
+	};
+
+	return(0);
+};
+
+########################################
 
 sub edit_notes {
 	my $argv_list	= shift;
@@ -641,7 +697,12 @@ sub export_files_item {
 ################################################################################
 
 if (@{ARGV}) {
-	if (${ARGV[0]} eq "links") {
+	if (${ARGV[0]} eq "search") {
+		shift;
+		&refresh_tokens();
+		&search_regex(@{ARGV});
+	}
+	elsif (${ARGV[0]} eq "links") {
 		shift;
 		&refresh_tokens();
 		&manage_links(@{ARGV});
