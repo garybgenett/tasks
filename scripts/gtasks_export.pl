@@ -40,6 +40,7 @@ my $FILE		= "tasks";
 my $DEFAULT_LIST	= "0.GTD";
 my $PROJECT_LIST	= "0.Projects";
 
+my $PROJ_LINK_NORMAL	= "*";
 my $PROJ_LINK_OPEN	= "=";
 my $PROJ_LINK_CLOSED	= "x";
 my $PROJ_LINK_SEPARATE	= ": ";
@@ -249,13 +250,14 @@ sub search_regex {
 				if (${match}) {
 					print "\t" . $task->{"title"} . "\n";
 					foreach my $field (@{$match}) {
-						print "\t\t<" . ${field} . ">\n";
 						if (${field} eq "title") {
+							print "\t\t<" . ${field} . ">\n";
 							next();
 						};
 						my $test = $task->{$field};
-						while (${test} =~ m|^\s*(.*${regex}.*)$|gm) {
-							print "\t\t\t" . $1 . "\n";
+						my $link = "\\s*(?:MATCH|[${PROJ_LINK_NORMAL}${PROJ_LINK_OPEN}${PROJ_LINK_CLOSED}][ ])?";
+						while (${test} =~ m|^${link}(.*${regex}.*)$|gm) {
+							print "\t\t<" . ${field} . ">\t" . $1 . "\n";
 						};
 					};
 				};
