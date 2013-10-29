@@ -345,8 +345,6 @@ sub manage_links {
 	my $links	= {};
 	my $output;
 
-	print "\n";
-
 	$output = &api_fetch_lists();
 
 #>>> BUG IN PERL!
@@ -355,7 +353,6 @@ sub manage_links {
 	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
 #>>>
 		if ($tasklist->{"title"} ne ${DEFAULT_LIST}) {
-			printf("%-10.10s %-50.50s %s\n", (("-" x 9) . ">"), $tasklist->{"id"}, $tasklist->{"title"} || "-");
 			my $out = &manage_links_list($tasklist->{"id"});
 			if ($tasklist->{"title"} eq ${PROJECT_LIST}) {
 				#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
