@@ -201,18 +201,18 @@ sub api_fetch_tasks {
 ########################################
 
 sub api_get {
-	my $selflink	= shift;
-	$mech->get(${selflink}) && $API_REQUEST_COUNT++;
+	my $uri		= shift;
+	$mech->get(${uri}) && $API_REQUEST_COUNT++;
 	return(decode_json($mech->content()));
 };
 
 ########################################
 
 sub api_patch {
-	my $selflink	= shift;
+	my $uri		= shift;
 	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
-		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+		"PATCH", ${uri}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
 	return(0);
 };
@@ -608,13 +608,13 @@ sub export_files_list_tree {
 	my $indent	= shift;
 	my $key;
 
-	foreach $key (keys($tree)) {
+	foreach $key (keys(${tree})) {
 		if (!exists($tree->{$key}->{"pos"})) {
 			$tree->{$key}->{"pos"} = "";
 		};
 	};
 
-	foreach $key (sort({$tree->{$a}{"pos"} cmp $tree->{$b}{"pos"}} keys($tree))) {
+	foreach $key (sort({$tree->{$a}{"pos"} cmp $tree->{$b}{"pos"}} keys(${tree}))) {
 		if ($tree->{$key}->{"pos"}) {
 			&export_files_item($tree->{$key}{"node"}, ${indent}, "");
 			if (exists($root_tree->{$key}{"sub"})) {
