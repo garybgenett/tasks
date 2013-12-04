@@ -31,6 +31,7 @@ my $mech = WWW::Mechanize->new(
 
 use HTTP::Request;
 use JSON::PP;
+my $json = JSON::PP->new();
 
 use File::Temp qw(tempfile);
 
@@ -68,6 +69,27 @@ my $EXPORT_JSON		= "1";
 my $EXPORT_CSV		= "1";
 my $EXPORT_TXT		= "1";
 
+my $JSON_FIELDS = [
+	"kind",
+	"id",
+	"etag",
+	"title",
+	"updated",
+	"selfLink",
+	"parent",
+	"position",
+	"notes",
+	"status",
+	"due",
+	"completed",
+	"deleted",
+	"hidden",
+	"links",
+
+	"nextPageToken",
+	"items",
+];
+
 my $CSV_FIELDS = [
 	"title",
 
@@ -93,6 +115,46 @@ my $HIDE_COMPLETED	= "0";
 my $HIDE_DELETED	= "0";
 
 my $CAT_TEXT		= "0";
+
+########################################
+
+#>>> JSON Methods
+
+	$json->allow_blessed(0);
+	$json->allow_nonref(0);
+	$json->allow_unknown(0);
+	$json->convert_blessed(0);
+	$json->relaxed(0);
+
+	$json->ascii(1);
+	$json->latin1(0);
+	$json->utf8(0);
+
+	$json->canonical(0);
+	$json->pretty(0);
+	$json->shrink(0);
+
+	$json->indent(1);
+	$json->space_after(1);
+	$json->space_before(0);
+
+#>>> JSON:PP Methods
+
+	$json->loose(0);
+
+	$json->escape_slash(0);
+	$json->indent_length(1);
+
+	$json->sort_by(sub {
+		my $order = {};
+		#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
+		@{ $order }{@{ $JSON_FIELDS }} = 0..$#{ $JSON_FIELDS };
+		if (exists($order->{$JSON::PP::a}) && exists($order->{$JSON::PP::b})) {
+			$order->{$JSON::PP::a} <=> $order->{$JSON::PP::b};
+		} else {
+			$JSON::PP::a cmp $JSON::PP::b;
+		};
+	});
 
 ########################################
 
@@ -570,7 +632,7 @@ sub export_files {
 
 	if (${EXPORT_JSON}) {
 		print JSON ("#" x 5) . "[ LISTS ]" . ("#" x 5) . "\n\n";
-		print JSON encode_json(${output});
+		print JSON $json->encode(${output});
 		print JSON "\n";
 	};
 
@@ -585,7 +647,7 @@ sub export_files {
 
 		if (${EXPORT_JSON}) {
 			print JSON ("#" x 5) . "[ " . $tasklist->{"title"} . " ]" . ("#" x 5) . "\n\n";
-			print JSON encode_json(${output});
+			print JSON $json->encode(${output});
 			print JSON "\n";
 		};
 
