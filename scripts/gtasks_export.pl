@@ -110,7 +110,10 @@ do(".token") || die();
 
 ################################################################################
 
-my $API_REQUEST_COUNT = "0";
+my $API_ERROR		= "GTASKS_EXPORT_ERROR";
+my $API_PAGES		= "GTASKS_EXPORT_PAGES";
+
+my $API_REQUEST_COUNT	= "0";
 
 sub EXIT {
 	my $status = shift || "0";
@@ -179,31 +182,67 @@ sub refresh_tokens {
 ################################################################################
 
 sub api_fetch_lists {
-	$mech->get("${URL}/users/\@me/lists"
-		. "?maxResults=1000000"
-	) && $API_REQUEST_COUNT++;
-	return(decode_json($mech->content()));
+	my $output = &api_get("${URL}/users/\@me/lists");
+	return(${output});
 };
 
 ########################################
 
 sub api_fetch_tasks {
 	my $listid	= shift;
-	$mech->get("${URL}/lists/${listid}/tasks"
-		. "?maxResults=1000000"
-		. "&showCompleted=true"
-		. "&showDeleted=true"
-		. "&showHidden=true"
-	) && $API_REQUEST_COUNT++;
-	return(decode_json($mech->content()));
+	my $output = &api_get("${URL}/lists/${listid}/tasks", {
+		"showCompleted"		=> "true",
+		"showDeleted"		=> "true",
+		"showHidden"		=> "true",
+	});
+	return(${output});
 };
 
 ########################################
 
 sub api_get {
 	my $uri		= shift;
-	$mech->get(${uri}) && $API_REQUEST_COUNT++;
-	return(decode_json($mech->content()));
+	my $fields	= shift;
+	my $output;
+	my $page;
+
+#>>> BUG IN GOOGLE TASKS API!
+#>>> http://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=2837
+#>>> SHOULD BE ABLE TO REQUEST AN ARBITRARY AMOUNT
+	$uri .= "?maxResults=100";
+
+	if (defined(${fields})) {
+		foreach my $field (keys(${fields})) {
+			$uri .= "&" . ${field} . "=" . $fields->{$field};
+		};
+	};
+
+	do {
+		$mech->get("${uri}"
+			. (defined(${page}) ? "&pageToken=${page}" : "")
+		) && $API_REQUEST_COUNT++;
+		my $out = decode_json($mech->content());
+
+		#>>> http://www.perlmonks.org/?node_id=995613
+		foreach my $key (keys(${out})) {
+			if (exists($output->{$key}) && $output->{$key} ne $out->{$key}) {
+				if (ref($output->{$key}) eq "ARRAY") {
+					push(@{$output->{$key}}, @{$out->{$key}});
+				} else {
+					$output->{$key} = [ ${API_ERROR}, $output->{$key}, $out->{$key} ];
+				};
+			} else {
+				$output->{$key} = $out->{$key};
+			};
+		}
+
+		$page = $out->{"nextPageToken"};
+		$output->{$API_PAGES}++;
+	}
+	until (!defined(${page}));
+
+	delete($output->{"nextPageToken"});
+	return(${output});
 };
 
 ########################################
@@ -531,7 +570,7 @@ sub export_files {
 
 	if (${EXPORT_JSON}) {
 		print JSON ("#" x 5) . "[ LISTS ]" . ("#" x 5) . "\n\n";
-		print JSON $mech->content();
+		print JSON encode_json(${output});
 		print JSON "\n";
 	};
 
@@ -546,7 +585,7 @@ sub export_files {
 
 		if (${EXPORT_JSON}) {
 			print JSON ("#" x 5) . "[ " . $tasklist->{"title"} . " ]" . ("#" x 5) . "\n\n";
-			print JSON $mech->content();
+			print JSON encode_json(${output});
 			print JSON "\n";
 		};
 
