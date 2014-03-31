@@ -2,41 +2,159 @@
 # task configuration file
 ################################################################################
 
-defaultwidth=80
-defaultheight=30
+data.location=				/.g/_data/zactive/_pim/tasks
 
-xterm.title=no
+shadow.file=				/.g/_data/zactive/_pim/tasks.json
+shadow.command=				export
+shadow.notify=				off
 
-########################################
-
-debug=no
-exit.on.missing.db=yes
-verbose=yes
+include					/usr/share/task/rc/holidays.en-US.rc
 
 ########################################
 
-data.location=/.g/_data/zactive/_pim/tasks
+defaultwidth=				0
+defaultheight=				0
 
-include /usr/share/task/rc/dark-red-256.theme
-include /usr/share/task/rc/holidays.en-US.rc
+detection=				on
+xterm.title=				no
 
 ################################################################################
 
-default.command=next
+default.command=			view
+locking=				on
 
-search.case.sensitive=no
-
-list.all.projects=on
-list.all.tags=on
+debug=					no
+exit.on.missing.db=			yes
+verbose=				yes
 
 ########################################
 
-weekstart=Monday
+indent.annotation=			2
+indent.report=				0
 
-dateformat=Y-M-D
-dateformat.annotation=YMD
-dateformat.holiday=YMD
-dateformat.report=Y-M-D
+abbreviation.minimum=			1
+bulk=					1
+recurrence.limit=			1
+
+search.case.sensitive=			no
+expressions=				on
+patterns=				on
+regex=					yes
+
+list.all.projects=			no
+list.all.tags=				yes
+print.empty.columns=			yes
+
+journal.info=				on
+journal.time=				yes
+journal.time.start.annotation=		[track:begin]
+journal.time.stop.annotation=		[track:end]
+
+################################################################################
+
+weekstart=				Monday
+due=					14
+monthsperline=				3
+
+dateformat=				Y-M-D
+dateformat.holiday=			Y-M-D
+dateformat.report=			Y-M-D
+
+dateformat.annotation=			Y-M-D H:N:S
+dateformat.edit=			Y-M-D H:N:S
+dateformat.info=			Y-M-D H:N:S
+
+########################################
+
+include					/usr/share/task/rc/dark-16.theme
+color=					on
+
+color.debug=				cyan on yellow
+color.error=				cyan on red
+
+color.footnote=				cyan
+color.header=				cyan
+
+color.active=				on green
+color.alternate=			none
+
+color.blocked=				blue
+color.blocking=				yellow
+color.recurring=			red
+color.scheduled=			magenta
+color.tagged=				none
+
+color.pri.H=				none
+color.pri.M=				none
+color.pri.L=				none
+
+color.due.today=			white on red
+color.due=				black on red
+color.overdue=				yellow on red
+
+color.calendar.due.today=		white on red
+color.calendar.due=			black on red
+color.calendar.holiday=			black on yellow
+color.calendar.overdue=			yellow on red
+color.calendar.today=			black on white
+color.calendar.weekend=			none
+color.calendar.weeknumber=		cyan
+
+################################################################################
+
+extensions=				on
+
+uda.kind.label=				Kind
+uda.kind.type=				string
+uda.kind.values=			notes,track
+
+########################################
+
+report.dump.description=		Custom: Shows all information
+report.dump.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,uuid,parent,imask,mask
+report.dump.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+UUID,+PUID,+I,+M
+report.dump.filter=			#>>>
+report.dump.sort=			entry+
+
+report.fail.description=		Custom: Finds non-conforming tasks
+report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,imask,mask
+report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+I,+M
+report.fail.filter=			((kind.any: (tags.any: or -ANNOTATED)) or (kind.none: (tags.none: or +ANNOTATED)) or (priority.any: or wait.any: or scheduled.any: or until.any: ))
+report.fail.sort=			entry+
+
+report.look.description=		Custom: Shows all valid information
+report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,due,end,imask,mask
+report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I,+M
+report.look.filter=			#>>>
+report.look.sort=			entry+
+
+########################################
+
+report.data.description=		Custom: Reference and non-task data
+report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
+report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.data.filter=			project:_data
+report.data.sort=			kind-,description+
+
+report.meta.description=		Custom: Metadata and recurring tasks
+report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
+report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.meta.filter=			((project.not:_data (kind.any: or recur.any: or project:.research or tags:.waiting)) or +ACTIVE)
+report.meta.sort=			project+,kind-,parent+,entry+
+
+########################################
+
+report.read.description=		Custom: Default list view, sorted for review
+report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
+report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.read.filter=			#>>>
+report.read.sort=			project+,kind-,depends+,entry+
+
+report.view.description=		Custom: Default list view
+report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status
+report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT
+report.view.filter=			((project.not:_data (kind.none: status:pending project.not:.someday tags.not:.waiting (+DUE or -BLOCKED))) or +ACTIVE)
+report.view.sort=			due+,priority-,start-,entry+
 
 ################################################################################
 # end of file
