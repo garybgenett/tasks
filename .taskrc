@@ -108,51 +108,55 @@ uda.kind.label=				Kind
 uda.kind.type=				string
 uda.kind.values=			notes,track
 
+uda.area.label=				Area
+uda.area.type=				string
+uda.area.values=			_gtd,computer,family,self,work
+
 ########################################
 
 report.dump.description=		Custom: Shows all information
-report.dump.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,uuid,parent,imask,mask
-report.dump.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+UUID,+PUID,+I,+M
+report.dump.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,uuid,parent,imask,mask
+report.dump.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+UUID,+PUID,+I,+M
 report.dump.filter=			#>>>
 report.dump.sort=			entry+
 
 report.fail.description=		Custom: Finds non-conforming tasks
-report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,imask,mask
-report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+I,+M
-report.fail.filter=			((kind.any: (tags.any: or -ANNOTATED)) or (kind.none: (tags.none: or +ANNOTATED)) or (priority.any: or wait.any: or scheduled.any: or until.any: ))
+report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,imask,mask
+report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+I,+M
+report.fail.filter=			((kind.any: (tags.any: or -ANNOTATED)) or (kind.none: (tags.none: or +ANNOTATED)) or (area.none: ) or (priority.any: or wait.any: or scheduled.any: or until.any: ))
 report.fail.sort=			entry+
 
 report.look.description=		Custom: Shows all valid information
-report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,priority,entry,due,end,imask,mask
-report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I,+M
+report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask,mask
+report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I,+M
 report.look.filter=			#>>>
 report.look.sort=			entry+
 
 ########################################
 
 report.data.description=		Custom: Reference and non-task data
-report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
-report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,imask,mask
+report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+I,+M
 report.data.filter=			project:_data
-report.data.sort=			kind-,description+
+report.data.sort=			kind-,area+,description+
 
 report.meta.description=		Custom: Metadata and recurring tasks
-report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
-report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,imask,mask
+report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+I,+M
 report.meta.filter=			((project.not:_data (kind.any: or recur.any: or project:.research or tags:.waiting)) or +ACTIVE)
 report.meta.sort=			project+,kind-,parent+,entry+
 
 ########################################
 
 report.read.description=		Custom: Default list view, sorted for review
-report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status,imask,mask
-report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT,+I,+M
+report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,imask,mask
+report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+I,+M
 report.read.filter=			#>>>
 report.read.sort=			project+,kind-,depends+,entry+
 
 report.view.description=		Custom: Default list view
-report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,tags,entry.age,recur,status
-report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,TAGS,A,R,STAT
+report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
+report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
 report.view.filter=			((project.not:_data (kind.none: status:pending project.not:.someday tags.not:.waiting (+DUE or -BLOCKED))) or +ACTIVE)
 report.view.sort=			due+,priority-,start-,entry+
 
