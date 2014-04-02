@@ -347,6 +347,9 @@ sub api_post {
 sub taskwarrior_export {
 	my $title	= shift;
 	my $tasks	= shift || "";
+	my $links	= [];
+	my $created;
+	my $previous;
 	my $listid;
 	my $output;
 
@@ -355,7 +358,6 @@ sub taskwarrior_export {
 
 	$output = &api_fetch_lists();
 
-	my $created;
 	foreach my $tasklist (@{$output->{"items"}}) {
 		if ($tasklist->{"title"} eq ${title}) {
 			$created = "1";
@@ -363,8 +365,9 @@ sub taskwarrior_export {
 
 			$output = &api_fetch_tasks($tasklist->{"id"});
 
-			foreach my $task (@{$output->{"items"}}) {
-				&api_delete($task->{"selfLink"});
+			foreach my $task (sort({$a->{"position"} cmp $b->{"position"}} @{$output->{"items"}})) {
+				push(@{$links}, $task->{"selfLink"});
+				$previous = $task->{"selfLink"};
 			};
 
 			last();
@@ -377,11 +380,12 @@ sub taskwarrior_export {
 		$listid = $output->{"id"};
 	};
 
-	foreach my $task (reverse(@{${tasks}})) {
+	foreach my $task (@{${tasks}}) {
 		if ($task->{"status"} eq "deleted") {
 			$task->{"deleted"} = "true";
 		};
 		$task->{"status"} = "needsAction";
+		$task->{"notes"} = "";
 		if (defined($task->{"due"})) {
 			$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
 		};
@@ -398,13 +402,34 @@ sub taskwarrior_export {
 				};
 			};
 		};
-		&api_post("${URL}/lists/${listid}/tasks", {
+		my $blob = {
 			"title"		=> $task->{"description"},
 			"status"	=> $task->{"status"},
 			"due"		=> $task->{"due"},
 			"completed"	=> $task->{"end"},
 			"deleted"	=> $task->{"deleted"},
 			"notes"		=> $task->{"notes"},
+			"parent"	=> undef,
+		};
+		if (@{$links}) {
+			&api_patch(shift(@{$links}), ${blob});
+		} else {
+			$output = &api_post("${URL}/lists/${listid}/tasks", {${blob},
+				"previous"	=> ${previous},
+			});
+			$previous = $output->{"selfLink"};
+		};
+	};
+
+	while (@{$links}) {
+		&api_patch(shift(@{$links}), {
+			"title"		=> "0",
+			"status"	=> "needsAction",
+			"due"		=> undef,
+			"completed"	=> undef,
+			"deleted"	=> "true",
+			"notes"		=> undef,
+			"parent"	=> undef,
 		});
 	};
 
