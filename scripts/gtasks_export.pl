@@ -349,7 +349,7 @@ sub taskwarrior_export {
 	my $output;
 
 	$tasks = qx(task export ${tasks});
-	$tasks = $json->decode("[${tasks}]");
+	$tasks = decode_json("[${tasks}]");
 
 	$output = &api_fetch_lists();
 
@@ -363,8 +363,17 @@ sub taskwarrior_export {
 			my $post_url = "${URL}/lists/" . $output->{"id"} . "/tasks";
 
 			foreach my $task (reverse(@{${tasks}})) {
+				if ($task->{"status"} eq "deleted") {
+					$task->{"deleted"} = "true";
+				} else {
+					$task->{"status"} = "needsAction";
+				};
 				if (defined($task->{"due"})) {
 					$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
+				};
+				if (defined($task->{"end"})) {
+					$task->{"end"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
+					$task->{"status"} = "completed";
 				};
 				if (defined($task->{"annotations"})) {
 					foreach my $annotation (@{$task->{"annotations"}}) {
@@ -376,9 +385,12 @@ sub taskwarrior_export {
 					};
 				};
 				&api_post(${post_url}, {
-					"title"	=> $task->{"description"},
-					"due"	=> $task->{"due"},
-					"notes"	=> $task->{"notes"},
+					"title"		=> $task->{"description"},
+					"status"	=> $task->{"status"},
+					"due"		=> $task->{"due"},
+					"completed"	=> $task->{"end"},
+					"deleted"	=> $task->{"deleted"},
+					"notes"		=> $task->{"notes"},
 				});
 			};
 
