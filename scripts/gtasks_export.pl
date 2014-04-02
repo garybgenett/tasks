@@ -348,7 +348,7 @@ sub taskwarrior_export {
 	my $tasks	= shift || "";
 	my $output;
 
-	$tasks = qx(task export ${tasks});
+	$tasks = qx(task export "${tasks}");
 	$tasks = decode_json("[${tasks}]");
 
 	$output = &api_fetch_lists();
