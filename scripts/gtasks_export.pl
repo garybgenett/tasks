@@ -380,9 +380,8 @@ sub taskwarrior_export {
 	foreach my $task (reverse(@{${tasks}})) {
 		if ($task->{"status"} eq "deleted") {
 			$task->{"deleted"} = "true";
-		} else {
-			$task->{"status"} = "needsAction";
 		};
+		$task->{"status"} = "needsAction";
 		if (defined($task->{"due"})) {
 			$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
 		};
