@@ -262,7 +262,9 @@ sub api_fetch_lists {
 sub api_create_task {
 	my $listid	= shift;
 	my $fields	= shift;
-	my $output = &api_post("${URL}/lists/${listid}/tasks", ${fields});
+	my $url = "${URL}/lists/${listid}/tasks";
+	$url .= "?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
+	my $output = &api_post(${url}, ${fields});
 	return(${output});
 };
 
@@ -324,6 +326,16 @@ sub api_get {
 	until (!defined(${page}));
 
 	return(${output});
+};
+
+########################################
+
+sub api_move {
+	my $selflink	= shift;
+	my $fields	= shift;
+	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
+	&api_post(${selflink}, {});
+	return(0);
 };
 
 ########################################
@@ -438,14 +450,13 @@ sub taskwarrior_export {
 			"deleted"	=> $task->{"deleted"},
 			"notes"		=> $task->{"notes"},
 			"parent"	=> undef,
+			"previous"	=> ${previous},
 		};
 		if (@{$links}) {
 			&api_patch(shift(@{$links}), ${blob});
 			print "=";
 		} else {
-			$output = &api_create_task(${listid}, {${blob},
-				"previous"	=> ${previous},
-			});
+			$output = &api_create_task(${listid}, ${blob});
 			$previous = $output->{"selfLink"};
 			print "+";
 		};
