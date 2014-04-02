@@ -34,6 +34,7 @@ use JSON::PP;
 my $json = JSON::PP->new();
 
 use File::Temp qw(tempfile);
+use MIME::Base64;
 
 ################################################################################
 
@@ -309,6 +310,17 @@ sub api_get {
 
 ########################################
 
+sub api_delete {
+	my $uri		= shift;
+	my $fields	= shift;
+	$mech->request(HTTP::Request->new(
+		"DELETE", ${uri}, ["Content-Type", "application/json"],
+	)) && $API_REQUEST_COUNT++;
+	return(0);
+};
+
+########################################
+
 sub api_patch {
 	my $uri		= shift;
 	my $fields	= shift;
@@ -318,7 +330,66 @@ sub api_patch {
 	return(decode_json($mech->content()));
 };
 
+########################################
+
+sub api_post {
+	my $uri		= shift;
+	my $fields	= shift;
+	$mech->request(HTTP::Request->new(
+		"POST", ${uri}, ["Content-Type", "application/json"], encode_json(${fields}),
+	)) && $API_REQUEST_COUNT++;
+	return(decode_json($mech->content()));
+};
+
 ################################################################################
+
+sub taskwarrior_export {
+	my $title	= shift;
+	my $tasks	= shift || "";
+	my $output;
+
+	$tasks = qx(task export ${tasks});
+	$tasks = $json->decode("[${tasks}]");
+
+	$output = &api_fetch_lists();
+
+	foreach my $tasklist (@{$output->{"items"}}) {
+		if ($tasklist->{"title"} eq ${title}) {
+
+			&api_delete($tasklist->{"selfLink"});
+			$output = &api_post("${URL}/users/\@me/lists", {
+				"title"		=> ${title},
+			});
+			my $post_url = "${URL}/lists/" . $output->{"id"} . "/tasks";
+
+			foreach my $task (reverse(@{${tasks}})) {
+				if (defined($task->{"due"})) {
+					$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
+				};
+				if (defined($task->{"annotations"})) {
+					foreach my $annotation (@{$task->{"annotations"}}) {
+						if ($annotation->{"description"} =~ /^notes[:]/) {
+							my $notes = $annotation->{"description"};
+							$notes =~ s/^notes[:]//g;
+							$task->{"notes"} = decode_base64(${notes});
+						};
+					};
+				};
+				&api_post(${post_url}, {
+					"title"	=> $task->{"description"},
+					"due"	=> $task->{"due"},
+					"notes"	=> $task->{"notes"},
+				});
+			};
+
+			last();
+		};
+	};
+
+	return(0);
+};
+
+########################################
 
 sub search_regex {
 	my $regex	= shift;
@@ -797,7 +868,12 @@ sub export_files_item {
 ################################################################################
 
 if (@{ARGV}) {
-	if (${ARGV[0]} eq "search") {
+	if (${ARGV[0]} eq "taskwarrior") {
+		shift;
+		&refresh_tokens();
+		&taskwarrior_export(@{ARGV});
+	}
+	elsif (${ARGV[0]} eq "search") {
 		shift;
 		&refresh_tokens();
 		&search_regex(@{ARGV});
