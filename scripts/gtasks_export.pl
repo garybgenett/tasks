@@ -347,6 +347,7 @@ sub api_post {
 sub taskwarrior_export {
 	my $title	= shift;
 	my $tasks	= shift || "";
+	my $field	= shift || "description";
 	my $links	= [];
 	my $created;
 	my $previous;
@@ -380,7 +381,17 @@ sub taskwarrior_export {
 		$listid = $output->{"id"};
 	};
 
-	foreach my $task (@{${tasks}}) {
+#>>> BUG IN PERL!
+#>>> http://www.perlmonks.org/?node_id=490213
+	my @array = @{$tasks};
+	foreach my $task (sort({
+		if (exists($a->{$field}) && exists($b->{$field})) {
+			$a->{$field} cmp $b->{$field};
+		} else {
+			$a->{"description"} cmp $b->{"description"};
+		};
+	} @{array})) {
+#>>>
 		if ($task->{"status"} eq "deleted") {
 			$task->{"deleted"} = "true";
 		};
