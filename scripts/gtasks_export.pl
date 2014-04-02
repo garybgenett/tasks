@@ -244,8 +244,25 @@ sub refresh_tokens {
 
 ################################################################################
 
+sub api_create_list {
+	my $fields = shift;
+	my $output = &api_post("${URL}/users/\@me/lists", ${fields});
+	return(${output});
+};
+
+########################################
+
 sub api_fetch_lists {
 	my $output = &api_get("${URL}/users/\@me/lists");
+	return(${output});
+};
+
+########################################
+
+sub api_create_task {
+	my $listid	= shift;
+	my $fields	= shift;
+	my $output = &api_post("${URL}/lists/${listid}/tasks", ${fields});
 	return(${output});
 };
 
@@ -264,7 +281,7 @@ sub api_fetch_tasks {
 ########################################
 
 sub api_get {
-	my $uri		= shift;
+	my $url		= shift;
 	my $fields	= shift;
 	my $output;
 	my $page;
@@ -272,16 +289,16 @@ sub api_get {
 #>>> BUG IN GOOGLE TASKS API!
 #>>> http://code.google.com/a/google.com/p/apps-api-issues/issues/detail?id=2837
 #>>> SHOULD BE ABLE TO REQUEST AN ARBITRARY AMOUNT
-	$uri .= "?maxResults=100";
+	$url .= "?maxResults=100";
 
 	if (defined(${fields})) {
 		foreach my $field (keys(${fields})) {
-			$uri .= "&" . ${field} . "=" . $fields->{$field};
+			$url .= "&" . ${field} . "=" . $fields->{$field};
 		};
 	};
 
 	do {
-		$mech->get("${uri}"
+		$mech->get("${url}"
 			. (defined(${page}) ? "&pageToken=${page}" : "")
 		) && $API_REQUEST_COUNT++;
 		my $out = decode_json($mech->content());
@@ -312,10 +329,10 @@ sub api_get {
 ########################################
 
 sub api_delete {
-	my $uri		= shift;
+	my $selflink	= shift;
 	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
-		"DELETE", ${uri}, ["Content-Type", "application/json"],
+		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
 	return(0);
 };
@@ -323,10 +340,10 @@ sub api_delete {
 ########################################
 
 sub api_patch {
-	my $uri		= shift;
+	my $selflink	= shift;
 	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
-		"PATCH", ${uri}, ["Content-Type", "application/json"], encode_json(${fields}),
+		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
 	return(decode_json($mech->content()));
 };
@@ -334,10 +351,10 @@ sub api_patch {
 ########################################
 
 sub api_post {
-	my $uri		= shift;
+	my $selflink	= shift;
 	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
-		"POST", ${uri}, ["Content-Type", "application/json"], encode_json(${fields}),
+		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
 	return(decode_json($mech->content()));
 };
@@ -375,7 +392,7 @@ sub taskwarrior_export {
 		};
 	};
 	if (!${created}) {
-		$output = &api_post("${URL}/users/\@me/lists", {
+		$output = &api_create_list({
 			"title"		=> ${title},
 		});
 		$listid = $output->{"id"};
@@ -426,7 +443,7 @@ sub taskwarrior_export {
 			&api_patch(shift(@{$links}), ${blob});
 			print "=";
 		} else {
-			$output = &api_post("${URL}/lists/${listid}/tasks", {${blob},
+			$output = &api_create_task(${listid}, {${blob},
 				"previous"	=> ${previous},
 			});
 			$previous = $output->{"selfLink"};
