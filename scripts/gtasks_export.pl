@@ -413,11 +413,13 @@ sub taskwarrior_export {
 		};
 		if (@{$links}) {
 			&api_patch(shift(@{$links}), ${blob});
+			print "=";
 		} else {
 			$output = &api_post("${URL}/lists/${listid}/tasks", {${blob},
 				"previous"	=> ${previous},
 			});
 			$previous = $output->{"selfLink"};
+			print "+";
 		};
 	};
 
@@ -431,7 +433,10 @@ sub taskwarrior_export {
 			"notes"		=> undef,
 			"parent"	=> undef,
 		});
+		print "-";
 	};
+
+	print "\n";
 
 	return(0);
 };
