@@ -300,11 +300,12 @@ sub api_get {
 		}
 
 		$page = $out->{"nextPageToken"};
+		delete($out->{"nextPageToken"});
+		delete($output->{"nextPageToken"});
 		$output->{$API_PAGES}++;
 	}
 	until (!defined(${page}));
 
-	delete($output->{"nextPageToken"});
 	return(${output});
 };
 
