@@ -355,47 +355,46 @@ sub taskwarrior_export {
 
 	foreach my $tasklist (@{$output->{"items"}}) {
 		if ($tasklist->{"title"} eq ${title}) {
-
 			&api_delete($tasklist->{"selfLink"});
-			$output = &api_post("${URL}/users/\@me/lists", {
-				"title"		=> ${title},
-			});
-			my $post_url = "${URL}/lists/" . $output->{"id"} . "/tasks";
-
-			foreach my $task (reverse(@{${tasks}})) {
-				if ($task->{"status"} eq "deleted") {
-					$task->{"deleted"} = "true";
-				} else {
-					$task->{"status"} = "needsAction";
-				};
-				if (defined($task->{"due"})) {
-					$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
-				};
-				if (defined($task->{"end"})) {
-					$task->{"end"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
-					$task->{"status"} = "completed";
-				};
-				if (defined($task->{"annotations"})) {
-					foreach my $annotation (@{$task->{"annotations"}}) {
-						if ($annotation->{"description"} =~ /^notes[:]/) {
-							my $notes = $annotation->{"description"};
-							$notes =~ s/^notes[:]//g;
-							$task->{"notes"} = decode_base64(${notes});
-						};
-					};
-				};
-				&api_post(${post_url}, {
-					"title"		=> $task->{"description"},
-					"status"	=> $task->{"status"},
-					"due"		=> $task->{"due"},
-					"completed"	=> $task->{"end"},
-					"deleted"	=> $task->{"deleted"},
-					"notes"		=> $task->{"notes"},
-				});
-			};
-
 			last();
 		};
+	};
+
+	$output = &api_post("${URL}/users/\@me/lists", {
+		"title"		=> ${title},
+	});
+	my $post_url = "${URL}/lists/" . $output->{"id"} . "/tasks";
+
+	foreach my $task (reverse(@{${tasks}})) {
+		if ($task->{"status"} eq "deleted") {
+			$task->{"deleted"} = "true";
+		} else {
+			$task->{"status"} = "needsAction";
+		};
+		if (defined($task->{"due"})) {
+			$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
+		};
+		if (defined($task->{"end"})) {
+			$task->{"end"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
+			$task->{"status"} = "completed";
+		};
+		if (defined($task->{"annotations"})) {
+			foreach my $annotation (@{$task->{"annotations"}}) {
+				if ($annotation->{"description"} =~ /^notes[:]/) {
+					my $notes = $annotation->{"description"};
+					$notes =~ s/^notes[:]//g;
+					$task->{"notes"} = decode_base64(${notes});
+				};
+			};
+		};
+		&api_post(${post_url}, {
+			"title"		=> $task->{"description"},
+			"status"	=> $task->{"status"},
+			"due"		=> $task->{"due"},
+			"completed"	=> $task->{"end"},
+			"deleted"	=> $task->{"deleted"},
+			"notes"		=> $task->{"notes"},
+		});
 	};
 
 	return(0);
