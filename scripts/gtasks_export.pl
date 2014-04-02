@@ -315,7 +315,7 @@ sub api_patch {
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${uri}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
-	return(0);
+	return(decode_json($mech->content()));
 };
 
 ################################################################################
@@ -390,11 +390,11 @@ sub edit_notes {
 			foreach my $task (@{$output->{"items"}}) {
 				if ($task->{"title"} eq ${argv_name}) {
 					$selflink = $task->{"selfLink"};
-					last;
+					last();
 				};
 			};
 
-			last;
+			last();
 		};
 	};
 
