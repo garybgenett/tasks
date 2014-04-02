@@ -346,6 +346,7 @@ sub api_post {
 sub taskwarrior_export {
 	my $title	= shift;
 	my $tasks	= shift || "";
+	my $listid;
 	my $output;
 
 	$tasks = qx(task export "${tasks}");
@@ -353,17 +354,27 @@ sub taskwarrior_export {
 
 	$output = &api_fetch_lists();
 
+	my $created;
 	foreach my $tasklist (@{$output->{"items"}}) {
 		if ($tasklist->{"title"} eq ${title}) {
-			&api_delete($tasklist->{"selfLink"});
+			$created = "1";
+			$listid = $tasklist->{"id"};
+
+			$output = &api_fetch_tasks($tasklist->{"id"});
+
+			foreach my $task (@{$output->{"items"}}) {
+				&api_delete($task->{"selfLink"});
+			};
+
 			last();
 		};
 	};
-
-	$output = &api_post("${URL}/users/\@me/lists", {
-		"title"		=> ${title},
-	});
-	my $post_url = "${URL}/lists/" . $output->{"id"} . "/tasks";
+	if (!${created}) {
+		$output = &api_post("${URL}/users/\@me/lists", {
+			"title"		=> ${title},
+		});
+		$listid = $output->{"id"};
+	};
 
 	foreach my $task (reverse(@{${tasks}})) {
 		if ($task->{"status"} eq "deleted") {
@@ -387,7 +398,7 @@ sub taskwarrior_export {
 				};
 			};
 		};
-		&api_post(${post_url}, {
+		&api_post("${URL}/lists/${listid}/tasks", {
 			"title"		=> $task->{"description"},
 			"status"	=> $task->{"status"},
 			"due"		=> $task->{"due"},
