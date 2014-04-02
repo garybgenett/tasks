@@ -201,7 +201,7 @@ sub refresh_tokens {
 			. "&response_type=code"
 		) && $API_REQUEST_COUNT++;
 		$mech->submit_form(
-			"form_id"	=> "submit_access_form",
+			"form_id"	=> "connect-approve",
 			"fields"	=> {"submit_access" => "true"},
 		) && $API_REQUEST_COUNT++;
 		$CODE = $mech->content();
