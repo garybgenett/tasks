@@ -378,8 +378,8 @@ sub taskwarrior_export {
 	my $tasks	= shift || "";
 	my $field	= shift || "description";
 	my $links	= [];
+	my $previous	= undef;
 	my $created;
-	my $previous;
 	my $listid;
 	my $output;
 
@@ -395,9 +395,8 @@ sub taskwarrior_export {
 
 			$output = &api_fetch_tasks($tasklist->{"id"});
 
-			foreach my $task (sort({$a->{"position"} cmp $b->{"position"}} @{$output->{"items"}})) {
+			foreach my $task (@{$output->{"items"}}) {
 				push(@{$links}, $task->{"selfLink"});
-				$previous = $task->{"selfLink"};
 			};
 
 			last();
@@ -452,17 +451,18 @@ sub taskwarrior_export {
 			"previous"	=> ${previous},
 		};
 		if (@{$links}) {
-			&api_patch(shift(@{$links}), ${blob});
+			$output = &api_patch(shift(@{$links}), ${blob});
+			$previous = $output->{"id"};
 			print "=";
 		} else {
 			$output = &api_create_task(${listid}, ${blob});
-			$previous = $output->{"selfLink"};
+			$previous = $output->{"id"};
 			print "+";
 		};
 	};
 
 	while (@{$links}) {
-		&api_patch(shift(@{$links}), {
+		$output = &api_patch(shift(@{$links}), {
 			"title"		=> "0",
 			"status"	=> "needsAction",
 			"due"		=> undef,
@@ -470,7 +470,9 @@ sub taskwarrior_export {
 			"deleted"	=> "true",
 			"notes"		=> "",
 			"parent"	=> undef,
+			"previous"	=> ${previous},
 		});
+		$previous = $output->{"id"};
 		print "-";
 	};
 
