@@ -76,7 +76,7 @@ color.footnote=				cyan
 color.header=				cyan
 
 color.active=				on green
-color.alternate=			none
+color.alternate=			on black
 
 color.blocked=				blue
 color.blocking=				yellow
