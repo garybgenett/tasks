@@ -334,8 +334,23 @@ sub api_move {
 	my $selflink	= shift;
 	my $fields	= shift;
 	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	&api_post(${selflink}, {});
-	return(0);
+	my $output = &api_post(${selflink}, {});
+	return(${output});
+};
+
+########################################
+
+sub api_patch {
+	my $selflink	= shift;
+	my $fields	= shift;
+	if (exists($fields->{"parent"}) || exists($fields->{"previous"})) {
+		my $output = &api_move(${selflink}, ${fields});
+		$selflink = $output->{"selfLink"};
+	};
+	$mech->request(HTTP::Request->new(
+		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+	)) && $API_REQUEST_COUNT++;
+	return(decode_json($mech->content()));
 };
 
 ########################################
@@ -345,17 +360,6 @@ sub api_delete {
 	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
 		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && $API_REQUEST_COUNT++;
-	return(0);
-};
-
-########################################
-
-sub api_patch {
-	my $selflink	= shift;
-	my $fields	= shift;
-	$mech->request(HTTP::Request->new(
-		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
 	return(decode_json($mech->content()));
 };
