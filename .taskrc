@@ -154,6 +154,20 @@ report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
 report.view.filter=			((project.not:_data (kind.none: status:pending project.not:.someday tags.not:.waiting (recur.none: or +TODAY or +OVERDUE) (+DUE or -BLOCKED))) or +ACTIVE)
 report.view.sort=			due+,priority-,start-,description+,entry+
 
+########################################
+
+report.export-agenda.description=	Export: Actions
+report.export-agenda.columns=		#>>>
+report.export-agenda.labels=		#>>>
+report.export-agenda.filter=		(status:pending tags:agenda (due.none: or +DUE or +OVERDUE))
+report.export-agenda.sort=		#>>>
+
+report.export-remind.description=	Export: Reminders
+report.export-remind.columns=		#>>>
+report.export-remind.labels=		#>>>
+report.export-remind.filter=		(status:pending due.any: )
+report.export-remind.sort=		#>>>
+
 ################################################################################
 # end of file
 ################################################################################
