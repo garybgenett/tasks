@@ -41,7 +41,7 @@ expressions=				on
 patterns=				on
 regex=					yes
 
-list.all.projects=			no
+list.all.projects=			yes
 list.all.tags=				yes
 print.empty.columns=			yes
 
