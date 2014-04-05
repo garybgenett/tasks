@@ -380,13 +380,17 @@ sub api_post {
 sub taskwarrior_export {
 	my $title	= shift;
 	my $tasks	= shift || "";
-	my $field	= shift || "description";
-	my $default	= shift || "";
+	my $field_one	= shift || "description";
+	my $field_two	= shift || "entry";
 	my $links	= [];
 	my $previous	= undef;
 	my $created;
 	my $listid;
 	my $output;
+
+	my($default_one, $default_two);
+	($field_one, $default_one) = split(",", $field_one);
+	($field_two, $default_two) = split(",", $field_two);
 
 	$tasks = qx(task export "${tasks}");
 	$tasks = decode_json("[${tasks}]");
@@ -419,9 +423,13 @@ sub taskwarrior_export {
 	my @array = @{$tasks};
 	foreach my $task (sort({
 		((
-			($a->{$field} || ${default}) cmp ($b->{$field} || ${default})
+			($a->{$field_one} || ${default_one}) cmp ($b->{$field_one} || ${default_one})
+		) || (
+			($a->{$field_two} || ${default_two}) cmp ($b->{$field_two} || ${default_two})
 		) || (
 			$a->{"description"} cmp $b->{"description"}
+		) || (
+			$a->{"entry"} cmp $b->{"entry"}
 		));
 	} @{array})) {
 #>>>
