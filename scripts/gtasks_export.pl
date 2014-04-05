@@ -381,6 +381,7 @@ sub taskwarrior_export {
 	my $title	= shift;
 	my $tasks	= shift || "";
 	my $field	= shift || "description";
+	my $default	= shift || "";
 	my $links	= [];
 	my $previous	= undef;
 	my $created;
@@ -417,11 +418,11 @@ sub taskwarrior_export {
 #>>> http://www.perlmonks.org/?node_id=490213
 	my @array = @{$tasks};
 	foreach my $task (sort({
-		if (exists($a->{$field}) && exists($b->{$field})) {
-			$a->{$field} cmp $b->{$field};
-		} else {
-			$a->{"description"} cmp $b->{"description"};
-		};
+		((
+			($a->{$field} || ${default}) cmp ($b->{$field} || ${default})
+		) || (
+			$a->{"description"} cmp $b->{"description"}
+		));
 	} @{array})) {
 #>>>
 		if ($task->{"status"} eq "deleted") {
