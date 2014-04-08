@@ -437,6 +437,7 @@ sub taskwarrior_export {
 			$task->{"deleted"} = "true";
 		};
 		$task->{"status"} = "needsAction";
+		$task->{"notes"} = "";
 		if (defined($task->{"due"})) {
 			$task->{"due"} =~ s/^([0-9]{4})([0-9]{2})([0-9]{2})[T]([0-9]{2})([0-9]{2})([0-9]{2})[Z]$/$1-$2-$3T$4:$5:$6Z/;
 		};
@@ -446,9 +447,9 @@ sub taskwarrior_export {
 		};
 		if (defined($task->{"annotations"})) {
 			foreach my $annotation (@{$task->{"annotations"}}) {
-				if ($annotation->{"description"} =~ /^notes[:]/) {
+				if ($annotation->{"description"} =~ /^[[]notes[]][:]/) {
 					my $notes = $annotation->{"description"};
-					$notes =~ s/^notes[:]//g;
+					$notes =~ s/^[[]notes[]][:]//g;
 					$task->{"notes"} = decode_base64(${notes});
 				};
 			};
