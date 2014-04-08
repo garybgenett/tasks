@@ -152,7 +152,9 @@ report.view.description=		Custom: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
 report.view.filter=			((project.not:_data (kind.none: status:pending project.not:.someday tags.not:.waiting (recur.none: or +TODAY or +OVERDUE) (+DUE or -BLOCKED))) or +ACTIVE)
-report.view.sort=			start-,due+,priority-,entry+
+report.view.sort=			start-,urgency-,due+,priority-,project+,depends+,entry+
+
+#>>>report.next.sort=			urgency-,due+,priority-,start-,project+
 
 ########################################
 
