@@ -22,7 +22,7 @@ function onLoad() {
 			eventSource:	eventSource,
 			intervalUnit:	Timeline.DateTime.HOUR,
 			overview:	false,
-			width:		"40%",
+			width:		"70%",
 			intervalPixels:	40,
 			theme:		theme,
 		}),
@@ -30,7 +30,7 @@ function onLoad() {
 			eventSource:	eventSource,
 			intervalUnit:	Timeline.DateTime.DAY,
 			overview:	true,
-			width:		"30%",
+			width:		"15%",
 			intervalPixels:	140,
 			theme:		theme,
 		}),
@@ -38,7 +38,7 @@ function onLoad() {
 			eventSource:	eventSource,
 			intervalUnit:	Timeline.DateTime.MONTH,
 			overview:	true,
-			width:		"30%",
+			width:		"15%",
 			intervalPixels:	80,
 			theme:		theme,
 		}),
@@ -52,7 +52,7 @@ function onLoad() {
 </head>
 <body onload="onLoad();" onresize="onResize();">
 <noscript>This page requires Javascript.</noscript>
-<div id="timeline" style="height: 400px; border: 1px solid gray;"></div>
-<div id="timegrid" style="height: 400px; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
+<div id="timeline" style="height: 800px; border: 1px solid gray;"></div>
+<div id="timegrid" style="height: 800px; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
 </body>
 </html>
