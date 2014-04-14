@@ -1,0 +1,58 @@
+<!-- http://simile-widgets.org/wiki/Timeline_GettingStarted -->
+<!-- http://simile-widgets.org/wiki/Timeline_EventSources -->
+<!-- http://simile-widgets.org/wiki/Timeline_CreatingNewThemes -->
+<!-- http://simile-widgets.org/wiki/Timeline_ThemeClass -->
+<html>
+<head>
+<script type="text/javascript" src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true"></script>
+<script type="text/javascript" src="http://static.simile.mit.edu/timegrid/api-1.0/timegrid-api.js"></script>
+<script type="text/javascript">
+function onLoad() {
+	var eventSource = new Timeline.DefaultEventSource();
+	var theme = Timeline.ClassicTheme.create();
+		theme.timeline_start			= new Date(Date.UTC(2014,3,0,0,0,0,0));
+		theme.timeline_stop			= new Date(Date.UTC(2015,12,31,0,0,0,0));
+		theme.firstDayOfWeek			= 1;
+		theme.ether.interval.weekend.opacity	= 90;
+		theme.event.overviewTrack.height	= 20;
+		theme.event.tape.height			= 20;
+		theme.event.track.height		= 40;
+	var bandInfos = [
+		Timeline.createBandInfo({
+			eventSource:	eventSource,
+			intervalUnit:	Timeline.DateTime.HOUR,
+			overview:	false,
+			width:		"40%",
+			intervalPixels:	40,
+			theme:		theme,
+		}),
+		Timeline.createBandInfo({
+			eventSource:	eventSource,
+			intervalUnit:	Timeline.DateTime.DAY,
+			overview:	true,
+			width:		"30%",
+			intervalPixels:	140,
+			theme:		theme,
+		}),
+		Timeline.createBandInfo({
+			eventSource:	eventSource,
+			intervalUnit:	Timeline.DateTime.MONTH,
+			overview:	true,
+			width:		"30%",
+			intervalPixels:	80,
+			theme:		theme,
+		}),
+	];
+	bandInfos[1].syncWith = 0; bandInfos[1].highlight = true;
+	bandInfos[2].syncWith = 1; bandInfos[2].highlight = true;
+	timeline = Timeline.create(document.getElementById("timeline"), bandInfos);
+	Timeline.loadJSON("tasks.timeline.json", function(json,url){eventSource.loadJSON(json,url);});
+}
+</script>
+</head>
+<body onload="onLoad();" onresize="onResize();">
+<noscript>This page requires Javascript.</noscript>
+<div id="timeline" style="height: 400px; border: 1px solid gray;"></div>
+<div id="timegrid" style="height: 400px; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
+</body>
+</html>
