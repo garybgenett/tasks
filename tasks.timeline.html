@@ -1,19 +1,21 @@
+<html>
+<head>
+<title>Taskwarrior Timeline: SIMILE Timeline Widget</title>
 <!-- http://simile-widgets.org/wiki/Timeline_GettingStarted -->
 <!-- http://simile-widgets.org/wiki/Timeline_EventSources -->
 <!-- http://simile-widgets.org/wiki/Timeline_CreatingNewThemes -->
 <!-- http://simile-widgets.org/wiki/Timeline_ThemeClass -->
-<html>
-<head>
 <script type="text/javascript" src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true"></script>
 <script type="text/javascript" src="http://static.simile.mit.edu/timegrid/api-1.0/timegrid-api.js"></script>
 <script type="text/javascript">
 function onLoad() {
-	var eventSource = new Timeline.DefaultEventSource();
+	var eventSource		= new Timeline.DefaultEventSource();
+	var projectSource	= new Timeline.DefaultEventSource();
 	var theme = Timeline.ClassicTheme.create();
 		theme.timeline_start			= new Date(Date.UTC(2014,3,0,0,0,0,0));
 		theme.timeline_stop			= new Date(Date.UTC(2015,12,31,0,0,0,0));
 		theme.firstDayOfWeek			= 1;
-		theme.ether.interval.weekend.opacity	= 90;
+		theme.ether.interval.weekend.opacity	= 25;
 		theme.event.overviewTrack.height	= 20;
 		theme.event.tape.height			= 20;
 		theme.event.track.height		= 40;
@@ -22,37 +24,51 @@ function onLoad() {
 			eventSource:	eventSource,
 			intervalUnit:	Timeline.DateTime.HOUR,
 			overview:	false,
-			width:		"70%",
-			intervalPixels:	40,
+			width:		"40%",
+			intervalPixels:	40,	// about a day
 			theme:		theme,
 		}),
 		Timeline.createBandInfo({
 			eventSource:	eventSource,
 			intervalUnit:	Timeline.DateTime.DAY,
 			overview:	true,
-			width:		"15%",
-			intervalPixels:	140,
+			width:		"10%",
+			intervalPixels:	140,	// about a week
 			theme:		theme,
 		}),
 		Timeline.createBandInfo({
-			eventSource:	eventSource,
+			eventSource:	projectSource,
+			intervalUnit:	Timeline.DateTime.WEEK,
+			overview:	false,
+			width:		"30%",
+			intervalPixels:	70,	// about a quarter
+			theme:		theme,
+		}),
+		Timeline.createBandInfo({
+			eventSource:	projectSource,
 			intervalUnit:	Timeline.DateTime.MONTH,
 			overview:	true,
-			width:		"15%",
-			intervalPixels:	80,
+			width:		"20%",
+			intervalPixels:	80,	// about a year
 			theme:		theme,
 		}),
 	];
 	bandInfos[1].syncWith = 0; bandInfos[1].highlight = true;
 	bandInfos[2].syncWith = 1; bandInfos[2].highlight = true;
+	bandInfos[3].syncWith = 2; bandInfos[3].highlight = true;
 	timeline = Timeline.create(document.getElementById("timeline"), bandInfos);
-	Timeline.loadJSON("tasks.timeline.json", function(json,url){eventSource.loadJSON(json,url);});
+	Timeline.loadJSON("tasks.timeline.json",		function(json,url){eventSource.loadJSON(json,url);});
+	Timeline.loadJSON("tasks.timeline.projects.json",	function(json,url){projectSource.loadJSON(json,url);});
 }
 </script>
 </head>
-<body onload="onLoad();" onresize="onResize();">
+<body onload="onLoad();" onresize="onLoad();">
 <noscript>This page requires Javascript.</noscript>
-<div id="timeline" style="height: 800px; border: 1px solid gray;"></div>
-<div id="timegrid" style="height: 800px; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
+<!-- sizes/ratios configured with these "ideal" settings
+<div id="timeline" style="height: 800px; width: 1000px; border: 1px solid gray;"></div>
+<div id="timegrid" style="height: 800px; width: 1000px; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
+-->
+<div id="timeline" style="height: 100%; width: 100%; border: 1px solid gray;"></div>
+<div id="timegrid" style="height: 100%; width: 100%; border: 1px solid gray;" tg:role="grid" tg:views="week,month" tg:src="tasks.timeline.json"></div>
 </body>
 </html>
