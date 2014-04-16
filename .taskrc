@@ -84,9 +84,9 @@ color.recurring=			red
 color.scheduled=			magenta
 color.tagged=				none
 
-color.pri.H=				none
-color.pri.M=				none
-color.pri.L=				none
+color.pri.H=				magenta
+color.pri.M=				magenta
+color.pri.L=				magenta
 
 color.due.today=			white on red
 color.due=				black on red
