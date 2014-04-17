@@ -158,10 +158,10 @@ report.view.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 ########################################
 
-report.export-agenda.description=	Export: Actions
+report.export-agenda.description=	Export: Agenda
 report.export-agenda.columns=		#>>>
 report.export-agenda.labels=		#>>>
-report.export-agenda.filter=		(status:pending tags:agenda (due.none: or +DUE or +OVERDUE))
+report.export-agenda.filter=		(status:pending tags:agenda (due.none: or +DUE or +TODAY or +OVERDUE))
 report.export-agenda.sort=		#>>>
 
 report.export-remind.description=	Export: Reminders
