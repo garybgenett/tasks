@@ -34,7 +34,7 @@ indent.report=				0
 
 abbreviation.minimum=			1
 bulk=					1
-recurrence.limit=			0
+recurrence.limit=			1
 
 search.case.sensitive=			no
 expressions=				on
