@@ -148,6 +148,12 @@ report.read.sort=			project+,kind-,depends+,description+,entry+
 
 ########################################
 
+report.mind.description=		Custom: Reminders for all tasks with due date
+report.mind.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
+report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
+report.mind.filter=			(status:pending due.any: )
+report.mind.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
+
 report.view.description=		Custom: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
@@ -155,20 +161,6 @@ report.view.filter=			((project.not:_data (kind.none: status:pending project.not
 report.view.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
-
-########################################
-
-report.export-agenda.description=	Export: Agenda
-report.export-agenda.columns=		#>>>
-report.export-agenda.labels=		#>>>
-report.export-agenda.filter=		(status:pending tags:agenda (due.none: or +DUE or +TODAY or +OVERDUE))
-report.export-agenda.sort=		#>>>
-
-report.export-remind.description=	Export: Reminders
-report.export-remind.columns=		#>>>
-report.export-remind.labels=		#>>>
-report.export-remind.filter=		(status:pending due.any: )
-report.export-remind.sort=		#>>>
 
 ################################################################################
 # end of file
