@@ -140,13 +140,13 @@ report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,
 report.meta.filter=			((project.not:_data (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
 report.meta.sort=			project+,kind-,area+,description+,entry+
 
-########################################
-
-report.read.description=		Custom: Default list view, sorted for review
+report.read.description=		Custom: List view, unfiltered and sorted for review
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
 report.read.sort=			project+,kind-,depends+,description+,entry+
+
+########################################
 
 report.view.description=		Custom: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
