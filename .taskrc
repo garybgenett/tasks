@@ -154,6 +154,12 @@ report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
 report.mind.filter=			(status:pending due.any: )
 report.mind.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
+report.todo.description=		Custom: Due and priority tasks
+report.todo.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
+report.todo.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
+report.todo.filter=			(status:pending (priority.any: or (+DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.todo.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
+
 report.view.description=		Custom: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
