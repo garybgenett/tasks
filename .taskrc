@@ -131,7 +131,7 @@ report.fail.sort=			entry+
 report.data.description=		Custom: Reference and non-task data
 report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
-report.data.filter=			project:_data
+report.data.filter=			(project:_data or project:_journal)
 report.data.sort=			project+,kind-,area+,description+,entry+
 
 report.meta.description=		Custom: Metadata and recurring tasks
