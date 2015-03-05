@@ -4,10 +4,6 @@
 
 data.location=				/.g/_data/zactive/_pim/tasks
 
-shadow.file=				/.g/_data/zactive/_pim/tasks.json
-shadow.command=				export
-shadow.notify=				off
-
 include					/usr/share/task/rc/holidays.en-US.rc
 
 ########################################
@@ -48,7 +44,6 @@ recurrence.limit=			1
 
 search.case.sensitive=			no
 expressions=				on
-patterns=				on
 regex=					yes
 
 list.all.projects=			yes
@@ -111,8 +106,6 @@ color.calendar.weekend=			none
 color.calendar.weeknumber=		cyan
 
 ################################################################################
-
-extensions=				on
 
 uda.kind.label=				Kind
 uda.kind.type=				string
