@@ -83,8 +83,10 @@ color.header=				cyan
 color.active=				on green
 color.alternate=			on black
 
-color.blocked=				blue
+color.blocked=				cyan
 color.blocking=				yellow
+color.completed=			blue
+color.deleted=				underline blue
 color.recurring=			red
 color.scheduled=			magenta
 color.tagged=				none
