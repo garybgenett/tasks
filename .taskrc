@@ -12,6 +12,16 @@ include					/usr/share/task/rc/holidays.en-US.rc
 
 ########################################
 
+taskd.server=				server.example.net:53589
+taskd.credentials=			local/user/17835bc0-774f-415e-956a-d5ca07c3069f
+
+taskd.ca=				/.g/_data/zactive/.home/.openssl/server-ca.example.net.crt
+taskd.certificate=			/.g/_data/zactive/.home/.openssl/client.example.net.crt
+taskd.key=				/.g/_data/zactive/.home/.openssl/client.example.net.key
+debug.tls=				1
+
+########################################
+
 defaultwidth=				0
 defaultheight=				0
 
