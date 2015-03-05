@@ -392,8 +392,11 @@ sub taskwarrior_export {
 	($field_one, $default_one) = split(",", $field_one);
 	($field_two, $default_two) = split(",", $field_two);
 
-	$tasks = qx(task export "${tasks}");
-	$tasks = decode_json("[${tasks}]");
+	if (${tasks}) { $tasks = "\"${tasks}\""; };
+	$tasks = qx(task export ${tasks});
+	$tasks =~ s/([^,])\n/$1,/g;
+	$tasks =~ s/,$//g;
+	$tasks = decode_json("[" . ${tasks} . "]");
 
 	$output = &api_fetch_lists();
 
