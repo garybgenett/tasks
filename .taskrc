@@ -157,7 +157,7 @@ report.sort.description=		Custom: List view, unfiltered and sorted by dates
 report.sort.columns=			entry,entry.age,due,recur,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,status,priority,imask
 report.sort.labels=			+BORN,A,+DEAD,R,+DIED,ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,STAT,+P,+I
 report.sort.filter=			#>>>
-report.sort.sort=			end+,due+,entry+
+report.sort.sort=			end+,due+,modified+,entry+
 
 ########################################
 
