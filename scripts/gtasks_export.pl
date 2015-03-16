@@ -347,10 +347,8 @@ sub api_get {
 sub api_move {
 	my $selflink	= shift;
 	my $fields	= shift;
-	my $output = &api_post(${selflink} . "/move", {
-		"parent"	=> ($fields->{"parent"}		|| ""),
-		"previous"	=> ($fields->{"previous"}	|| ""),
-	});
+	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
+	my $output = &api_post(${selflink}, {});
 	return(${output});
 };
 
@@ -360,7 +358,8 @@ sub api_patch {
 	my $selflink	= shift;
 	my $fields	= shift;
 	if (exists($fields->{"parent"}) || exists($fields->{"previous"})) {
-		&api_move(${selflink}, ${fields});
+		my $output = &api_move(${selflink}, ${fields});
+		$selflink = $output->{"selfLink"};
 	};
 	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
 		sleep(1);
