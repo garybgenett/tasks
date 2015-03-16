@@ -346,8 +346,10 @@ sub api_get {
 sub api_move {
 	my $selflink	= shift;
 	my $fields	= shift;
-	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	my $output = &api_post(${selflink}, {});
+	my $output = &api_post(${selflink} . "/move", {
+		"parent"	=> ($fields->{"parent"}		|| ""),
+		"previous"	=> ($fields->{"previous"}	|| ""),
+	});
 	return(${output});
 };
 
@@ -357,8 +359,7 @@ sub api_patch {
 	my $selflink	= shift;
 	my $fields	= shift;
 	if (exists($fields->{"parent"}) || exists($fields->{"previous"})) {
-		my $output = &api_move(${selflink}, ${fields});
-		$selflink = $output->{"selfLink"};
+		&api_move(${selflink}, ${fields});
 	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
