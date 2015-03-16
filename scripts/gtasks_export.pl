@@ -64,6 +64,7 @@ my $INDENT		= " ";
 
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
+my $REQ_PER_SEC		= "5";
 
 ########################################
 
@@ -361,6 +362,9 @@ sub api_patch {
 	if (exists($fields->{"parent"}) || exists($fields->{"previous"})) {
 		&api_move(${selflink}, ${fields});
 	};
+	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+		sleep(1);
+	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
@@ -372,6 +376,9 @@ sub api_patch {
 sub api_delete {
 	my $selflink	= shift;
 	my $fields	= shift;
+	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+		sleep(1);
+	};
 	$mech->request(HTTP::Request->new(
 		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
@@ -383,6 +390,9 @@ sub api_delete {
 sub api_post {
 	my $selflink	= shift;
 	my $fields	= shift;
+	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+		sleep(1);
+	};
 	$mech->request(HTTP::Request->new(
 		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && $API_REQUEST_COUNT++;
