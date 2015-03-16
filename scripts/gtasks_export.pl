@@ -5,11 +5,12 @@ use warnings;
 # https://developers.google.com/accounts/docs/OAuth2InstalledApp
 # https://developers.google.com/google-apps/tasks/v1/reference
 ################################################################################
-# http://search.cpan.org/~jesse/WWW-Mechanize-1.72/lib/WWW/Mechanize.pm
-# http://search.cpan.org/~gaas/libwww-perl-6.04/lib/LWP/UserAgent.pm
-# http://search.cpan.org/~gaas/HTTP-Message-6.06/lib/HTTP/Request.pm
-# http://search.cpan.org/~makamaka/JSON-PP-2.27201/lib/JSON/PP.pm
-# http://search.cpan.org/~tjenness/File-Temp-0.22/Temp.pm
+# 5.18.2	https://www.perl.org
+# 1.730.0	http://search.cpan.org/~ether/WWW-Mechanize/lib/WWW/Mechanize.pm
+# 6.50.0	http://search.cpan.org/~gaas/libwww-perl/lib/LWP/UserAgent.pm
+# 6.30.0	http://search.cpan.org/~gaas/HTTP-Message/lib/HTTP/Request.pm
+# 2.272.20	http://search.cpan.org/~makamaka/JSON-PP/lib/JSON/PP.pm
+# 0.230.0	http://search.cpan.org/~dagolden/File-Temp-0.2304/lib/File/Temp.pm
 ################################################################################
 
 use Data::Dumper;
