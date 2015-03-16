@@ -13,6 +13,10 @@ use warnings;
 # 0.230.0	http://search.cpan.org/~dagolden/File-Temp-0.2304/lib/File/Temp.pm
 ################################################################################
 
+use Carp qw(confess);
+#>>>$SIG{__WARN__}	= \&confess;
+#>>>$SIG{__DIE__}	= \&confess;
+
 use Data::Dumper;
 sub DUMPER {
 	my $DUMP = shift;
@@ -27,8 +31,16 @@ sub DUMPER {
 
 use WWW::Mechanize;
 my $mech = WWW::Mechanize->new(
-	"agent" => "Mozilla/5.0",
+	"agent"		=> "Mozilla/5.0",
+	"autocheck"	=> "1",
+	"stack_depth"	=> "0",
+	"onwarn"	=> \&mech_fail,
+	"onerror"	=> \&mech_fail,
 );
+sub mech_fail {
+	&DUMPER($mech->response());
+	&confess();
+};
 
 use HTTP::Request;
 use JSON::PP;
