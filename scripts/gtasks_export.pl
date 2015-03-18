@@ -480,8 +480,11 @@ sub taskwarrior_export {
 				};
 			};
 		};
+		my $task_title = $task->{"description"};
+		if (defined($task->{"project"}))	{ $task_title = "[" . $task->{"project"} . "] " . ${task_title}	; };
+		if (defined($task->{"tags"}))		{ $task_title .= " @" . join(" @", @{$task->{"tags"}})		; };
 		my $blob = {
-			"title"		=> $task->{"description"},
+			"title"		=> ${task_title},
 			"status"	=> $task->{"status"},
 			"due"		=> $task->{"due"},
 			"completed"	=> $task->{"end"},
