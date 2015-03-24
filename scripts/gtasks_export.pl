@@ -64,7 +64,7 @@ my $INDENT		= " ";
 
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
-my $REQ_PER_SEC		= "5";
+my $REQ_PER_SEC		= "3";
 
 ########################################
 
