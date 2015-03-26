@@ -65,6 +65,7 @@ my $INDENT		= " ";
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
 my $REQ_PER_SEC		= "3";
+my $REQ_PER_SEC_SLEEP	= "1";
 
 ########################################
 
@@ -314,6 +315,9 @@ sub api_get {
 	};
 
 	do {
+		if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+			sleep(${REQ_PER_SEC_SLEEP});
+		};
 		$mech->get("${url}"
 			. (defined(${page}) ? "&pageToken=${page}" : "")
 		) && $API_REQUEST_COUNT++;
@@ -362,7 +366,7 @@ sub api_patch {
 		$selflink = $output->{"selfLink"};
 	};
 	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(1);
+		sleep(${REQ_PER_SEC_SLEEP});
 	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
@@ -376,7 +380,7 @@ sub api_delete {
 	my $selflink	= shift;
 	my $fields	= shift;
 	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(1);
+		sleep(${REQ_PER_SEC_SLEEP});
 	};
 	$mech->request(HTTP::Request->new(
 		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
@@ -390,7 +394,7 @@ sub api_post {
 	my $selflink	= shift;
 	my $fields	= shift;
 	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(1);
+		sleep(${REQ_PER_SEC_SLEEP});
 	};
 	$mech->request(HTTP::Request->new(
 		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
