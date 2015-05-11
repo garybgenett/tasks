@@ -35,12 +35,14 @@ verbose=				yes
 
 ########################################
 
+recurrence=				no
+recurrence.limit=			1
+
 indent.annotation=			2
 indent.report=				0
 
 abbreviation.minimum=			1
 bulk=					1
-recurrence.limit=			1
 
 search.case.sensitive=			no
 expressions=				on
