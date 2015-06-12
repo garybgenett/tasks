@@ -93,9 +93,9 @@ color.recurring=			red
 color.scheduled=			magenta
 color.tagged=				none
 
-color.pri.H=				magenta
-color.pri.M=				magenta
-color.pri.L=				magenta
+color.uda.priority.H=			magenta
+color.uda.priority.M=			magenta
+color.uda.priority.L=			magenta
 
 color.due.today=			white on red
 color.due=				black on red
