@@ -88,7 +88,7 @@ sub get_calendar {
 	my $id		= shift;
 
 	$name = "${FILE}-${name}${EXTENSION}";
-	print "${name}\n";
+	print "${name} :: ${id}\n";
 
 	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "1");
 	my $zip = Archive::Zip->new();
