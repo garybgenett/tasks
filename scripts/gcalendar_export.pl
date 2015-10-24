@@ -51,7 +51,7 @@ my $FILE		= "calendar";
 my $EXTENSION		= ".ics";
 
 my $REQ_PER_SEC		= "1";
-my $REQ_PER_SEC_SLEEP	= "10";
+my $REQ_PER_SEC_SLEEP	= "15";
 
 ########################################
 
