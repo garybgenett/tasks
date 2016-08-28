@@ -207,7 +207,15 @@ sub EXIT {
 
 sub refresh_tokens {
 	if (!${CODE} || !${REFRESH}) {
-		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
+		$mech->get("https://mail.google.com/tasks/canvas") && $API_REQUEST_COUNT++;
+
+#>>>		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
+		$mech->form_id("gaia_loginform");
+		$mech->field("Email",	${USERNAME});
+		$mech->field("Passwd",	${PASSWORD});
+		$mech->submit() && $API_REQUEST_COUNT++;
+
+#>>>		$mech->get("https://accounts.google.com/AccountLoginInfo") && $API_REQUEST_COUNT++;
 		$mech->form_id("gaia_loginform");
 		$mech->field("Email",	${USERNAME});
 		$mech->field("Passwd",	${PASSWORD});

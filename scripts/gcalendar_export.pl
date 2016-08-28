@@ -72,7 +72,15 @@ sub EXIT {
 ########################################
 
 sub authenticate {
-	$mech->get("https://accounts.google.com/ServiceLogin") && $REQUEST_COUNT++;
+	$mech->get("https://www.google.com/calendar") && $REQUEST_COUNT++;
+
+#>>>	$mech->get("https://accounts.google.com/ServiceLogin") && $REQUEST_COUNT++;
+	$mech->form_id("gaia_loginform");
+	$mech->field("Email",	${USERNAME});
+	$mech->field("Passwd",	${PASSWORD});
+	$mech->submit() && $REQUEST_COUNT++;
+
+#>>>	$mech->get("https://accounts.google.com/AccountLoginInfo") && $REQUEST_COUNT++;
 	$mech->form_id("gaia_loginform");
 	$mech->field("Email",	${USERNAME});
 	$mech->field("Passwd",	${PASSWORD});
