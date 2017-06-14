@@ -130,7 +130,7 @@ report.dump.sort=			entry+
 report.fail.description=		Custom: Finds non-conforming tasks
 report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,imask,mask
 report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+I,+M
-report.fail.filter=			(((project:_data or project:_journal or project:.someday ) kind.not:notes ) or (project.none: kind:notes) or (status.not:pending kind:track ) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (priority.any: or wait.any: or scheduled.any: or until.any: ))
+report.fail.filter=			(((project:_data or project:_journal or project:.someday) kind.not:notes) or (project.none: kind:notes) or (status.not:pending kind:track) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (priority.any: or wait.any: or scheduled.any: or until.any: ))
 report.fail.sort=			entry+
 
 ########################################
@@ -139,13 +139,13 @@ report.data.description=		Custom: Reference and non-task data
 report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
 report.data.filter=			(project:_data or project:_journal)
-report.data.sort=			project+,kind-,area+,description+,entry+
+report.data.sort=			project+,kind+,area-,description+,entry+
 
 report.meta.description=		Custom: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
 report.meta.filter=			((project.not:_data project.not:_journal (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
-report.meta.sort=			project+,kind-,area+,description+,entry+
+report.meta.sort=			project+,kind+,area-,description+,entry+
 
 ########################################
 
@@ -153,7 +153,7 @@ report.read.description=		Custom: List view, unfiltered and sorted for review
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
-report.read.sort=			project+,kind-,depends+,description+,entry+
+report.read.sort=			project+,kind+,depends+,description+,entry+
 
 report.sort.description=		Custom: List view, unfiltered and sorted by dates
 report.sort.columns=			entry,entry.age,due,recur,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,status,priority,imask
