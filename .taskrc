@@ -152,7 +152,7 @@ report.meta.sort=			project+,kind+,area-,description+,entry+
 report.mark.description=		Custom [Mark]: Time tacking tasks
 report.mark.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
 report.mark.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
-report.mark.filter=			(status:pending kind:track)
+report.mark.filter=			((status:pending kind:track) or +ACTIVE)
 report.mark.sort=			project+,description+,entry+
 
 ########################################
