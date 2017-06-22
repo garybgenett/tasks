@@ -68,8 +68,8 @@ my $INDENT		= " ";
 
 my $SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL			= "https://www.googleapis.com/tasks/v1";
-my $REQ_PER_SEC		= "3";
-my $REQ_PER_SEC_SLEEP	= "2";
+my $REQ_PER_SEC		= "2";
+my $REQ_PER_SEC_SLEEP	= "1";
 
 ########################################
 
@@ -207,30 +207,30 @@ sub EXIT {
 
 sub refresh_tokens {
 	if (!${CODE} || !${REFRESH}) {
-		$mech->get("https://mail.google.com/tasks/canvas") && $API_REQUEST_COUNT++;
+		$mech->get("https://mail.google.com/tasks/canvas") && api_req_per_sec();
 
-#>>>		$mech->get("https://accounts.google.com/ServiceLogin") && $API_REQUEST_COUNT++;
+#>>>		$mech->get("https://accounts.google.com/ServiceLogin") && api_req_per_sec();
 		$mech->form_id("gaia_loginform");
 		$mech->field("Email",	${USERNAME});
 		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit() && $API_REQUEST_COUNT++;
+		$mech->submit() && api_req_per_sec();
 
-#>>>		$mech->get("https://accounts.google.com/AccountLoginInfo") && $API_REQUEST_COUNT++;
+#>>>		$mech->get("https://accounts.google.com/AccountLoginInfo") && api_req_per_sec();
 		$mech->form_id("gaia_loginform");
 		$mech->field("Email",	${USERNAME});
 		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit() && $API_REQUEST_COUNT++;
+		$mech->submit() && api_req_per_sec();
 
 		$mech->get("https://accounts.google.com/o/oauth2/auth"
 			. "?client_id=${CLIENTID}"
 			. "&redirect_uri=${REDIRECT}"
 			. "&scope=${SCOPE}"
 			. "&response_type=code"
-		) && $API_REQUEST_COUNT++;
+		) && api_req_per_sec();
 		$mech->submit_form(
 			"form_id"	=> "connect-approve",
 			"fields"	=> {"submit_access" => "true"},
-		) && $API_REQUEST_COUNT++;
+		) && api_req_per_sec();
 		$CODE = $mech->content();
 		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
 		$CODE =~ s|".*$||s;
@@ -241,7 +241,7 @@ sub refresh_tokens {
 			"client_secret"		=> ${CLSECRET},
 			"redirect_uri"		=> ${REDIRECT},
 			"grant_type"		=> "authorization_code",
-		}) && $API_REQUEST_COUNT++;
+		}) && api_req_per_sec();
 		$REFRESH = decode_json($mech->content());
 		$REFRESH = $REFRESH->{"refresh_token"};
 
@@ -256,7 +256,7 @@ sub refresh_tokens {
 		"client_id"		=> ${CLIENTID},
 		"client_secret"		=> ${CLSECRET},
 		"grant_type"		=> "refresh_token",
-	}) && $API_REQUEST_COUNT++;
+	}) && api_req_per_sec();
 	$ACCESS = decode_json($mech->content());
 	$ACCESS = $ACCESS->{"access_token"};
 
@@ -309,6 +309,16 @@ sub api_fetch_tasks {
 
 ########################################
 
+sub api_req_per_sec {
+	$API_REQUEST_COUNT++;
+	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+		sleep(${REQ_PER_SEC_SLEEP});
+	};
+	return();
+};
+
+########################################
+
 sub api_get {
 	my $url		= shift;
 	my $fields	= shift;
@@ -327,12 +337,9 @@ sub api_get {
 	};
 
 	do {
-		if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-			sleep(${REQ_PER_SEC_SLEEP});
-		};
 		$mech->get("${url}"
 			. (defined(${page}) ? "&pageToken=${page}" : "")
-		) && $API_REQUEST_COUNT++;
+		) && api_req_per_sec();
 		my $out = decode_json($mech->content());
 
 		#>>> http://www.perlmonks.org/?node_id=995613
@@ -377,12 +384,9 @@ sub api_patch {
 		my $output = &api_move(${selflink}, ${fields});
 		$selflink = $output->{"selfLink"};
 	};
-	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(${REQ_PER_SEC_SLEEP});
-	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && $API_REQUEST_COUNT++;
+	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
 };
 
@@ -391,12 +395,9 @@ sub api_patch {
 sub api_delete {
 	my $selflink	= shift;
 	my $fields	= shift;
-	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(${REQ_PER_SEC_SLEEP});
-	};
 	$mech->request(HTTP::Request->new(
 		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && $API_REQUEST_COUNT++;
+	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
 };
 
@@ -405,12 +406,9 @@ sub api_delete {
 sub api_post {
 	my $selflink	= shift;
 	my $fields	= shift;
-	if ((${API_REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
-		sleep(${REQ_PER_SEC_SLEEP});
-	};
 	$mech->request(HTTP::Request->new(
 		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && $API_REQUEST_COUNT++;
+	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
 };
 
