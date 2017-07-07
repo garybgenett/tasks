@@ -429,6 +429,8 @@ sub taskwarrior_export {
 	($field_one, $default_one) = split(",", $field_one);
 	($field_two, $default_two) = split(",", $field_two);
 
+	print "${title}\n";
+
 	if (${tasks}) { $tasks = "\"${tasks}\""; };
 	$tasks = qx(task export ${tasks});
 	$tasks =~ s/([^,])\n/$1,/g;
