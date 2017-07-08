@@ -49,6 +49,8 @@ my $json = JSON::PP->new();
 use File::Temp qw(tempfile);
 use MIME::Base64;
 
+use POSIX qw(strftime);
+
 ########################################
 
 $| = "1";
@@ -56,6 +58,7 @@ $| = "1";
 ################################################################################
 
 my $FILE		= "tasks";
+my $INBOX_LIST		= "+Inbox";
 my $DEFAULT_LIST	= "0.GTD";
 my $PROJECT_LIST	= "0.Projects";
 
@@ -543,6 +546,63 @@ sub taskwarrior_export {
 
 ########################################
 
+sub taskwarrior_import {
+	my $created;
+	my $output;
+	my $uuid;
+
+	$output = &api_fetch_lists();
+
+	foreach my $tasklist (@{$output->{"items"}}) {
+		if ($tasklist->{"title"} eq ${INBOX_LIST}) {
+			$created = "1";
+
+			$output = &api_fetch_tasks($tasklist->{"id"});
+
+			foreach my $task (@{$output->{"items"}}) {
+				if (!$task->{"completed"} && !$task->{"deleted"}) {
+					print "\n";
+					print $task->{"title"} . "\n";
+
+					chomp($output = qx(task $task->{"title"}));
+					if ($? != 0 ) {
+						print STDERR "FAILED COMMAND!\n";
+						next();
+					} else {
+						print ${output} . "\n";
+						$output =~ m/task[ ]([0-9a-f-]+)/;
+						$output = $1;
+						if (${output}) {
+							chomp($uuid = qx(task ${output} uuid));
+							chomp($output = qx(task export ${uuid}));
+							$uuid .= "\n" . ${output};
+							print ${uuid} . "\n";
+						};
+					};
+
+					$output = &api_patch($task->{"selfLink"}, {
+						"status"	=> "completed",
+						"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
+						"notes"		=> ${uuid},
+					});
+				};
+			};
+
+			last();
+		};
+	};
+
+	if (!${created}) {
+		print STDERR "\n";
+		print STDERR "DOES NOT EXIST!\n";
+		&EXIT(1);
+	};
+
+	return(0);
+};
+
+########################################
+
 sub search_regex {
 	my $regex	= shift;
 	my $output;
@@ -1024,6 +1084,11 @@ if (@{ARGV}) {
 		shift;
 		&refresh_tokens();
 		&taskwarrior_export(@{ARGV});
+	}
+	elsif (${ARGV[0]} eq "twimport") {
+		shift;
+		&refresh_tokens();
+		&taskwarrior_import(@{ARGV});
 	}
 	elsif (${ARGV[0]} eq "search") {
 		shift;
