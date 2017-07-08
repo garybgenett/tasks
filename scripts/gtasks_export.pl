@@ -429,7 +429,7 @@ sub taskwarrior_export {
 	($field_one, $default_one) = split(",", $field_one);
 	($field_two, $default_two) = split(",", $field_two);
 
-	print "${title}\n";
+	print "\n${title}: ";
 
 	if (${tasks}) { $tasks = "\"${tasks}\""; };
 	$tasks = qx(task export ${tasks});
@@ -498,7 +498,8 @@ sub taskwarrior_export {
 		};
 		my $task_title = $task->{"description"};
 		if (defined($task->{"project"}))	{ $task_title = "[" . $task->{"project"} . "] " . ${task_title}	; };
-		if (defined($task->{"tags"}))		{ $task_title .= " @" . join(" @", @{$task->{"tags"}})		; };
+#>>>		if (defined($task->{"tags"}))		{ $task_title .= " @" . join(" @", @{$task->{"tags"}})		; };
+		if (defined($task->{"uuid"}))		{ $task_title .= " [" . $task->{"uuid"} . "]"			; };
 		my $blob = {
 			"title"		=> ${task_title},
 			"status"	=> $task->{"status"},
@@ -1019,7 +1020,7 @@ sub export_files_item {
 ################################################################################
 
 if (@{ARGV}) {
-	if (${ARGV[0]} eq "taskwarrior") {
+	if (${ARGV[0]} eq "twexport" || ${ARGV[0]} eq "taskwarrior") {
 		shift;
 		&refresh_tokens();
 		&taskwarrior_export(@{ARGV});
