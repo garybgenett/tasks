@@ -549,6 +549,7 @@ sub taskwarrior_export {
 sub taskwarrior_import {
 	my $created;
 	my $output;
+	my $taskid;
 	my $uuid;
 
 	$output = &api_fetch_lists();
@@ -564,27 +565,45 @@ sub taskwarrior_import {
 					print "\n";
 					print $task->{"title"} . "\n";
 
-					chomp($output = qx(task $task->{"title"}));
-					if ($? != 0 ) {
-						print STDERR "FAILED COMMAND!\n";
-						next();
+					alarm 10;
+					chomp($output = qx(task $task->{"title"} 2>&1));
+					my $status = $?;
+					alarm 0;
+
+					if (${status} != 0 ) {
+						$output = "FAILED COMMAND!\n" . ${output};
+						print STDERR ${output} . "\n";
+
+						$output = &api_patch($task->{"selfLink"}, {
+							"notes"		=> ${output},
+						});
 					} else {
-						print ${output} . "\n";
-						$output =~ m/task[ ]([0-9a-f-]+)/;
-						$output = $1;
-						if (${output}) {
-							chomp($uuid = qx(task ${output} uuid));
-							chomp($output = qx(task export ${uuid}));
-							$uuid .= "\n" . ${output};
+						$taskid = ${output};
+						$taskid =~ m/task[ ]([0-9a-f-]+)/;
+						$taskid = $1;
+
+						if (!${taskid}) {
+							$output = "UNKNOWN OUTPUT!\n" . ${output};
+							print STDERR ${output} . "\n";
+
+							$output = &api_patch($task->{"selfLink"}, {
+								"notes"		=> ${output},
+							});
+						} else {
+							print ${output} . "\n";
+
+							chomp($uuid = qx(task ${taskid} uuid));
+							chomp($taskid = qx(task export ${uuid}));
+							$uuid .= "\n" . ${taskid};
 							print ${uuid} . "\n";
+
+							$output = &api_patch($task->{"selfLink"}, {
+								"status"	=> "completed",
+								"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
+								"notes"		=> ${uuid},
+							});
 						};
 					};
-
-					$output = &api_patch($task->{"selfLink"}, {
-						"status"	=> "completed",
-						"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
-						"notes"		=> ${uuid},
-					});
 				};
 			};
 
