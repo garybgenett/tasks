@@ -552,6 +552,8 @@ sub taskwarrior_import {
 	my $taskid;
 	my $uuid;
 
+	print "\n${title}:\n";
+
 	$output = &api_fetch_lists();
 
 	foreach my $tasklist (@{$output->{"items"}}) {
