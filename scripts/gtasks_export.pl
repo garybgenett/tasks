@@ -58,7 +58,6 @@ $| = "1";
 ################################################################################
 
 my $FILE		= "tasks";
-my $INBOX_LIST		= "+Inbox";
 my $DEFAULT_LIST	= "0.GTD";
 my $PROJECT_LIST	= "0.Projects";
 
@@ -547,6 +546,7 @@ sub taskwarrior_export {
 ########################################
 
 sub taskwarrior_import {
+	my $title	= shift;
 	my $created;
 	my $output;
 	my $taskid;
@@ -555,7 +555,7 @@ sub taskwarrior_import {
 	$output = &api_fetch_lists();
 
 	foreach my $tasklist (@{$output->{"items"}}) {
-		if ($tasklist->{"title"} eq ${INBOX_LIST}) {
+		if ($tasklist->{"title"} eq ${title}) {
 			$created = "1";
 
 			$output = &api_fetch_tasks($tasklist->{"id"});
