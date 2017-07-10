@@ -614,7 +614,7 @@ sub taskwarrior_import {
 
 							chomp($uuid = qx(task ${taskid} uuid));
 							chomp($taskid = qx(task export ${uuid}));
-							$uuid .= "\n" . ${taskid};
+							$uuid = $task->{"updated"} . "\n" . ${uuid} . "\n" . ${taskid};
 							print ${uuid} . "\n";
 
 							&api_patch($task->{"selfLink"}, {
