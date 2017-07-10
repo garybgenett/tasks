@@ -41,6 +41,19 @@ sub mech_fail {
 	&DUMPER($mech->response());
 	&confess();
 };
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#my $web = WWW::Mechanize->new(
+#	"agent"		=> "Mozilla/5.0",
+#	"autocheck"	=> "1",
+#	"stack_depth"	=> "0",
+#	"onwarn"	=> \&web_fail,
+#	"onerror"	=> \&web_fail,
+#);
+#sub web_fail {
+#	&DUMPER($web->response());
+#	&confess();
+#};
+#>>>
 
 use HTTP::Request;
 use JSON::PP;
@@ -60,6 +73,9 @@ $| = "1";
 my $FILE		= "tasks";
 my $DEFAULT_LIST	= "0.GTD";
 my $PROJECT_LIST	= "0.Projects";
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#my $PURGE_LIST		= "PURGE";
+#>>>
 
 my $PROJ_LINK_NORMAL	= "*";
 my $PROJ_LINK_OPEN	= "=";
@@ -73,6 +89,9 @@ my $URL_OAUTH_AUTH	= "https://accounts.google.com/o/oauth2/auth";
 my $URL_OAUTH_TOKEN	= "https://accounts.google.com/o/oauth2/token";
 my $URL_SCOPE		= "https://www.googleapis.com/auth/tasks";
 my $URL_API		= "https://www.googleapis.com/tasks/v1";
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#my $URL_WEB_POST	= "https://mail.google.com/tasks/r/d";
+#>>>
 
 my $REQ_PER_SEC		= "3";
 my $REQ_PER_SEC_SLEEP	= "2";
@@ -864,6 +883,179 @@ sub manage_cruft_list {
 
 ########################################
 
+sub purge_lists {
+	my $skips	= shift;
+	my $keeps	= shift;
+	my $skip;
+	my $keep;
+	my $output;
+
+	if ($skips) { $skips = [ split(",", ${skips}) ]; } else { $skips = []; };
+	if ($keeps) { $keeps = [ split(",", ${keeps}) ]; } else { $keeps = []; };
+
+	print "\n";
+
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#	$output = &api_create_list({
+#		"title"		=> ${PURGE_LIST},
+#	});
+#	my $purge_list = $output->{"selfLink"};
+#	$web = &auth_login(${web});
+#>>>
+	$output = &api_fetch_lists();
+
+#>>> BUG IN PERL!
+#>>> http://www.perlmonks.org/?node_id=490213
+	my @array = @{$output->{"items"}};
+	foreach my $tasklist (sort({$a->{"title"} cmp $b->{"title"}} @{array})) {
+#>>>
+		$skip = "0";
+		$keep = "0";
+
+		foreach my $list (@{$skips}) {
+			if ($tasklist->{"title"} eq ${list}) {
+				$skip = "1";
+				last();
+			};
+		};
+		foreach my $list (@{$keeps}) {
+			if ($tasklist->{"title"} eq ${list}) {
+				$keep = "1";
+				last();
+			};
+		};
+
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#		if ($tasklist->{"selfLink"} eq ${purge_list}) {
+#			print $tasklist->{"title"} . ": ignored";
+#		}
+#		elsif ($skip) {
+		if ($skip) {
+#>>>
+			print $tasklist->{"title"} . ": skipped";
+		}
+		elsif ($keep) {
+			print $tasklist->{"title"} . ": keeping";
+#>>> MISSING FEATURE IN GOOGLE TASKS!
+#>>> https://productforums.google.com/d/msg/gmail/yKbRwhi6hYU/48XhvtZ5LTIJ
+#>>> https://productforums.google.com/d/msg/gmail/yKbRwhi6hYU/2QXGlAfwQx4J
+			$output = &api_fetch_tasks($tasklist->{"id"});
+			foreach my $task (@{$output->{"items"}}) {
+				&api_patch($task->{"selfLink"}, {
+#>>>					"title"		=> " ",
+					"title"		=> "0",
+#>>>					"status"	=> "needsAction",
+					"status"	=> "completed",
+					"due"		=> undef,
+#>>>					"completed"	=> undef,
+					"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
+					"deleted"	=> undef,
+					"notes"		=> "",
+				});
+#>>>				&api_delete($task->{"selfLink"});
+				print ".";
+			};
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#>>> keeping for posterity... this crap didn't work either (essentially the same effect)...
+#			$web->get(${URL_WEB});
+#			$output = $web->content();
+#			$output =~ s|^.+<script>function _init\(\){_setup\(||gms;
+#			$output =~ s|\)}</script>.+$||gms;
+#			$output = decode_json(${output});
+#
+#			#>>> https://stackoverflow.com/questions/4214917/android-problem-to-access-google-tasks-with-oauth#4771907
+#			$web->add_header("AT" => "1");
+#
+#			my $target;
+#			my $id;
+#
+#			foreach $output (@{ $output->{"t"}{"lists"} }) {
+#				#>>> technically, ${PURGE_LIST} is not accurate here, but what the hell... this is a total hack already...
+#				if ($output->{"name"} eq ${PURGE_LIST}) {
+#					$target = $output->{"id"};
+#				};
+#				if ($output->{"name"} eq $tasklist->{"title"}) {
+#					$id = $output->{"id"};
+#				};
+#			};
+#
+#			$web->post(${URL_WEB_POST}, {
+#				"r"				=> encode_json({
+#					"action_list"		=> [{
+#						"action_type"	=> "get_all",
+#						"action_id"	=> "0",
+#						"list_id"	=> ${id},
+#						"get_deleted"	=> JSON::PP::true,
+#					}],
+#					"client_version"	=> "0",
+#				}),
+#			});
+#			$output = decode_json($web->content());
+#
+#			foreach $output (@{ $output->{"tasks"} }) {
+#				$web->post(${URL_WEB_POST}, {
+#					"r"				=> encode_json({
+#						"action_list"		=> [{
+#							"action_type"	=> "move",
+#							"action_id"	=> "0",
+#							"id"		=> $output->{"id"},
+#							"source_list"	=> ${id},
+#							"dest_list"	=> ${target},
+#							"dest_parent"	=> ${target},
+#						}],
+#						"current_list_id"	=> ${id},
+#						"client_version"	=> "0",
+#						"last_sync_point"	=> "0",
+#					}),
+#				});
+#				#>>> clear instead of move, just for fun...
+#				#$web->post(${URL_WEB_POST}, {
+#				#	"r"				=> encode_json({
+#				#		"action_list"		=> [{
+#				#			"action_type"	=> "update",
+#				#			"action_id"	=> "0",
+#				#			"id"		=> $output->{"id"},
+#				#			"entity_delta"	=> { "task_date" => "", },
+#				#		}],
+#				#		"current_list_id"	=> ${id},
+#				#		"client_version"	=> "0",
+#				#		"last_sync_point"	=> "0",
+#				#	}),
+#				#});
+#				#$web->post(${URL_WEB_POST}, {
+#				#	"r"				=> encode_json({
+#				#		"action_list"		=> [{
+#				#			"action_type"	=> "update",
+#				#			"action_id"	=> "0",
+#				#			"id"		=> $output->{"id"},
+#				#			"entity_delta"	=> { "notes" => "", },
+#				#		}],
+#				#		"current_list_id"	=> ${id},
+#				#		"client_version"	=> "0",
+#				#		"last_sync_point"	=> "0",
+#				#	}),
+#				#});
+#				#>>>
+#				print ",";
+#			};
+#>>>
+		}
+		else {
+			print $tasklist->{"title"} . ": purged";
+			&api_delete($tasklist->{"selfLink"});
+		};
+
+		print "\n";
+	};
+
+#>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
+#	&api_delete(${purge_list});
+#>>>
+	return(0);
+};
+
+#######################################
+
 sub edit_notes {
 	my $argv_list	= shift;
 	my $argv_name	= shift;
@@ -1143,6 +1335,11 @@ if (@{ARGV}) {
 		shift;
 		&refresh_tokens();
 		&manage_cruft(@{ARGV});
+	}
+	elsif (${ARGV[0]} eq "purge") {
+		shift;
+		&refresh_tokens();
+		&purge_lists(@{ARGV});
 	}
 	elsif (defined(${ARGV[0]}) && defined(${ARGV[1]})) {
 		&refresh_tokens();
