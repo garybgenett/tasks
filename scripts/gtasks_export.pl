@@ -68,8 +68,12 @@ my $PROJ_LINK_SEPARATE	= ": ";
 
 my $INDENT		= " ";
 
-my $SCOPE		= "https://www.googleapis.com/auth/tasks";
-my $URL			= "https://www.googleapis.com/tasks/v1";
+my $URL_WEB		= "https://mail.google.com/tasks/canvas";
+my $URL_OAUTH_AUTH	= "https://accounts.google.com/o/oauth2/auth";
+my $URL_OAUTH_TOKEN	= "https://accounts.google.com/o/oauth2/token";
+my $URL_SCOPE		= "https://www.googleapis.com/auth/tasks";
+my $URL_API		= "https://www.googleapis.com/tasks/v1";
+
 my $REQ_PER_SEC		= "3";
 my $REQ_PER_SEC_SLEEP	= "2";
 
@@ -207,43 +211,53 @@ sub EXIT {
 
 ########################################
 
+sub auth_login {
+	my $mech_auth	= shift;
+
+	$mech_auth->get(${URL_WEB});
+
+#>>>	$mech_auth->get("https://accounts.google.com/ServiceLogin");
+	$mech_auth->form_id("gaia_loginform");
+	$mech_auth->field("Email",	${USERNAME});
+	$mech_auth->field("Passwd",	${PASSWORD});
+	$mech_auth->submit();
+
+#>>>	$mech_auth->get("https://accounts.google.com/AccountLoginInfo");
+	$mech_auth->form_id("gaia_loginform");
+	$mech_auth->field("Email",	${USERNAME});
+	$mech_auth->field("Passwd",	${PASSWORD});
+	$mech_auth->submit();
+
+	return(${mech_auth});
+};
+
+########################################
+
 sub refresh_tokens {
 	if (!${CODE} || !${REFRESH}) {
-		$mech->get("https://mail.google.com/tasks/canvas") && api_req_per_sec();
+		$mech = &auth_login(${mech});
 
-#>>>		$mech->get("https://accounts.google.com/ServiceLogin") && api_req_per_sec();
-		$mech->form_id("gaia_loginform");
-		$mech->field("Email",	${USERNAME});
-		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit() && api_req_per_sec();
-
-#>>>		$mech->get("https://accounts.google.com/AccountLoginInfo") && api_req_per_sec();
-		$mech->form_id("gaia_loginform");
-		$mech->field("Email",	${USERNAME});
-		$mech->field("Passwd",	${PASSWORD});
-		$mech->submit() && api_req_per_sec();
-
-		$mech->get("https://accounts.google.com/o/oauth2/auth"
+		$mech->get(${URL_OAUTH_AUTH}
 			. "?client_id=${CLIENTID}"
 			. "&redirect_uri=${REDIRECT}"
-			. "&scope=${SCOPE}"
+			. "&scope=${URL_SCOPE}"
 			. "&response_type=code"
-		) && api_req_per_sec();
+		);
 		$mech->submit_form(
 			"form_id"	=> "connect-approve",
 			"fields"	=> {"submit_access" => "true"},
-		) && api_req_per_sec();
+		);
 		$CODE = $mech->content();
 		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
 		$CODE =~ s|".*$||s;
 
-		$mech->post("https://accounts.google.com/o/oauth2/token", {
+		$mech->post(${URL_OAUTH_TOKEN}, {
 			"code"			=> ${CODE},
 			"client_id"		=> ${CLIENTID},
 			"client_secret"		=> ${CLSECRET},
 			"redirect_uri"		=> ${REDIRECT},
 			"grant_type"		=> "authorization_code",
-		}) && api_req_per_sec();
+		});
 		$REFRESH = decode_json($mech->content());
 		$REFRESH = $REFRESH->{"refresh_token"};
 
@@ -253,12 +267,12 @@ sub refresh_tokens {
 		close(OUTPUT) || die();
 	};
 
-	$mech->post("https://accounts.google.com/o/oauth2/token", {
+	$mech->post(${URL_OAUTH_TOKEN}, {
 		"refresh_token"		=> ${REFRESH},
 		"client_id"		=> ${CLIENTID},
 		"client_secret"		=> ${CLSECRET},
 		"grant_type"		=> "refresh_token",
-	}) && api_req_per_sec();
+	});
 	$ACCESS = decode_json($mech->content());
 	$ACCESS = $ACCESS->{"access_token"};
 
@@ -271,44 +285,6 @@ sub refresh_tokens {
 	return(0);
 };
 
-################################################################################
-
-sub api_create_list {
-	my $fields = shift;
-	my $output = &api_post("${URL}/users/\@me/lists", ${fields});
-	return(${output});
-};
-
-########################################
-
-sub api_fetch_lists {
-	my $output = &api_get("${URL}/users/\@me/lists");
-	return(${output});
-};
-
-########################################
-
-sub api_create_task {
-	my $listid	= shift;
-	my $fields	= shift;
-	my $url = "${URL}/lists/${listid}/tasks";
-	$url .= "?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	my $output = &api_post(${url}, ${fields});
-	return(${output});
-};
-
-########################################
-
-sub api_fetch_tasks {
-	my $listid	= shift;
-	my $output = &api_get("${URL}/lists/${listid}/tasks", {
-		"showCompleted"		=> "true",
-		"showDeleted"		=> "true",
-		"showHidden"		=> "true",
-	});
-	return(${output});
-};
-
 ########################################
 
 sub api_req_per_sec {
@@ -319,7 +295,7 @@ sub api_req_per_sec {
 	return();
 };
 
-########################################
+################################################################################
 
 sub api_get {
 	my $url		= shift;
@@ -369,12 +345,13 @@ sub api_get {
 
 ########################################
 
-sub api_move {
+sub api_post {
 	my $selflink	= shift;
 	my $fields	= shift;
-	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	my $output = &api_post(${selflink}, {});
-	return(${output});
+	$mech->request(HTTP::Request->new(
+		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+	)) && api_req_per_sec();
+	return(decode_json($mech->content()));
 };
 
 ########################################
@@ -388,30 +365,71 @@ sub api_patch {
 	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && api_req_per_sec();
+	)) &&
+#>>> BUG IN GOOGLE API QUOTA COUNTING?
+	$API_REQUEST_COUNT++ &&
+#>>>
+	api_req_per_sec();
 	return(decode_json($mech->content()));
+};
+
+########################################
+
+sub api_move {
+	my $selflink	= shift;
+	my $fields	= shift;
+	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
+	my $output = &api_post(${selflink}, {});
+	return(${output});
 };
 
 ########################################
 
 sub api_delete {
 	my $selflink	= shift;
-	my $fields	= shift;
 	$mech->request(HTTP::Request->new(
-		"DELETE", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+		"DELETE", ${selflink},
 	)) && api_req_per_sec();
-	return(decode_json($mech->content()));
+#>>>	return(decode_json($mech->content()));
+	return(0);
+};
+
+################################################################################
+
+sub api_create_list {
+	my $fields = shift;
+	my $output = &api_post("${URL_API}/users/\@me/lists", ${fields});
+	return(${output});
 };
 
 ########################################
 
-sub api_post {
-	my $selflink	= shift;
+sub api_fetch_lists {
+	my $output = &api_get("${URL_API}/users/\@me/lists");
+	return(${output});
+};
+
+########################################
+
+sub api_create_task {
+	my $listid	= shift;
 	my $fields	= shift;
-	$mech->request(HTTP::Request->new(
-		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && api_req_per_sec();
-	return(decode_json($mech->content()));
+	my $url = "${URL_API}/lists/${listid}/tasks";
+	$url .= "?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
+	my $output = &api_post(${url}, ${fields});
+	return(${output});
+};
+
+########################################
+
+sub api_fetch_tasks {
+	my $listid	= shift;
+	my $output = &api_get("${URL_API}/lists/${listid}/tasks", {
+		"showCompleted"		=> "true",
+		"showDeleted"		=> "true",
+		"showHidden"		=> "true",
+	});
+	return(${output});
 };
 
 ################################################################################
@@ -529,7 +547,7 @@ sub taskwarrior_export {
 			"status"	=> "needsAction",
 			"due"		=> undef,
 			"completed"	=> undef,
-			"deleted"	=> "true",
+			"deleted"	=> JSON::PP::true,
 			"notes"		=> "",
 			"parent"	=> undef,
 			"previous"	=> ${previous},
@@ -576,7 +594,7 @@ sub taskwarrior_import {
 						$output = "FAILED COMMAND!\n" . ${output};
 						print STDERR ${output} . "\n";
 
-						$output = &api_patch($task->{"selfLink"}, {
+						&api_patch($task->{"selfLink"}, {
 							"notes"		=> ${output},
 						});
 					} else {
@@ -588,7 +606,7 @@ sub taskwarrior_import {
 							$output = "UNKNOWN OUTPUT!\n" . ${output};
 							print STDERR ${output} . "\n";
 
-							$output = &api_patch($task->{"selfLink"}, {
+							&api_patch($task->{"selfLink"}, {
 								"notes"		=> ${output},
 							});
 						} else {
@@ -599,7 +617,7 @@ sub taskwarrior_import {
 							$uuid .= "\n" . ${taskid};
 							print ${uuid} . "\n";
 
-							$output = &api_patch($task->{"selfLink"}, {
+							&api_patch($task->{"selfLink"}, {
 								"status"	=> "completed",
 								"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
 								"notes"		=> ${uuid},
@@ -671,77 +689,6 @@ sub search_regex {
 	};
 
 	return(0);
-};
-
-########################################
-
-sub edit_notes {
-	my $argv_list	= shift;
-	my $argv_name	= shift;
-	my $selflink;
-	my $output;
-
-	if (${argv_list} eq "0") {
-		$argv_list = ${PROJECT_LIST};
-	};
-
-	$output = &api_fetch_lists();
-
-	foreach my $tasklist (@{$output->{"items"}}) {
-		if ($tasklist->{"title"} eq ${argv_list}) {
-			$output = &api_fetch_tasks($tasklist->{"id"});
-
-			foreach my $task (@{$output->{"items"}}) {
-				if ($task->{"title"} eq ${argv_name}) {
-					$selflink = $task->{"selfLink"};
-					last();
-				};
-			};
-
-			last();
-		};
-	};
-
-	if (!${selflink}) {
-		print STDERR "\n";
-		print STDERR "DOES NOT EXIST!\n";
-		&EXIT(1);
-	} else {
-		$output = &api_get(${selflink});
-		$output = &edit_notes_text($output->{"notes"});
-
-		if ($output) {
-			&refresh_tokens();
-			&api_patch(${selflink}, {
-				"notes"		=> ${output},
-			});
-		};
-	};
-
-	return(0);
-};
-
-########################################
-
-sub edit_notes_text {
-	my $notes	= shift;
-
-	$notes =~ s|^(${INDENT}+)|("\t" x (length($1) / 2))|egm;
-
-	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "0");
-	print ${TEMPFILE} ${notes};
-	close(${TEMPFILE}) || die();
-
-	system("${ENV{EDITOR}} ${tempfile}");
-
-	open(${TEMPFILE}, "<", "${tempfile}") || die();
-	$notes = do { local $/; <$TEMPFILE> };
-	close(${TEMPFILE}) || die();
-
-	$notes =~ s|^(\t+)|(${INDENT} x (length($1) * 2))|egm;
-	$notes =~ s/\n+$//;
-
-	return(${notes});
 };
 
 ########################################
@@ -913,6 +860,77 @@ sub manage_cruft_list {
 	};
 
 	return(0);
+};
+
+########################################
+
+sub edit_notes {
+	my $argv_list	= shift;
+	my $argv_name	= shift;
+	my $selflink;
+	my $output;
+
+	if (${argv_list} eq "0") {
+		$argv_list = ${PROJECT_LIST};
+	};
+
+	$output = &api_fetch_lists();
+
+	foreach my $tasklist (@{$output->{"items"}}) {
+		if ($tasklist->{"title"} eq ${argv_list}) {
+			$output = &api_fetch_tasks($tasklist->{"id"});
+
+			foreach my $task (@{$output->{"items"}}) {
+				if ($task->{"title"} eq ${argv_name}) {
+					$selflink = $task->{"selfLink"};
+					last();
+				};
+			};
+
+			last();
+		};
+	};
+
+	if (!${selflink}) {
+		print STDERR "\n";
+		print STDERR "DOES NOT EXIST!\n";
+		&EXIT(1);
+	} else {
+		$output = &api_get(${selflink});
+		$output = &edit_notes_text($output->{"notes"});
+
+		if ($output) {
+			&refresh_tokens();
+			&api_patch(${selflink}, {
+				"notes"		=> ${output},
+			});
+		};
+	};
+
+	return(0);
+};
+
+########################################
+
+sub edit_notes_text {
+	my $notes	= shift;
+
+	$notes =~ s|^(${INDENT}+)|("\t" x (length($1) / 2))|egm;
+
+	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "0");
+	print ${TEMPFILE} ${notes};
+	close(${TEMPFILE}) || die();
+
+	system("${ENV{EDITOR}} ${tempfile}");
+
+	open(${TEMPFILE}, "<", "${tempfile}") || die();
+	$notes = do { local $/; <$TEMPFILE> };
+	close(${TEMPFILE}) || die();
+
+	$notes =~ s|^(\t+)|(${INDENT} x (length($1) * 2))|egm;
+	$notes =~ s/\n+$//;
+
+	return(${notes});
 };
 
 ########################################
