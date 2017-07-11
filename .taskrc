@@ -35,6 +35,8 @@ verbose=				yes
 
 ########################################
 
+gc=					off
+
 recurrence=				no
 recurrence.limit=			1
 
