@@ -1,0 +1,67 @@
+# ### Weekly Review
+# .in
+# .view
+# mind
+# todo
+# read status:pending tag:.research
+# read status:pending tag:.waiting
+# projects
+# projects status:pending
+# +ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
+# read status:pending project:
+# udas
+# udas status:pending
+# +ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done
+# +ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
+# tags
+# tags status:pending
+# +ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
+# read project:.someday
+# fail
+# data
+# meta status:pending
+# +ACTIVE; task-recur
+# .repo
+
+task mind;
+task todo;
+task read status:pending tag:.research;
+task read status:pending tag:.waiting;
+task projects;
+task projects status:pending;
+for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done;
+task read status:pending project:;
+task udas;
+task udas status:pending;
+for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done;
+for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done;
+task tags;
+task tags status:pending;
+for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done;
+task read project:.someday;
+task fail;
+task data;
+task meta status:pending;
+eval ${MARKER}; task-recur;
+eval ${MARKER}; impersonate_command repo;
+
+# ### Weekly Report
+# diagnostics
+# summary
+# rc.defaultwidth=120 rc.defaultheight=40 history.monthly
+# rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly
+# rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly
+# rc.defaultwidth=120 rc.defaultheight=40 burndown.daily
+# +ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
+# timesheet 2
+# stats
+
+task diagnostics;
+task summary;
+task rc.defaultwidth=120 rc.defaultheight=40 history.monthly;
+task rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly;
+task rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly;
+task rc.defaultwidth=120 rc.defaultheight=40 burndown.daily;
+SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \);
+task timesheet 2;
+task stats;
