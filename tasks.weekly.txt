@@ -1,28 +1,72 @@
-# ### Weekly Review
-# .in
-# .view
-# mind
-# todo
-# read status:pending tag:.research
-# read status:pending tag:.waiting
-# projects
-# projects status:pending
-# +ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
-# read status:pending project:
-# udas
-# udas status:pending
-# +ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done
-# +ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
-# tags
-# tags status:pending
-# +ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
-# read project:.someday
-# fail
-# data
-# meta status:pending
-# +ACTIVE; task-recur
-# .repo
+###[ Weekly Review Steps & Commands ]###
 
+#[ Markdown Source ]
+#]### Weekly Review
+#]
+#]  * Thoughts
+#]  * Queues
+#]    * Inbox (`.in`)
+#]    * Notepad
+#]    * Paperwork
+#]    * Browser
+#]    * Email
+#]    * Phone
+#]        * Voicemails
+#]        * Texts
+#]    * Calendar
+#]        * Past, for missed
+#]        * Future, for upcoming
+#]  * System (`.view`)
+#]    * Reminders (`mind`)
+#]        * Past, for missed
+#]        * Future, for upcoming
+#]    * Todos (`todo`)
+#]    * Research (`read status:pending tag:.research`)
+#]    * Waiting (`read status:pending tag:.waiting`)
+#]    * Projects
+#]        * All (`projects`)
+#]        * Active (`projects status:pending`)
+#]        * Iterate (`+ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done`)
+#]    * Tasks (`read status:pending project:`)
+#]        * UDAs
+#]            * All (`udas`)
+#]            * Active (`udas status:pending`)
+#]            * Kinds (`+ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done`)
+#]            * Areas (`+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done`)
+#]        * Tags
+#]            * All (`tags`)
+#]            * Active (`tags status:pending`)
+#]            * Iterate (`+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done`)
+#]    * Someday (`read project:.someday`)
+#]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur`)
+#]    * Report (`.repo`)
+
+#[ _task_parse_cmd :: impersonate_command ]
+#|.in
+#|.view
+#|mind
+#|todo
+#|read status:pending tag:.research
+#|read status:pending tag:.waiting
+#|projects
+#|projects status:pending
+#|+ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
+#|read status:pending project:
+#|udas
+#|udas status:pending
+#|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done
+#|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
+#|tags
+#|tags status:pending
+#|+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
+#|read project:.someday
+#|fail
+#|data
+#|meta status:pending
+#|+ACTIVE; task-recur
+#|.repo
+
+#[ _task_parse_cmd_bash :: bash]
 task mind;
 task todo;
 task read status:pending tag:.research;
@@ -45,17 +89,34 @@ task meta status:pending;
 eval ${MARKER}; task-recur;
 eval ${MARKER}; impersonate_command repo;
 
-# ### Weekly Report
-# diagnostics
-# summary
-# rc.defaultwidth=120 rc.defaultheight=40 history.monthly
-# rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly
-# rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly
-# rc.defaultwidth=120 rc.defaultheight=40 burndown.daily
-# +ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
-# timesheet 2
-# stats
+#[ Markdown Source ]
+#]### Weekly Report
+#]
+#]  * Integrity (`diagnostics`)
+#]  * Projects (`summary`)
+#]  * History
+#]    * Numerical (`rc.defaultwidth=120 rc.defaultheight=40 history.monthly`)
+#]    * Graphical (`rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly`)
+#]  * Trending
+#]    * Weekly (`rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly`)
+#]    * Daily (`rc.defaultwidth=120 rc.defaultheight=40 burndown.daily`)
+#]  * Activity
+#]    * Custom (`+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)`)
+#]    * Default (`timesheet 2`)
+#]  * Statistics (`stats`)
 
+#[ _task_parse_cmd :: impersonate_command ]
+#|diagnostics
+#|summary
+#|rc.defaultwidth=120 rc.defaultheight=40 history.monthly
+#|rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly
+#|rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly
+#|rc.defaultwidth=120 rc.defaultheight=40 burndown.daily
+#|+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
+#|timesheet 2
+#|stats
+
+#[ _task_parse_cmd_bash :: bash]
 task diagnostics;
 task summary;
 task rc.defaultwidth=120 rc.defaultheight=40 history.monthly;
