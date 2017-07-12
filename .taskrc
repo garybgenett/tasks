@@ -157,6 +157,13 @@ report.mark.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,
 report.mark.filter=			((status:pending kind:track) or +ACTIVE)
 report.mark.sort=			project+,description+,entry+
 
+report.mind.description=		Custom [Mind]: Reminders for all tasks with due date
+#>>>report.mind.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
+report.mind.columns=			id,depends,urgency.integer,start.age,due.remaining,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,due,end,imask
+report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
+report.mind.filter=			((status:pending due.any: ) or +ACTIVE)
+report.mind.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
+
 ########################################
 
 report.read.description=		Custom [Read]: List view, unfiltered and sorted for review
@@ -172,12 +179,6 @@ report.sort.filter=			#>>>
 report.sort.sort=			end+,due+,modified+,entry+
 
 ########################################
-
-report.mind.description=		Custom [Mind]: Reminders for all tasks with due date
-report.mind.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
-report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
-report.mind.filter=			(status:pending due.any: )
-report.mind.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 report.todo.description=		Custom [Todo]: Due and priority tasks
 report.todo.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
