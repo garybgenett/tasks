@@ -38,7 +38,7 @@
 #]            * Active (`tags status:pending`)
 #]            * Iterate (`+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done`)
 #]    * Someday (`read project:.someday`)
-#]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur`)
+#]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
 #]    * Report (`.repo`)
 
 #[ _task_parse_cmd :: impersonate_command ]
@@ -63,7 +63,8 @@
 #|fail
 #|data
 #|meta status:pending
-#|+ACTIVE; task-recur
+#|+ACTIVE; task-recur status:recurring
+#|+ACTIVE; task-recur status.not:recurring
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
@@ -86,7 +87,8 @@ task read project:.someday;
 task fail;
 task data;
 task meta status:pending;
-eval ${MARKER}; task-recur;
+eval ${MARKER}; task-recur status:recurring;
+eval ${MARKER}; task-recur status.not:recurring;
 eval ${MARKER}; impersonate_command repo;
 
 #[ Markdown Source ]
