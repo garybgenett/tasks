@@ -472,9 +472,8 @@ sub taskwarrior_export {
 
 	if (${tasks}) { $tasks = "\"${tasks}\""; };
 	$tasks = qx(task export ${tasks});
-	$tasks =~ s/([^,])\n/$1,/g;
-	$tasks =~ s/,$//g;
-	$tasks = decode_json("[" . ${tasks} . "]");
+	$tasks =~ s/\n//g;
+	$tasks = decode_json(${tasks});
 
 	$output = &api_fetch_lists();
 
@@ -631,7 +630,7 @@ sub taskwarrior_import {
 						} else {
 							print ${output} . "\n";
 
-							chomp($uuid = qx(task ${taskid} uuid));
+							chomp($uuid = qx(task uuids ${taskid}));
 							chomp($taskid = qx(task export ${uuid}));
 							$uuid = $task->{"updated"} . "\n" . ${uuid} . "\n" . ${taskid};
 							print ${uuid} . "\n";

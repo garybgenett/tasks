@@ -31,7 +31,7 @@ locking=				on
 
 debug=					no
 exit.on.missing.db=			yes
-verbose=				yes
+#>>>verbose=				yes
 
 ########################################
 
