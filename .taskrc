@@ -4,8 +4,6 @@
 
 data.location=				/.g/_data/zactive/_pim/tasks
 
-include					/usr/share/task/rc/holidays.en-US.rc
-
 ########################################
 
 taskd.server=				server.example.net:53589
@@ -20,15 +18,12 @@ debug.tls=				1
 
 defaultwidth=				0
 defaultheight=				0
-
 detection=				on
 xterm.title=				no
 
 ################################################################################
 
-default.command=			view
 locking=				on
-
 debug=					no
 exit.on.missing.db=			yes
 #>>>verbose=				yes
@@ -61,17 +56,29 @@ journal.time.stop.annotation=		[track]:[end]
 
 ################################################################################
 
+include					/usr/share/task/rc/holidays.en-US.rc
+date.iso=				yes
+
 weekstart=				Monday
 due=					14
-monthsperline=				3
 
 dateformat=				Y-M-D
-dateformat.holiday=			Y-M-D
 dateformat.report=			Y-M-D
+dateformat.holiday=			YMD
 
 dateformat.annotation=			Y-M-D H:N:S
 dateformat.edit=			Y-M-D H:N:S
 dateformat.info=			Y-M-D H:N:S
+
+calendar.offset=			on
+calendar.offset.value=			-1
+monthsperline=				3
+
+displayweeknumber=			yes
+calendar.legend=			yes
+calendar.holidays=			full
+calendar.details=			full
+calendar.details.report=		mind
 
 ########################################
 
@@ -105,13 +112,20 @@ color.overdue=				yellow on red
 
 color.calendar.due.today=		white on red
 color.calendar.due=			black on red
-color.calendar.holiday=			black on yellow
 color.calendar.overdue=			yellow on red
+
 color.calendar.today=			black on white
-color.calendar.weekend=			none
+color.calendar.holiday=			black on yellow
 color.calendar.weeknumber=		cyan
+color.calendar.weekend=			magenta
 
 ################################################################################
+
+default.command=			view
+
+alias.cal=				calendar
+
+########################################
 
 uda.kind.label=				Kind
 uda.kind.type=				string
