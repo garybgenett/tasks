@@ -17,6 +17,9 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]  * System (`.view`)
+#]    * Calendar (`calendar`)
+#]        * Past, for missed
+#]        * Future, for upcoming
 #]    * Reminders (`mind`)
 #]        * Past, for missed
 #]        * Future, for upcoming
@@ -44,6 +47,7 @@
 #[ _task_parse_cmd :: impersonate_command ]
 #|.in
 #|.view
+#|calendar
 #|mind
 #|todo
 #|read status:pending tag:.research
@@ -68,6 +72,7 @@
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
+task calendar;
 task mind;
 task todo;
 task read status:pending tag:.research;
