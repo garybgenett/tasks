@@ -76,8 +76,8 @@ monthsperline=				3
 
 displayweeknumber=			yes
 calendar.legend=			yes
-calendar.holidays=			full
-calendar.details=			full
+calendar.holidays=			sparse
+calendar.details=			sparse
 calendar.details.report=		mind
 
 ########################################
