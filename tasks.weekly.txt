@@ -17,7 +17,7 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]  * System (`.view`)
-#]    * Reminders (`calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full`, `mind`)
+#]    * Reminders (`calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full`, `mind`)
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
@@ -36,7 +36,7 @@
 #]        * Tags
 #]            * All (`tags`)
 #]            * Active (`tags status:pending`)
-#]            * Iterate (`+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done`)
+#]            * Iterate (`+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done`)
 #]    * Someday (`read project:.someday`)
 #]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
 #]    * Report (`.repo`)
@@ -44,7 +44,7 @@
 #[ _task_parse_cmd :: impersonate_command ]
 #|.in
 #|.view
-#|calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full
+#|calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full
 #|mind
 #|todo
 #|read status:pending tag:.research
@@ -59,7 +59,7 @@
 #|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
 #|tags
 #|tags status:pending
-#|+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
+#|+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
 #|read project:.someday
 #|fail
 #|data
@@ -69,7 +69,7 @@
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
-task calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full;
+task calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full;
 task mind;
 task todo;
 task read status:pending tag:.research;
@@ -84,7 +84,7 @@ for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" 
 for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done;
 task tags;
 task tags status:pending;
-for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/(next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done;
+for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done;
 task read project:.someday;
 task fail;
 task data;
