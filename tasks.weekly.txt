@@ -17,10 +17,7 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]  * System (`.view`)
-#]    * Calendar (`calendar`)
-#]        * Past, for missed
-#]        * Future, for upcoming
-#]    * Reminders (`mind`)
+#]    * Reminders (`calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full`, `mind`)
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
@@ -47,7 +44,7 @@
 #[ _task_parse_cmd :: impersonate_command ]
 #|.in
 #|.view
-#|calendar
+#|calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full
 #|mind
 #|todo
 #|read status:pending tag:.research
@@ -72,7 +69,7 @@
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
-task calendar;
+task calendar rc.monthsperline=4 rc.calendar.holidays=full rc.calendar.details=full;
 task mind;
 task todo;
 task read status:pending tag:.research;
