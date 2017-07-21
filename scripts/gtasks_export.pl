@@ -345,7 +345,7 @@ sub api_get {
 				if (ref($output->{$key}) eq "ARRAY") {
 					push(@{$output->{$key}}, @{$out->{$key}});
 				} else {
-					$output->{$key} = [ ${API_ERROR}, $output->{$key}, $out->{$key} ];
+					push(@{$output->{$API_ERROR}}, [ ${key}, $output->{$key}, $out->{$key} ]);
 				};
 			} else {
 				$output->{$key} = $out->{$key};
