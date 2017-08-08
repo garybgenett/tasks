@@ -138,8 +138,8 @@ uda.area.values=			_gtd,computer,family,money,people,self,travel,work,writing
 ########################################
 
 report.dump.description=		Custom [Dump]: Shows all information
-report.dump.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,uuid,parent,imask,mask
-report.dump.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+UUID,+PUID,+I,+M
+report.dump.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,modified,due,end,uuid,parent,imask,mask
+report.dump.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+MOVE,+DEAD,+DIED,+UUID,+PUID,+I,+M
 report.dump.filter=			#>>>
 report.dump.sort=			entry+
 
