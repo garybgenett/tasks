@@ -187,8 +187,8 @@ report.read.filter=			#>>>
 report.read.sort=			project+,kind+,depends+,description+,entry+
 
 report.sort.description=		Custom [Sort]: List view, unfiltered and sorted by dates
-report.sort.columns=			entry,entry.age,modified,due,recur,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,status,priority,imask
-report.sort.labels=			+BORN,A,+MOVE,+DEAD,R,+DIED,ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,STAT,+P,+I
+report.sort.columns=			entry,modified,due,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,imask
+report.sort.labels=			+BORN,+MOVE,+DEAD,+DIED,ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+I
 report.sort.filter=			#>>>
 report.sort.sort=			end+,due+,modified+,entry+
 
