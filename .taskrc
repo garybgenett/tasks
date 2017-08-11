@@ -18,21 +18,21 @@ debug.tls=				1
 
 defaultwidth=				0
 defaultheight=				0
-detection=				on
-xterm.title=				no
+detection=				1
+xterm.title=				0
 
 ################################################################################
 
-locking=				on
-debug=					no
-exit.on.missing.db=			yes
-#>>>verbose=				yes
+locking=				1
+debug=					0
+exit.on.missing.db=			1
+#>>>verbose=				1
 
 ########################################
 
-gc=					off
+gc=					0
 
-recurrence=				no
+recurrence=				0
 recurrence.limit=			1
 
 indent.annotation=			2
@@ -41,23 +41,23 @@ indent.report=				0
 abbreviation.minimum=			1
 bulk=					1
 
-search.case.sensitive=			no
-expressions=				on
-regex=					yes
+search.case.sensitive=			0
+expressions=				1
+regex=					1
 
-list.all.projects=			yes
-list.all.tags=				yes
-print.empty.columns=			yes
+list.all.projects=			1
+list.all.tags=				1
+print.empty.columns=			1
 
-journal.info=				on
-journal.time=				yes
+journal.info=				1
+journal.time=				1
 journal.time.start.annotation=		[track]:[begin]
 journal.time.stop.annotation=		[track]:[end]
 
 ################################################################################
 
 include					/usr/share/task/rc/holidays.en-US.rc
-date.iso=				yes
+date.iso=				1
 
 weekstart=				Monday
 due=					14
@@ -70,12 +70,12 @@ dateformat.annotation=			Y-M-D H:N:S
 dateformat.edit=			Y-M-D H:N:S
 dateformat.info=			Y-M-D H:N:S
 
-calendar.offset=			on
+calendar.offset=			1
 calendar.offset.value=			-1
 monthsperline=				3
 
-displayweeknumber=			yes
-calendar.legend=			yes
+displayweeknumber=			1
+calendar.legend=			1
 calendar.holidays=			sparse
 calendar.details=			sparse
 calendar.details.report=		mind
@@ -83,7 +83,7 @@ calendar.details.report=		mind
 ########################################
 
 include					/usr/share/task/rc/dark-16.theme
-color=					on
+color=					1
 
 color.debug=				cyan on yellow
 color.error=				cyan on red
