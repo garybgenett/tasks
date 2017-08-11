@@ -26,7 +26,7 @@
 #]    * Projects
 #]        * All (`projects`)
 #]        * Active (`projects status:pending`)
-#]        * Iterate (`+ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done`)
+#]        * Iterate (`+ACTIVE; for FILE in $(task _unique project status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done`)
 #]    * Tasks (`read status:pending project:`)
 #]        * UDAs
 #]            * All (`udas`)
@@ -36,7 +36,7 @@
 #]        * Tags
 #]            * All (`tags`)
 #]            * Active (`tags status:pending`)
-#]            * Iterate (`+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done`)
+#]            * Iterate (`+ACTIVE; for FILE in $(task _unique tags status:pending); do task read status:pending tag:${FILE}; done`)
 #]    * Someday (`read project:.someday`)
 #]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
 #]    * Report (`.repo`)
@@ -51,7 +51,7 @@
 #|read status:pending tag:.waiting
 #|projects
 #|projects status:pending
-#|+ACTIVE; for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
+#|+ACTIVE; for FILE in $(task _unique project status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
 #|read status:pending project:
 #|udas
 #|udas status:pending
@@ -59,7 +59,7 @@
 #|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
 #|tags
 #|tags status:pending
-#|+ACTIVE; for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done
+#|+ACTIVE; for FILE in $(task _unique tags status:pending); do task read status:pending tag:${FILE}; done
 #|read project:.someday
 #|fail
 #|data
@@ -76,7 +76,7 @@ task read status:pending tag:.research;
 task read status:pending tag:.waiting;
 task projects;
 task projects status:pending;
-for FILE in $(task _projects status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done;
+for FILE in $(task _unique project status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done;
 task read status:pending project:;
 task udas;
 task udas status:pending;
@@ -84,7 +84,7 @@ for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" 
 for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done;
 task tags;
 task tags status:pending;
-for FILE in $(task _tags status:pending | grep -E -v "^[._]" | sed -r "/([A-Z]|next|nocal|nocolor|nonag)/d"); do task read status:pending tag:${FILE}; done;
+for FILE in $(task _unique tags status:pending); do task read status:pending tag:${FILE}; done;
 task read project:.someday;
 task fail;
 task data;
