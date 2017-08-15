@@ -133,7 +133,7 @@ uda.kind.values=			notes,track
 
 uda.area.label=				Area
 uda.area.type=				string
-uda.area.values=			_gtd,computer,family,money,people,self,travel,work,writing
+uda.area.values=			_gtd,computer,family,money,people,self,travel,work.em,work.f5,writing
 
 ########################################
 
