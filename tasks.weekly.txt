@@ -30,9 +30,8 @@
 #]    * Tasks (`read status:pending project:`)
 #]        * UDAs
 #]            * All (`udas`)
-#]            * Active (`udas status:pending`)
-#]            * Kinds (`+ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done`)
-#]            * Areas (`+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done`)
+#]            * Kinds (`+ACTIVE; for FILE in $(task _unique kind status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE}; done`)
+#]            * Areas (`+ACTIVE; for FILE in $(task _unique area status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE}; done`)
 #]        * Tags
 #]            * All (`tags`)
 #]            * Active (`tags status:pending`)
@@ -54,9 +53,8 @@
 #|+ACTIVE; for FILE in $(task _unique project status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done
 #|read status:pending project:
 #|udas
-#|udas status:pending
-#|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done
-#|+ACTIVE; for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done
+#|+ACTIVE; for FILE in $(task _unique kind status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE}; done
+#|+ACTIVE; for FILE in $(task _unique area status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE}; done
 #|tags
 #|tags status:pending
 #|+ACTIVE; for FILE in $(task _unique tags status:pending); do task read status:pending tag:${FILE}; done
@@ -79,9 +77,8 @@ task projects status:pending;
 for FILE in $(task _unique project status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read project:${FILE}; done;
 task read status:pending project:;
 task udas;
-task udas status:pending;
-for FILE in $(task udas status:pending | grep -E "^kind" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending kind:${FILE}; done;
-for FILE in $(task udas status:pending | grep -E "^area" | sed -r "s|[_]gtd||g" | awk '{print $4;}' | tr ',' ' '); do task read status:pending area:${FILE}; done;
+for FILE in $(task _unique kind status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE}; done;
+for FILE in $(task _unique area status:pending | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE}; done;
 task tags;
 task tags status:pending;
 for FILE in $(task _unique tags status:pending); do task read status:pending tag:${FILE}; done;
