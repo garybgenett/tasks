@@ -96,8 +96,8 @@ color.alternate=			on black
 
 color.blocked=				cyan
 color.blocking=				yellow
-color.completed=			blue
-color.deleted=				underline blue
+color.completed=			green on blue
+color.deleted=				red on blue
 color.recurring=			red
 color.scheduled=			magenta
 color.tagged=				none
