@@ -25,7 +25,7 @@ xterm.title=				0
 
 exit.on.missing.db=			1
 locking=				1
-verbose=				1
+#>>>verbose=				1
 debug=					0
 
 allow.empty.filter=			0
