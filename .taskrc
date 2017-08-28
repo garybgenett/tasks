@@ -88,8 +88,12 @@ calendar.details.report=		mind
 include					/usr/share/task/rc/dark-16.theme
 color=					1
 
-color.debug=				cyan on yellow
+rule.color.merge=			1
+rule.precedence.color=			active,due.today,due,overdue,completed,deleted,recurring,blocking,blocked,scheduled,tagged,until
+
+color.debug=				blue on cyan
 color.error=				cyan on red
+color.warning=				cyan on magenta
 
 color.footnote=				cyan
 color.header=				cyan
@@ -104,6 +108,7 @@ color.deleted=				red on blue
 color.recurring=			red
 color.scheduled=			magenta
 color.tagged=				none
+color.until=				magenta
 
 color.uda.priority.H=			magenta
 color.uda.priority.M=			magenta
