@@ -50,7 +50,7 @@ my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
 my $APP_NAME	= "Event_Download";
 
-my $START_DATE	= "2016-10-24"; if ($ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
+my $START_DATE	= "2016-10-24"; if ($ARGV[0] =~ m/^([0-9]|[0-9]{4}[-][0-9]{2}[-][0-9]{2})$/) { $START_DATE = shift(); };
 my $SORT_COLUMN	= "Start Date";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
