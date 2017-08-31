@@ -51,7 +51,7 @@ my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 my $APP_NAME	= "Event_Download";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
-my $SORT_COLUMN	= "Modified";
+my $SORT_COLUMN	= "Start Date";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
@@ -100,41 +100,48 @@ my $events = {};
 
 ########################################
 
-my $this_mod = ${START_DATE};
-my $last_uid = "0";
-my $next_uid = "1";
+my $last_beg	= ${START_DATE};
+my $index_no	= "1";
+my $records	= "0";
+my $found;
 
-while (${last_uid} ne ${next_uid}) {
-	$last_uid = ${next_uid};
-
-	if (${this_mod} =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
-		$this_mod = ${this_mod} . " 00:00:00";
-	};
-	print STDERR "\n\tProcessing: ${this_mod}...";
+while (1) {
+	print STDERR "\n\tProcessing: ${last_beg} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
 
 	$mech->get(${URL_FETCH}
 		. "?scope=${URL_SCOPE}"
 		. "&authtoken=${APITOKEN}"
 		. "&sortColumnString=${SORT_COLUMN}"
 		. "&sortOrderString=${SORT_ORDER}"
-		. "&lastModifiedTime=${this_mod}"
-		. "&fromIndex=1"
-		. "&toIndex=${MAX_RECORDS}"
+		. "&fromIndex=${index_no}"
+		. "&toIndex=" . (${index_no} + (${MAX_RECORDS} -1))
 	) && $API_REQUEST_COUNT++;
 	my $output = decode_json($mech->content());
 
 	if ( $output->{"response"}{"nodata"} ) {
+		print STDERR "\n\tNo Data!";
 		last();
 	};
 
 	if (ref( $output->{"response"}{"result"}{"Events"}{"row"} ) eq "ARRAY") {
-		foreach my $event (@{ $output->{"response"}{"result"}{"Events"}{"row"} }) {
-			(${next_uid}, ${this_mod}) = &parse_event( $event->{"FL"} );
+		$found = $#{		$output->{"response"}{"result"}{"Events"}{"row"} };
+		foreach my $event (@{	$output->{"response"}{"result"}{"Events"}{"row"} }) {
+			${last_beg} = &parse_event( $event->{"FL"} );
 		};
 	} else {
-		print STDERR " completed!";
-		(${next_uid}, ${this_mod}) = &parse_event( $output->{"response"}{"result"}{"Events"}{"row"}{"FL"} );
+		$found = $#{			$output->{"response"}{"result"}{"Events"}{"row"}{"FL"} };
+		${last_beg} = &parse_event(	$output->{"response"}{"result"}{"Events"}{"row"}{"FL"} );
 	};
+
+	$records += ++${found};
+	print STDERR "${found} records found (${records} total).";
+
+	if (${found} < ${MAX_RECORDS}) {
+		print STDERR "\n\tCompleted!";
+		last();
+	};
+
+	$index_no += ${MAX_RECORDS};
 };
 
 print STDERR "\n";
@@ -178,7 +185,7 @@ sub parse_event {
 		"dsc"	=> $dsc || "",
 	};
 
-	return(${uid}, ${mod});
+	return(${beg});
 }
 
 ########################################
@@ -222,7 +229,10 @@ sub print_events {
 		$list->{$a}{"end"} cmp $list->{$b}{"end"} ||
 		$list->{$a}{"sub"} cmp $list->{$b}{"sub"}
 	} keys(%{$list}))) {
-		if ($list->{$event}{"sub"} =~ m/${find}/i) {
+		if (
+			($list->{$event}{"beg"} ge ${START_DATE}) &&
+			($list->{$event}{"sub"} =~ m/${find}/i)
+		) {
 			&print_fields(
 				"${stderr}", "",
 				(($keep =~ m/uid/) ? $list->{$event}{"uid"} : ""),
