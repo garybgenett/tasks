@@ -50,13 +50,21 @@ my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
 my $APP_NAME	= "Event_Download";
 
-my $START_DATE	= "2016-10-24"; if ($ARGV[0] =~ m/^([0-9]|[0-9]{4}[-][0-9]{2}[-][0-9]{2})$/) { $START_DATE = shift(); };
-my $SORT_COLUMN	= "Start Date";
+my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
+my $SORT_COLUMN	= "Start DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
-my $S_UID	= "%-37.37";
-my $S_DATE	= "%-20.20";
+my $S_UID	= "%-36.36s";
+my $S_DATE	= "%-19.19s";
+
+my $UID		= "UID";
+my $MOD		= "Modified Time";
+my $BEG		= "Start DateTime";
+my $END		= "End DateTime";
+my $SUB		= "Subject";
+my $LOC		= "Venue";
+my $DSC		= "Description";
 
 ########################################
 
@@ -106,6 +114,10 @@ my $records	= "0";
 my $found;
 
 while (1) {
+	if ($last_beg =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
+		$last_beg .= " 00:00:00";
+	};
+
 	print STDERR "\n\tProcessing: ${last_beg} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
 
 	$mech->get(${URL_FETCH}
@@ -156,36 +168,24 @@ print STDERR "\tAPI Requests: ${API_REQUEST_COUNT}\n";
 
 sub parse_event {
 	my $event = shift();
-
+	my $new = {};
 	my $uid;
-	my $mod;
-	my $beg;
-	my $end;
-	my $sub;
-	my $loc;
-	my $dsc;
+	my $last;
 
 	foreach my $value (@{$event}) {
-		if ($value->{"val"} eq "UID")			{ $uid = $value->{"content"}; };
-		if ($value->{"val"} eq "Modified Time")		{ $mod = $value->{"content"}; };
-		if ($value->{"val"} eq "Start DateTime")	{ $beg = $value->{"content"}; };
-		if ($value->{"val"} eq "End DateTime")		{ $end = $value->{"content"}; };
-		if ($value->{"val"} eq "Subject")		{ $sub = $value->{"content"}; };
-		if ($value->{"val"} eq "Venue")			{ $loc = $value->{"content"}; };
-		if ($value->{"val"} eq "Description")		{ $dsc = $value->{"content"}; };
+		if ($value->{"val"} eq ${UID}) {
+			$uid = $value->{"content"};
+		};
+		if ($value->{"val"} eq ${BEG}) {
+			$last = $value->{"content"};
+		};
+
+		$new->{ $value->{"val"} } = $value->{"content"};
 	};
 
-	$events->{ ${uid} } = {
-		"uid"	=> $uid || "",
-		"mod"	=> $mod || "",
-		"beg"	=> $beg || "",
-		"end"	=> $end || "",
-		"sub"	=> $sub || "",
-		"loc"	=> $loc || "",
-		"dsc"	=> $dsc || "",
-	};
+	$events->{$uid} = ${new};
 
-	return(${beg});
+	return($last);
 }
 
 ########################################
@@ -193,7 +193,7 @@ sub parse_event {
 sub print_events {
 	my $list = shift() || ${events};
 	my $find = shift() || ".";
-	my $keep = shift() || "uid mod beg end sub loc dsc";
+	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $SUB, ];
 
 	my $label;
 	($find, $label) = split(/\|/, ${find});
@@ -211,38 +211,24 @@ sub print_events {
 		print "\n";
 	};
 
-	&print_fields(
-		"${stderr}", "1",
-		(($keep =~ m/uid/) ? "UID"	: ""),
-		(($keep =~ m/mod/) ? "Modified"	: ""),
-		(($keep =~ m/beg/) ? "Start"	: ""),
-		(($keep =~ m/end/) ? "End"	: ""),
-		(($keep =~ m/sub/) ? "Subject"	: ""),
-		(($keep =~ m/loc/) ? ""		: ""),
-		(($keep =~ m/dsc/) ? ""		: ""),
-	);
+	my $fields = {};
+	foreach my $field (@{$keep}) {
+		$fields->{$field} = ${field};
+	};
+	&print_fields("${stderr}", "1", ${keep}, ${fields});
 
 	my $entries = "0";
 
 	foreach my $event (sort({
-		$list->{$a}{"beg"} cmp $list->{$b}{"beg"} ||
-		$list->{$a}{"end"} cmp $list->{$b}{"end"} ||
-		$list->{$a}{"sub"} cmp $list->{$b}{"sub"}
+		$list->{$a}{$BEG} cmp $list->{$b}{$BEG} ||
+		$list->{$a}{$END} cmp $list->{$b}{$END} ||
+		$list->{$a}{$SUB} cmp $list->{$b}{$SUB}
 	} keys(%{$list}))) {
 		if (
-			($list->{$event}{"beg"} ge ${START_DATE}) &&
-			($list->{$event}{"sub"} =~ m/${find}/i)
+			($list->{$event}{$BEG} ge ${START_DATE}) &&
+			($list->{$event}{$SUB} =~ m/${find}/i)
 		) {
-			&print_fields(
-				"${stderr}", "",
-				(($keep =~ m/uid/) ? $list->{$event}{"uid"} : ""),
-				(($keep =~ m/mod/) ? $list->{$event}{"mod"} : ""),
-				(($keep =~ m/beg/) ? $list->{$event}{"beg"} : ""),
-				(($keep =~ m/end/) ? $list->{$event}{"end"} : ""),
-				(($keep =~ m/sub/) ? $list->{$event}{"sub"} : ""),
-				(($keep =~ m/loc/) ? $list->{$event}{"loc"} : ""),
-				(($keep =~ m/dsc/) ? $list->{$event}{"dsc"} : ""),
-			);
+			&print_fields("${stderr}", "", ${keep}, $list->{$event});
 
 			$entries++;
 		};
@@ -263,32 +249,37 @@ sub print_events {
 sub print_fields {
 	my $stderr = shift() || "";
 	my $header = shift() || "";
-	my $uid = shift();
-	my $mod = shift();
-	my $beg = shift();
-	my $end = shift();
-	my $sub = shift();
-	my $loc = shift();
-	my $dsc = shift();
+	my $keep = shift() || [];
+	my $vals = shift() || {};
+
+	my $subject = $vals->{$SUB};
+	if ($vals->{$LOC}) { $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
+	if ($vals->{$DSC}) { $subject = "**${subject}**"; };
 
 	my $output = "";
 
-	if ($loc) { $sub = "[ ${sub} ][ ${loc} ]"; };
-	if ($dsc) { $sub = "**${sub}**"; };
+	foreach my $val (@{$keep}) {
+		my $value = "";
+		if ($vals->{$val}) {
+			$value = $vals->{$val};
+		};
 
-	if ($uid) { $output .= "| "; $output .= sprintf("${S_UID}s",	$uid); };
-	if ($mod) { $output .= "| "; $output .= sprintf("${S_DATE}s",	$mod); };
-	if ($beg) { $output .= "| "; $output .= sprintf("${S_DATE}s",	$beg); };
-	if ($end) { $output .= "| "; $output .= sprintf("${S_DATE}s",	$end); };
-	if ($sub) { $output .= "| "; $output .= sprintf("%s",		$sub); };
+		if (${val} eq $UID) { $value = sprintf("${S_UID}",	${value}); };
+		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $SUB) { $value = ${subject}; };
 
+		$output .= "| ${value} ";
+	};
+
+	$output =~ s/[[:space:]]*$//g;
 	$output .= "\n";
-	if ($header) {
-		if ($uid) { $output .= "|:---"; };
-		if ($mod) { $output .= "|:---"; };
-		if ($beg) { $output .= "|:---"; };
-		if ($end) { $output .= "|:---"; };
-		if ($sub) { $output .= "|:---"; };
+
+	if (${header}) {
+		foreach my $val (@{$keep}) {
+			$output .= "|:---";
+		};
 		$output .= "|\n";
 	};
 
@@ -311,7 +302,7 @@ if (%{$events}) {
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
-		&print_events(${events}, ${search}, "beg sub loc dsc");
+		&print_events(${events}, ${search}, [ ${BEG}, ${SUB}, ]);
 	};
 };
 
