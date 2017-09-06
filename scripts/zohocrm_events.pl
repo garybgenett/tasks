@@ -62,6 +62,7 @@ my $UID		= "UID";
 my $MOD		= "Modified Time";
 my $BEG		= "Start DateTime";
 my $END		= "End DateTime";
+my $REL		= "Related To";
 my $SUB		= "Subject";
 my $LOC		= "Venue";
 my $DSC		= "Description";
@@ -193,21 +194,29 @@ sub parse_event {
 sub print_events {
 	my $list = shift() || ${events};
 	my $find = shift() || ".";
-	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $SUB, ];
+	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, ];
 
-	my $label;
-	($find, $label) = split(/\|/, ${find});
+	my $stderr = "1";
+	my $case = "";
+	my $label = "";
+	if (${find} =~ /\|/) {
+		($stderr, $case, $find, $label) = split(/\|/, ${find});
+	};
+	if (!${label}) {
+		if ($find eq ".") {
+			$label = "All Events";
+		} else {
+			$label = ${find};
+		};
+	};
 
-	my $stderr;
-	if (${find} eq ".") {
-		$stderr = "1";
+	if (${stderr}) {
 		print STDERR "\n";
-		print STDERR "### All Events\n";
+		print STDERR "### ${label}\n";
 		print STDERR "\n";
 	} else {
-		$stderr = "";
 		print "\n";
-		print "### " . (${label} ? ${label} : ${find}) . "\n";
+		print "### ${label}\n";
 		print "\n";
 	};
 
@@ -215,7 +224,7 @@ sub print_events {
 	foreach my $field (@{$keep}) {
 		$fields->{$field} = ${field};
 	};
-	&print_fields("${stderr}", "1", ${keep}, ${fields});
+	&print_fields(${stderr}, "1", ${keep}, ${fields});
 
 	my $entries = "0";
 
@@ -228,9 +237,14 @@ sub print_events {
 			($list->{$event}{$BEG} ge ${START_DATE}) &&
 			($list->{$event}{$SUB} =~ m/${find}/i)
 		) {
-			&print_fields("${stderr}", "", ${keep}, $list->{$event});
+			if (
+				(!${case}) ||
+				((${case}) && ($list->{$event}{$SUB} =~ m/${find}/))
+			) {
+				&print_fields("${stderr}", "", ${keep}, $list->{$event});
 
-			$entries++;
+				$entries++;
+			};
 		};
 	};
 
@@ -253,8 +267,10 @@ sub print_fields {
 	my $vals = shift() || {};
 
 	my $subject = $vals->{$SUB};
-	if ($vals->{$LOC}) { $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
-	if ($vals->{$DSC}) { $subject = "**${subject}**"; };
+	if (!${header}) {
+		if ($vals->{$LOC}) { $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
+		if ($vals->{$DSC}) { $subject = "**${subject}**"; };
+	};
 
 	my $output = "";
 
@@ -302,7 +318,7 @@ if (%{$events}) {
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
-		&print_events(${events}, ${search}, [ ${BEG}, ${SUB}, ]);
+		&print_events(${events}, ${search}, [ ${BEG}, ${REL}, ${SUB}, ]);
 	};
 };
 
