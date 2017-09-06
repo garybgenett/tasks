@@ -46,6 +46,9 @@ my $URL_FETCH	= "https://crm.zoho.com/crm/private/json/Events/getRecords";
 my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
+my $URL_LEAD	= "https://crm.zoho.com/crm/EntityInfo.do?module=Leads&id=";
+my $URL_EVENT	= "https://crm.zoho.com/crm/EntityInfo.do?module=Events&id=";
+
 ########################################
 
 my $APP_NAME	= "Event_Download";
@@ -55,7 +58,7 @@ my $SORT_COLUMN	= "Start DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
-my $S_UID	= "%-36.36s";
+my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
 
 my $UID		= "UID";
@@ -266,12 +269,15 @@ sub print_fields {
 	my $keep = shift() || [];
 	my $vals = shift() || {};
 
+	my $related = ($vals->{$REL} ? $vals->{$REL} : "");
 	my $subject = ($vals->{$SUB} ? $vals->{$SUB} : "");
 	my $details = ($vals->{$DSC} ? $vals->{$DSC} : "");
 	if (!${header}) {
-		if ($vals->{$LOC}) { $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
-		if ($vals->{$DSC}) { $subject = "**${subject}**"; };
-		if ($vals->{$DSC}) { $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
+		if ($vals->{$REL} && $vals->{"RELATEDTOID"})	{ $related = "[${related}](${URL_LEAD}$vals->{'RELATEDTOID'})"; };
+		if ($vals->{$SUB} && $vals->{$UID})		{ $subject = "[${subject}](${URL_EVENT}$vals->{$UID})"; };
+		if ($vals->{$LOC})				{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
+		if ($vals->{$DSC})				{ $subject = "**${subject}**"; };
+		if ($vals->{$DSC})				{ $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
 	};
 
 	my $output = "";
@@ -286,6 +292,7 @@ sub print_fields {
 		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $REL) { $value = ${related}; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
 
