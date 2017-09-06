@@ -194,7 +194,7 @@ sub parse_event {
 sub print_events {
 	my $list = shift() || ${events};
 	my $find = shift() || ".";
-	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, ];
+	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, $DSC, ];
 
 	my $stderr = "1";
 	my $case = "";
@@ -266,10 +266,12 @@ sub print_fields {
 	my $keep = shift() || [];
 	my $vals = shift() || {};
 
-	my $subject = $vals->{$SUB};
+	my $subject = ($vals->{$SUB} ? $vals->{$SUB} : "");
+	my $details = ($vals->{$DSC} ? $vals->{$DSC} : "");
 	if (!${header}) {
 		if ($vals->{$LOC}) { $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
 		if ($vals->{$DSC}) { $subject = "**${subject}**"; };
+		if ($vals->{$DSC}) { $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
 	};
 
 	my $output = "";
@@ -285,6 +287,7 @@ sub print_fields {
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $SUB) { $value = ${subject}; };
+		if (${val} eq $DSC) { $value = ${details}; };
 
 		$output .= "| ${value} ";
 	};
