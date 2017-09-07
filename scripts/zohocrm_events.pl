@@ -115,9 +115,9 @@ if (!${APITOKEN}) {
 
 ########################################
 
-print STDERR "### Log\n";
-print STDERR "\n";
-print STDERR "\tTOKEN: ${APITOKEN}\n";
+print STDERR "### Processing Log\n";
+#>>>print STDERR "\n";
+#>>>print STDERR "\tTOKEN: ${APITOKEN}\n";
 
 ################################################################################
 
@@ -137,6 +137,8 @@ sub fetch_entries {
 	my $index_no	= "1";
 	my $records	= "0";
 	my $found;
+
+	print STDERR "\n\tFetching ${type}...";
 
 	while (1) {
 		if ($last_mod =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
@@ -184,7 +186,7 @@ sub fetch_entries {
 	print STDERR "\n";
 
 	print STDERR "\n";
-	print STDERR "\tTotal: " . scalar(keys(%{$fetches})) . "\n";
+	print STDERR "\tTotal ${type}: " . scalar(keys(%{$fetches})) . "\n";
 	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
 
 	return(0);
