@@ -119,6 +119,8 @@ my $fetches = {};
 my $leads = {};
 my $events = {};
 
+my $closed_list = {};
+
 ########################################
 
 sub fetch_entries {
@@ -266,6 +268,13 @@ sub print_events {
 		};
 	};
 
+	my $closed = "";
+	if (${find} eq "CLOSED") {
+		$closed = "1";
+		$find = ".";
+		$label = "Closed!";
+	};
+
 	if (${stderr}) {
 		print STDERR "\n";
 		print STDERR "### ${label}\n";
@@ -295,6 +304,9 @@ sub print_events {
 			(
 				(!${case}) ||
 				((${case}) && ($list->{$event}{$SUB} =~ m/${find}/))
+			) && (
+				(!${closed}) ||
+				(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} }))
 			)
 		) {
 			&print_fields("${stderr}", "", ${keep}, $list->{$event});
@@ -382,6 +394,14 @@ $fetches = {};
 
 ########################################
 
+foreach my $lead (keys(%{$leads})) {
+	if ($leads->{$lead}{$STS} && $leads->{$lead}{$STS} eq "Closed Won") {
+		$closed_list->{$lead} = "1";
+	};
+};
+
+########################################
+
 if (%{$leads}) {
 	&print_leads();
 };
@@ -390,6 +410,10 @@ if (%{$leads}) {
 
 if (%{$events}) {
 	&print_events();
+};
+
+if (%{$events}) {
+	&print_events(${events}, "CLOSED", [ ${BEG}, ${REL}, ${SUB}, ]);
 };
 
 if (%{$events}) {
