@@ -308,6 +308,9 @@ sub print_leads {
 			};
 		};
 	} else {
+		if (!${entries}) {
+			print STDERR "|\n";
+		};
 		print STDERR "\nEntries: ${entries}\n";
 	};
 
@@ -382,6 +385,9 @@ sub print_tasks {
 		$entries++;
 	};
 
+	if (!${entries}) {
+		print STDERR "|\n";
+	};
 	print STDERR "\nEntries: ${entries}\n";
 
 	return(0);
@@ -455,7 +461,11 @@ sub print_events {
 		};
 	};
 
-	my $output = "\nEntries: ${entries}\n";
+	my $output;
+	if (!${entries}) {
+		$output .= "|\n";
+	};
+	$output .= "\nEntries: ${entries}\n";
 	if (${stderr}) {
 		print STDERR ${output};
 	} else {
