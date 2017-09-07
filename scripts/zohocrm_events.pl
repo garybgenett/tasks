@@ -59,6 +59,13 @@ my $MAX_RECORDS	= "200";
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
 
+my $LID		= "LEADID";
+my $CMP		= "Company";
+my $LNM		= "Last Name";
+my $FNM		= "First Name";
+my $SRC		= "Lead Source";
+my $STS		= "Lead Status";
+
 my $RID		= "RELATEDTOID";
 
 my $UID		= "UID";
@@ -109,6 +116,7 @@ print STDERR "\tTOKEN: ${APITOKEN}\n";
 ################################################################################
 
 my $fetches = {};
+my $leads = {};
 my $events = {};
 
 ########################################
@@ -181,7 +189,7 @@ sub parse_entry {
 	my $last;
 
 	foreach my $value (@{$event}) {
-		if ($value->{"val"} eq ${UID}) {
+		if ($value->{"val"} eq ${UID} || $value->{"val"} eq ${LID}) {
 			$uid = $value->{"content"};
 		};
 		if ($value->{"val"} eq ${MOD}) {
@@ -195,6 +203,47 @@ sub parse_entry {
 
 	return($last);
 }
+
+########################################
+
+sub print_leads {
+	print STDERR "\n";
+	print STDERR "### Broken Leads\n";
+	print STDERR "\n";
+
+	print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}]\n";
+	print STDERR "|:---|:---|:---|\n";
+
+	my $entries = "0";
+
+	foreach my $lead (sort({
+		(($leads->{$a}{$LNM} ? $leads->{$a}{$LNM} : "") cmp ($leads->{$b}{$LNM} ? $leads->{$b}{$LNM} : "")) ||
+		(($leads->{$a}{$FNM} ? $leads->{$a}{$FNM} : "") cmp ($leads->{$b}{$FNM} ? $leads->{$b}{$FNM} : "")) ||
+		(($leads->{$a}{$MOD} ? $leads->{$a}{$MOD} : "") cmp ($leads->{$b}{$MOD} ? $leads->{$b}{$MOD} : ""))
+	} keys(%{$leads}))) {
+		my $src = ($leads->{$lead}{${SRC}} ? $leads->{$lead}{${SRC}} : "");
+		my $sts = ($leads->{$lead}{${STS}} ? $leads->{$lead}{${STS}} : "");
+
+		my $name = "";
+		$name .= "[ " . ($leads->{$lead}{${LNM}} ? $leads->{$lead}{${LNM}} : "") . " ]";
+		$name .= "[ " . ($leads->{$lead}{${FNM}} ? $leads->{$lead}{${FNM}} : "") . " ]";
+		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{${LID}}) . ")";
+		$name =~ s/\"/\'/g;
+
+		if (
+			(!$leads->{$lead}{$SRC}) ||
+			(!$leads->{$lead}{$STS})
+		) {
+			print STDERR "| ${src} | ${sts} | ${name}\n";
+
+			$entries++;
+		};
+	};
+
+	print STDERR "\nEntries: ${entries}\n";
+
+	return(0);
+};
 
 ########################################
 
@@ -323,9 +372,19 @@ sub print_fields {
 
 ################################################################################
 
+&fetch_entries("Leads");
+$leads = \%{ ${fetches} };
+$fetches = {};
+
 &fetch_entries("Events");
 $events = \%{ ${fetches} };
 $fetches = {};
+
+########################################
+
+if (%{$leads}) {
+	&print_leads();
+};
 
 ########################################
 
