@@ -41,25 +41,25 @@ $| = "1";
 ################################################################################
 
 my $URL_AUTH	= "https://accounts.zoho.com/apiauthtoken/nb/create";
-my $URL_FETCH	= "https://crm.zoho.com/crm/private/json/Events/getRecords";
+sub URL_FETCH	{ "https://crm.zoho.com/crm/private/json/" . shift() . "/getRecords"; };
+sub URL_LINK	{ "https://crm.zoho.com/crm/EntityInfo.do?module=" . shift() . "&id=" . shift(); };
 
 my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
-
-my $URL_LEAD	= "https://crm.zoho.com/crm/EntityInfo.do?module=Leads&id=";
-my $URL_EVENT	= "https://crm.zoho.com/crm/EntityInfo.do?module=Events&id=";
 
 ########################################
 
 my $APP_NAME	= "Event_Download";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
-my $SORT_COLUMN	= "Start DateTime";
+my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
+
+my $RID		= "RELATEDTOID";
 
 my $UID		= "UID";
 my $MOD		= "Modified Time";
@@ -108,69 +108,73 @@ print STDERR "\tTOKEN: ${APITOKEN}\n";
 
 ################################################################################
 
+my $fetches = {};
 my $events = {};
 
 ########################################
 
-my $last_beg	= ${START_DATE};
-my $index_no	= "1";
-my $records	= "0";
-my $found;
+sub fetch_entries {
+	my $type	= shift() || "Events";
+	my $last_mod	= ${START_DATE};
+	my $index_no	= "1";
+	my $records	= "0";
+	my $found;
 
-while (1) {
-	if ($last_beg =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
-		$last_beg .= " 00:00:00";
-	};
-
-	print STDERR "\n\tProcessing: ${last_beg} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
-
-	$mech->get(${URL_FETCH}
-		. "?scope=${URL_SCOPE}"
-		. "&authtoken=${APITOKEN}"
-		. "&sortColumnString=${SORT_COLUMN}"
-		. "&sortOrderString=${SORT_ORDER}"
-		. "&fromIndex=${index_no}"
-		. "&toIndex=" . (${index_no} + (${MAX_RECORDS} -1))
-	) && $API_REQUEST_COUNT++;
-	my $output = decode_json($mech->content());
-
-	if ( $output->{"response"}{"nodata"} ) {
-		print STDERR "\n\tNo Data!";
-		last();
-	};
-
-	if (ref( $output->{"response"}{"result"}{"Events"}{"row"} ) eq "ARRAY") {
-		$found = $#{		$output->{"response"}{"result"}{"Events"}{"row"} };
-		foreach my $event (@{	$output->{"response"}{"result"}{"Events"}{"row"} }) {
-			${last_beg} = &parse_event( $event->{"FL"} );
+	while (1) {
+		if ($last_mod =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
+			$last_mod .= " 00:00:00";
 		};
-	} else {
-		$found = $#{			$output->{"response"}{"result"}{"Events"}{"row"}{"FL"} };
-		${last_beg} = &parse_event(	$output->{"response"}{"result"}{"Events"}{"row"}{"FL"} );
+
+		print STDERR "\n\tProcessing: ${last_mod} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
+
+		$mech->get(&URL_FETCH(${type})
+			. "?scope=${URL_SCOPE}"
+			. "&authtoken=${APITOKEN}"
+			. "&sortColumnString=${SORT_COLUMN}"
+			. "&sortOrderString=${SORT_ORDER}"
+			. "&fromIndex=${index_no}"
+			. "&toIndex=" . (${index_no} + (${MAX_RECORDS} -1))
+		) && $API_REQUEST_COUNT++;
+		my $output = decode_json($mech->content());
+
+		if ( $output->{"response"}{"nodata"} ) {
+			print STDERR "\n\tNo Data!";
+			last();
+		};
+
+		if (ref( $output->{"response"}{"result"}{${type}}{"row"} ) eq "ARRAY") {
+			$found = $#{		$output->{"response"}{"result"}{${type}}{"row"} };
+			foreach my $event (@{	$output->{"response"}{"result"}{${type}}{"row"} }) {
+				${last_mod} = &parse_entry( $event->{"FL"} );
+			};
+		} else {
+			$found = $#{			$output->{"response"}{"result"}{${type}}{"row"}{"FL"} };
+			${last_mod} = &parse_entry(	$output->{"response"}{"result"}{${type}}{"row"}{"FL"} );
+		};
+
+		$records += ++${found};
+		print STDERR "${found} records found (${records} total).";
+
+		if (${found} < ${MAX_RECORDS}) {
+			print STDERR "\n\tCompleted!";
+			last();
+		};
+
+		$index_no += ${MAX_RECORDS};
 	};
 
-	$records += ++${found};
-	print STDERR "${found} records found (${records} total).";
+	print STDERR "\n";
 
-	if (${found} < ${MAX_RECORDS}) {
-		print STDERR "\n\tCompleted!";
-		last();
-	};
+	print STDERR "\n";
+	print STDERR "\tTotal: " . scalar(keys(%{$fetches})) . "\n";
+	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
 
-	$index_no += ${MAX_RECORDS};
+	return(0);
 };
-
-print STDERR "\n";
 
 ########################################
 
-print STDERR "\n";
-print STDERR "\tTotal Events: " . scalar(keys(%{$events})) . "\n";
-print STDERR "\tAPI Requests: ${API_REQUEST_COUNT}\n";
-
-################################################################################
-
-sub parse_event {
+sub parse_entry {
 	my $event = shift();
 	my $new = {};
 	my $uid;
@@ -180,14 +184,14 @@ sub parse_event {
 		if ($value->{"val"} eq ${UID}) {
 			$uid = $value->{"content"};
 		};
-		if ($value->{"val"} eq ${BEG}) {
+		if ($value->{"val"} eq ${MOD}) {
 			$last = $value->{"content"};
 		};
 
 		$new->{ $value->{"val"} } = $value->{"content"};
 	};
 
-	$events->{$uid} = ${new};
+	$fetches->{$uid} = ${new};
 
 	return($last);
 }
@@ -238,16 +242,15 @@ sub print_events {
 	} keys(%{$list}))) {
 		if (
 			($list->{$event}{$BEG} ge ${START_DATE}) &&
-			($list->{$event}{$SUB} =~ m/${find}/i)
-		) {
-			if (
+			($list->{$event}{$SUB} =~ m/${find}/i) &&
+			(
 				(!${case}) ||
 				((${case}) && ($list->{$event}{$SUB} =~ m/${find}/))
-			) {
-				&print_fields("${stderr}", "", ${keep}, $list->{$event});
+			)
+		) {
+			&print_fields("${stderr}", "", ${keep}, $list->{$event});
 
-				$entries++;
-			};
+			$entries++;
 		};
 	};
 
@@ -273,11 +276,11 @@ sub print_fields {
 	my $subject = ($vals->{$SUB} ? $vals->{$SUB} : "");
 	my $details = ($vals->{$DSC} ? $vals->{$DSC} : "");
 	if (!${header}) {
-		if ($vals->{$REL} && $vals->{"RELATEDTOID"})	{ $related = "[${related}](${URL_LEAD}$vals->{'RELATEDTOID'})"; };
-		if ($vals->{$SUB} && $vals->{$UID})		{ $subject = "[${subject}](${URL_EVENT}$vals->{$UID})"; };
-		if ($vals->{$LOC})				{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
-		if ($vals->{$DSC})				{ $subject = "**${subject}**"; };
-		if ($vals->{$DSC})				{ $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
+		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
+		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
+		if ($vals->{$LOC})			{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
+		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
+		if ($vals->{$DSC})			{ $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
 	};
 
 	my $output = "";
@@ -320,11 +323,15 @@ sub print_fields {
 
 ################################################################################
 
+&fetch_entries("Events");
+$events = \%{ ${fetches} };
+$fetches = {};
+
+########################################
+
 if (%{$events}) {
 	&print_events();
 };
-
-########################################
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
