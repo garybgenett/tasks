@@ -50,6 +50,7 @@ my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 ########################################
 
 my $APP_NAME	= "Event_Download";
+my $CSV_FILE	= "zoho-data.csv";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
 my $SORT_COLUMN	= "Modified DateTime";
@@ -210,12 +211,20 @@ sub parse_entry {
 ########################################
 
 sub print_leads {
-	print STDERR "\n";
-	print STDERR "### Broken Leads\n";
-	print STDERR "\n";
+	my $report = shift() || "";
 
-	print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}]\n";
-	print STDERR "|:---|:---|:---|\n";
+	if (${report} eq "CSV") {
+		open(CSV, ">" . ${CSV_FILE}) || die();
+		print CSV "\"Date\",\"Day\",\"${SRC}\",\"${STS}\",\"[ ${LNM} ][ ${FNM} ]\"\n";
+		print CSV "\"2017-01-02\",\"Mon\",\"NULL\",\"NULL\",\"NULL\",\n";
+	} else {
+		print STDERR "\n";
+		print STDERR "### Broken Leads\n";
+		print STDERR "\n";
+
+		print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}]\n";
+		print STDERR "|:---|:---|:---|\n";
+	};
 
 	my $entries = "0";
 
@@ -233,22 +242,40 @@ sub print_leads {
 		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{${LID}}) . ")";
 		$name =~ s/\"/\'/g;
 
-		if (
-			(!$leads->{$lead}{$SRC}) ||
-			(!$leads->{$lead}{$STS}) ||
-			(
-				($leads->{$lead}{$STS} ne "Initial Call") &&
-				($leads->{$lead}{$STS} ne "Not Interested") &&
-				(!$related_list->{ $leads->{$lead}{$LID} })
-			)
-		) {
-			print STDERR "| ${src} | ${sts} | ${name}\n";
+		if (${report} eq "CSV") {
+			if ($leads->{$lead}{$DSC}) {
+				while ($leads->{$lead}{$DSC} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[,].*)$/gm) {
+					if (${1}) {
+						my($date, $day) = split(",", ${1});
+						$date =~ s/[ ]//g;
+						$day =~ s/[ ]//g;
 
-			$entries++;
+						print CSV "\"${date}\",\"${day}\",\"${src}\",\"${sts}\",\"${name}\"\n";
+					};
+				};
+			};
+		} else {
+			if (
+				(!$leads->{$lead}{$SRC}) ||
+				(!$leads->{$lead}{$STS}) ||
+				(
+					($leads->{$lead}{$STS} ne "Initial Call") &&
+					($leads->{$lead}{$STS} ne "Not Interested") &&
+					(!$related_list->{ $leads->{$lead}{$LID} })
+				)
+			) {
+				print STDERR "| ${src} | ${sts} | ${name}\n";
+
+				$entries++;
+			};
 		};
 	};
 
-	print STDERR "\nEntries: ${entries}\n";
+	if (${report} eq "CSV") {
+		close(CSV) || die();
+	} else {
+		print STDERR "\nEntries: ${entries}\n";
+	};
 
 	return(0);
 };
@@ -413,6 +440,10 @@ foreach my $event (keys(%{$events})) {
 };
 
 ########################################
+
+if (%{$leads}) {
+	&print_leads("CSV");
+};
 
 if (%{$leads}) {
 	&print_leads();
