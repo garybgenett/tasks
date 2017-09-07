@@ -432,9 +432,9 @@ sub print_events {
 	my $entries = "0";
 
 	foreach my $event (sort({
-		(($tasks->{$a}{$BEG} ? $tasks->{$a}{$BEG} : "") cmp ($tasks->{$b}{$BEG} ? $tasks->{$b}{$BEG} : "")) ||
-		(($tasks->{$a}{$END} ? $tasks->{$a}{$END} : "") cmp ($tasks->{$b}{$END} ? $tasks->{$b}{$END} : "")) ||
-		(($tasks->{$a}{$SUB} ? $tasks->{$a}{$SUB} : "") cmp ($tasks->{$b}{$SUB} ? $tasks->{$b}{$SUB} : ""))
+		(($events->{$a}{$BEG} ? $events->{$a}{$BEG} : "") cmp ($events->{$b}{$BEG} ? $events->{$b}{$BEG} : "")) ||
+		(($events->{$a}{$END} ? $events->{$a}{$END} : "") cmp ($events->{$b}{$END} ? $events->{$b}{$END} : "")) ||
+		(($events->{$a}{$SUB} ? $events->{$a}{$SUB} : "") cmp ($events->{$b}{$SUB} ? $events->{$b}{$SUB} : ""))
 	} keys(%{$list}))) {
 		if (
 			($list->{$event}{$BEG} ge ${START_DATE}) &&
