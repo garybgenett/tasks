@@ -419,6 +419,7 @@ sub print_events {
 		$report = ${find};
 		$label = ${find};
 		$find = ".";
+		$stderr = "";
 	}
 	elsif (${find} eq "Active") {
 		$report = ${find};
@@ -574,6 +575,12 @@ if (%{$leads}) {
 	&print_leads("CSV");
 };
 
+if (%{$events}) {
+	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
+};
+
+########################################
+
 if (%{$leads}) {
 	&print_leads();
 };
@@ -585,11 +592,11 @@ if (%{$tasks}) {
 };
 
 if (%{$tasks}) {
-	&print_tasks("Deferred");
+	&print_tasks();
 };
 
 if (%{$tasks}) {
-	&print_tasks();
+	&print_tasks("Deferred");
 };
 
 ########################################
@@ -597,10 +604,6 @@ if (%{$tasks}) {
 #>>>if (%{$events}) {
 #>>>	&print_events();
 #>>>};
-
-if (%{$events}) {
-	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
-};
 
 if (%{$events}) {
 	&print_events(${events}, "Active", [ $BEG, $REL, $SUB, ]);
