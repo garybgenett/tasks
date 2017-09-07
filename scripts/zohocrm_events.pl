@@ -120,6 +120,7 @@ my $leads = {};
 my $events = {};
 
 my $closed_list = {};
+my $related_list = {};
 
 ########################################
 
@@ -234,7 +235,12 @@ sub print_leads {
 
 		if (
 			(!$leads->{$lead}{$SRC}) ||
-			(!$leads->{$lead}{$STS})
+			(!$leads->{$lead}{$STS}) ||
+			(
+				($leads->{$lead}{$STS} ne "Initial Call") &&
+				($leads->{$lead}{$STS} ne "Not Interested") &&
+				(!$related_list->{ $leads->{$lead}{$LID} })
+			)
 		) {
 			print STDERR "| ${src} | ${sts} | ${name}\n";
 
@@ -397,6 +403,12 @@ $fetches = {};
 foreach my $lead (keys(%{$leads})) {
 	if ($leads->{$lead}{$STS} && $leads->{$lead}{$STS} eq "Closed Won") {
 		$closed_list->{$lead} = "1";
+	};
+};
+
+foreach my $event (keys(%{$events})) {
+	if ($events->{$event}{$RID}) {
+		$related_list->{ $events->{$event}{$RID} } = "1";
 	};
 };
 
