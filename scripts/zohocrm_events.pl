@@ -226,6 +226,8 @@ sub print_leads {
 		print STDERR "|:---|:---|:---|\n";
 	};
 
+	my $err_date_list = {};
+
 	my $entries = "0";
 
 	foreach my $lead (sort({
@@ -250,6 +252,8 @@ sub print_leads {
 						$date =~ s/[ ]//g;
 						$day =~ s/[ ]//g;
 
+						$err_date_list->{$date}{$day}++;
+
 						print CSV "\"${date}\",\"${day}\",\"${src}\",\"${sts}\",\"${name}\"\n";
 					};
 				};
@@ -273,6 +277,28 @@ sub print_leads {
 
 	if (${report} eq "CSV") {
 		close(CSV) || die();
+
+		if (${err_date_list}) {
+			my $err_dates = [];
+			foreach my $date (sort(keys(%{$err_date_list}))) {
+				my $date_list = [];
+				@{$date_list} = keys(%{ $err_date_list->{$date} });
+				if ($#{$date_list} >= 1) {
+					push(@{$err_dates}, ${date});
+				};
+			};
+			if (@{$err_dates}) {
+				print STDERR "\n";
+				print STDERR "\tBroken Dates:\n";
+				foreach my $date (@{$err_dates}) {
+					print STDERR "\t\t${date}:";
+					foreach my $day (sort(keys(%{ $err_date_list->{$date} }))) {
+						print STDERR " {${day}: $err_date_list->{$date}{$day}}";
+					};
+					print STDERR "\n";
+				};
+			};
+		};
 	} else {
 		print STDERR "\nEntries: ${entries}\n";
 	};
