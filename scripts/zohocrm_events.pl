@@ -334,7 +334,7 @@ sub print_tasks {
 
 	foreach my $task (sort({
 		(($tasks->{$a}{$DUE} ? $tasks->{$a}{$DUE} : "") cmp ($tasks->{$b}{$DUE} ? $tasks->{$b}{$DUE} : "")) ||
-		(($tasks->{$a}{$TST} ? $tasks->{$a}{$TST} : "") cmp ($tasks->{$b}{$TST} ? $tasks->{$b}{$TST} : "")) ||
+		(($tasks->{$a}{$REL} ? $tasks->{$a}{$REL} : "") cmp ($tasks->{$b}{$REL} ? $tasks->{$b}{$REL} : "")) ||
 		(($tasks->{$a}{$SUB} ? $tasks->{$a}{$SUB} : "") cmp ($tasks->{$b}{$SUB} ? $tasks->{$b}{$SUB} : ""))
 	} keys(%{$tasks}))) {
 		my $related = ($tasks->{$task}{$REL} ? $tasks->{$task}{$REL} : "");
@@ -581,12 +581,12 @@ if (%{$events}) {
 };
 
 if (%{$events}) {
-	&print_events(${events}, "CLOSED", [ ${BEG}, ${REL}, ${SUB}, ]);
+	&print_events(${events}, "CLOSED", [ $BEG, $REL, $SUB, ]);
 };
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
-		&print_events(${events}, ${search}, [ ${BEG}, ${REL}, ${SUB}, ]);
+		&print_events(${events}, ${search}, [ $BEG, $REL, $SUB, ]);
 	};
 };
 
