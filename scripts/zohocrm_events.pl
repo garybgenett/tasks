@@ -414,11 +414,16 @@ sub print_events {
 		};
 	};
 
-	my $closed = "";
-	if (${find} eq "CLOSED") {
-		$closed = "1";
+	my $report = "";
+	if (${find} eq "Closed!") {
+		$report = ${find};
+		$label = ${find};
 		$find = ".";
-		$label = "Closed!";
+	}
+	elsif (${find} eq "Active") {
+		$report = ${find};
+		$label = ${find};
+		$find = ".";
 	};
 
 	if (${stderr}) {
@@ -449,10 +454,13 @@ sub print_events {
 			($list->{$event}{$SUB} =~ m/${find}/i) &&
 			(
 				(!${case}) ||
-				((${case}) && ($list->{$event}{$SUB} =~ m/${find}/))
+				($list->{$event}{$SUB} =~ m/${find}/)
 			) && (
-				(!${closed}) ||
+				(${report} ne "Closed!") ||
 				(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} }))
+			) && (
+				(${report} ne "Active") ||
+				($list->{$event}{$RID})
 			)
 		) {
 			&print_fields("${stderr}", "", ${keep}, $list->{$event});
@@ -586,12 +594,16 @@ if (%{$tasks}) {
 
 ########################################
 
+#>>>if (%{$events}) {
+#>>>	&print_events();
+#>>>};
+
 if (%{$events}) {
-	&print_events();
+	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
 };
 
 if (%{$events}) {
-	&print_events(${events}, "CLOSED", [ $BEG, $REL, $SUB, ]);
+	&print_events(${events}, "Active", [ $BEG, $REL, $SUB, ]);
 };
 
 if (%{$events}) {
