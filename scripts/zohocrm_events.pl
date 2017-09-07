@@ -67,6 +67,11 @@ my $FNM		= "First Name";
 my $SRC		= "Lead Source";
 my $STS		= "Lead Status";
 
+my $TID		= "ACTIVITYID";
+my $DUE		= "Due Date";
+my $TST		= "Status";
+my $PRI		= "Priority";
+
 my $RID		= "RELATEDTOID";
 
 my $UID		= "UID";
@@ -118,6 +123,7 @@ print STDERR "\tTOKEN: ${APITOKEN}\n";
 
 my $fetches = {};
 my $leads = {};
+my $tasks = {};
 my $events = {};
 
 my $closed_list = {};
@@ -193,7 +199,7 @@ sub parse_entry {
 	my $last;
 
 	foreach my $value (@{$event}) {
-		if ($value->{"val"} eq ${LID} || $value->{"val"} eq ${UID}) {
+		if ($value->{"val"} eq ${LID} || $value->{"val"} eq ${TID} || $value->{"val"} eq ${UID}) {
 			$uid = $value->{"content"};
 		};
 		if ($value->{"val"} eq ${MOD}) {
@@ -302,6 +308,79 @@ sub print_leads {
 	} else {
 		print STDERR "\nEntries: ${entries}\n";
 	};
+
+	return(0);
+};
+
+########################################
+
+sub print_tasks {
+	my $report = shift() || "";
+
+	print STDERR "\n";
+	if (!${report}) {
+		print STDERR "### Open Tasks\n";
+	} else {
+		print STDERR "### ${report} Tasks\n";
+	};
+	print STDERR "\n";
+
+	print STDERR "| ${DUE} | ${TST} | ${PRI} | ${REL} | ${SUB}\n";
+	print STDERR "|:---|:---|:---|:---|:---|\n";
+
+	my $entries = "0";
+
+	foreach my $task (sort({
+		(($tasks->{$a}{$DUE} ? $tasks->{$a}{$DUE} : "") cmp ($tasks->{$b}{$DUE} ? $tasks->{$b}{$DUE} : "")) ||
+		(($tasks->{$a}{$TST} ? $tasks->{$a}{$TST} : "") cmp ($tasks->{$b}{$TST} ? $tasks->{$b}{$TST} : "")) ||
+		(($tasks->{$a}{$SUB} ? $tasks->{$a}{$SUB} : "") cmp ($tasks->{$b}{$SUB} ? $tasks->{$b}{$SUB} : ""))
+	} keys(%{$tasks}))) {
+		my $related = ($tasks->{$task}{$REL} ? $tasks->{$task}{$REL} : "");
+		my $subject = ($tasks->{$task}{$SUB} ? $tasks->{$task}{$SUB} : "");
+		if ($tasks->{$task}{$REL} && $tasks->{$task}{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$tasks->{$task}{$RID}) . ")"; };
+		if ($tasks->{$task}{$SUB} && $tasks->{$task}{$TID})	{ $subject = "[${subject}](" . &URL_LINK("Tasks",	$tasks->{$task}{$TID}) . ")"; };
+
+		if (${report}) {
+			if (${report} eq "Broken") {
+				if (
+					($tasks->{$task}{$DUE}) &&
+					(
+						($tasks->{$task}{$TST}) && (
+							($tasks->{$task}{$TST} eq "Not Started") ||
+							($tasks->{$task}{$TST} eq "Deferred") ||
+							($tasks->{$task}{$TST} eq "Completed")
+						)
+					) &&
+					($tasks->{$task}{$PRI} eq "High")
+				) {
+					next();
+				};
+			}
+			elsif (${report} eq "Deferred") {
+				if ($tasks->{$task}{$TST} ne ${report}) {
+					next();
+				};
+			}
+			else {
+				next();
+			};
+		} else {
+			if ($tasks->{$task}{$TST} ne "Not Started") {
+				next();
+			};
+		};
+
+		print STDERR "| " . ($tasks->{$task}{$DUE} ? $tasks->{$task}{$DUE} : "");
+		print STDERR "| " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
+		print STDERR "| " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
+		print STDERR "| ${related}";
+		print STDERR "| ${subject}";
+		print STDERR "\n";
+
+		$entries++;
+	};
+
+	print STDERR "\nEntries: ${entries}\n";
 
 	return(0);
 };
@@ -447,6 +526,10 @@ sub print_fields {
 $leads = \%{ ${fetches} };
 $fetches = {};
 
+&fetch_entries("Tasks");
+$tasks = \%{ ${fetches} };
+$fetches = {};
+
 &fetch_entries("Events");
 $events = \%{ ${fetches} };
 $fetches = {};
@@ -473,6 +556,20 @@ if (%{$leads}) {
 
 if (%{$leads}) {
 	&print_leads();
+};
+
+########################################
+
+if (%{$tasks}) {
+	&print_tasks("Broken");
+};
+
+if (%{$tasks}) {
+	&print_tasks("Deferred");
+};
+
+if (%{$tasks}) {
+	&print_tasks();
 };
 
 ########################################
