@@ -193,7 +193,7 @@ sub parse_entry {
 	my $last;
 
 	foreach my $value (@{$event}) {
-		if ($value->{"val"} eq ${UID} || $value->{"val"} eq ${LID}) {
+		if ($value->{"val"} eq ${LID} || $value->{"val"} eq ${UID}) {
 			$uid = $value->{"content"};
 		};
 		if ($value->{"val"} eq ${MOD}) {
@@ -242,7 +242,6 @@ sub print_leads {
 		$name .= "[ " . ($leads->{$lead}{${LNM}} ? $leads->{$lead}{${LNM}} : "") . " ]";
 		$name .= "[ " . ($leads->{$lead}{${FNM}} ? $leads->{$lead}{${FNM}} : "") . " ]";
 		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{${LID}}) . ")";
-		$name =~ s/\"/\'/g;
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -252,9 +251,10 @@ sub print_leads {
 						$date =~ s/[ ]//g;
 						$day =~ s/[ ]//g;
 
-						$err_date_list->{$date}{$day}++;
-
+						$name =~ s/\"/\'/g;
 						print CSV "\"${date}\",\"${day}\",\"${src}\",\"${sts}\",\"${name}\"\n";
+
+						$err_date_list->{$date}{$day}++;
 					};
 				};
 			};
@@ -353,9 +353,9 @@ sub print_events {
 	my $entries = "0";
 
 	foreach my $event (sort({
-		$list->{$a}{$BEG} cmp $list->{$b}{$BEG} ||
-		$list->{$a}{$END} cmp $list->{$b}{$END} ||
-		$list->{$a}{$SUB} cmp $list->{$b}{$SUB}
+		(($tasks->{$a}{$BEG} ? $tasks->{$a}{$BEG} : "") cmp ($tasks->{$b}{$BEG} ? $tasks->{$b}{$BEG} : "")) ||
+		(($tasks->{$a}{$END} ? $tasks->{$a}{$END} : "") cmp ($tasks->{$b}{$END} ? $tasks->{$b}{$END} : "")) ||
+		(($tasks->{$a}{$SUB} ? $tasks->{$a}{$SUB} : "") cmp ($tasks->{$b}{$SUB} ? $tasks->{$b}{$SUB} : ""))
 	} keys(%{$list}))) {
 		if (
 			($list->{$event}{$BEG} ge ${START_DATE}) &&
