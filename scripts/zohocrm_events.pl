@@ -225,9 +225,8 @@ sub print_leads {
 	my $report = shift() || "";
 
 	if (${report} eq "CSV") {
-		open(CSV, ">" . ${CSV_FILE}) || die();
-		print CSV "\"Date\",\"Day\",\"${SRC}\",\"${STS}\",\"[ ${LNM} ][ ${FNM} ]\"\n";
-		print CSV "\"2017-01-02\",\"Mon\",\"NULL\",\"NULL\",\"NULL\",\n";
+		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"[ ${LNM} ][ ${FNM} ]\",\n";
+		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
 	} else {
 		print STDERR "\n";
 		print STDERR "### Broken Leads\n";
@@ -262,13 +261,13 @@ sub print_leads {
 						my $day = ${2};
 						$day =~ s/^[,][ ]//g;
 
+						$name =~ s/\"/\'/g;
+
+						print CSV "\"${date}\",\"${day}\",\"\",\"${src}\",\"${sts}\",\"${name}\",\n";
+
 						if (!${day}) {
 							$day = "NULL";
 						};
-						$name =~ s/\"/\'/g;
-
-						print CSV "\"${date}\",\"${day}\",\"${src}\",\"${sts}\",\"${name}\"\n";
-
 						$err_date_list->{$date}{$day}++;
 					};
 				};
@@ -291,8 +290,6 @@ sub print_leads {
 	};
 
 	if (${report} eq "CSV") {
-		close(CSV) || die();
-
 		if (${err_date_list}) {
 			my $err_dates = [];
 			foreach my $date (sort(keys(%{$err_date_list}))) {
@@ -489,6 +486,10 @@ sub print_events {
 				($list->{$event}{$RID})
 			)
 		) {
+			if (${report} eq "Closed!") {
+				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
+			};
+
 			&print_fields("${stderr}", "", ${keep}, $list->{$event});
 
 			$entries++;
@@ -596,6 +597,8 @@ foreach my $event (keys(%{$events})) {
 
 ########################################
 
+open(CSV, ">" . ${CSV_FILE}) || die();
+
 if (%{$leads}) {
 	&print_leads("CSV");
 };
@@ -603,6 +606,8 @@ if (%{$leads}) {
 if (%{$events}) {
 	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
 };
+
+close(CSV) || die();
 
 ########################################
 
