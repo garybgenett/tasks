@@ -34,6 +34,9 @@ sub mech_fail {
 
 use JSON::PP;
 
+use POSIX qw(strftime);
+use Time::Local qw(timelocal);
+
 ########################################
 
 $| = "1";
@@ -253,13 +256,17 @@ sub print_leads {
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
-				while ($leads->{$lead}{$DSC} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[,].*)$/gm) {
+				while ($leads->{$lead}{$DSC} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm) {
 					if (${1}) {
-						my($date, $day) = split(",", ${1});
-						$date =~ s/[ ]//g;
-						$day =~ s/[ ]//g;
+						my $date = ${1};
+						my $day = ${2};
+						$day =~ s/^[,][ ]//g;
 
+						if (!${day}) {
+							$day = "NULL";
+						};
 						$name =~ s/\"/\'/g;
+
 						print CSV "\"${date}\",\"${day}\",\"${src}\",\"${sts}\",\"${name}\"\n";
 
 						$err_date_list->{$date}{$day}++;
@@ -290,20 +297,38 @@ sub print_leads {
 			my $err_dates = [];
 			foreach my $date (sort(keys(%{$err_date_list}))) {
 				my $date_list = [];
-				@{$date_list} = keys(%{ $err_date_list->{$date} });
+				@{$date_list} = sort(keys(%{ $err_date_list->{$date} }));
+
+				my $is_day = ${date};
+				$is_day =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2})$/;
+				$is_day = timelocal(0,0,0,${3},(${2}-1),${1});
+				$is_day = strftime("%a", localtime(${is_day}));
+
+				my $err = "0";
+				if (defined($err_date_list->{$date}{"NULL"})) {
+					$err = "1";
+				};
+				if (!defined($err_date_list->{$date}{$is_day})) {
+					$err = "1";
+				};
 				if ($#{$date_list} >= 1) {
-					push(@{$err_dates}, ${date});
+					$err = "1";
+				};
+
+				if (${err}) {
+					my $entry = "${date}, ${is_day} =";
+					foreach my $day (@{$date_list}) {
+						$entry .= " [${day}]{$err_date_list->{$date}{$day}}";
+					};
+					push(@{$err_dates}, ${entry});
 				};
 			};
+
 			if (@{$err_dates}) {
 				print STDERR "\n";
 				print STDERR "\tBroken Dates:\n";
-				foreach my $date (@{$err_dates}) {
-					print STDERR "\t\t${date}:";
-					foreach my $day (sort(keys(%{ $err_date_list->{$date} }))) {
-						print STDERR " {${day}: $err_date_list->{$date}{$day}}";
-					};
-					print STDERR "\n";
+				foreach my $entry (@{$err_dates}) {
+					print STDERR "\t\t${entry}\n";
 				};
 			};
 		};
