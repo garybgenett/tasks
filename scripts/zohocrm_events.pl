@@ -54,6 +54,8 @@ my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
 my $APP_NAME	= "Event_Download";
 my $CSV_FILE	= "zoho-data.csv";
+my $LEGEND_FILE	= ".zoho.reports";
+my $LEGEND_NAME	= "Marker: Legend";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
 my $SORT_COLUMN	= "Modified DateTime";
@@ -222,6 +224,65 @@ sub parse_entry {
 
 	return($last);
 }
+
+########################################
+
+sub update_legend {
+	open(OUT, "<" . ${LEGEND_FILE}) || die();
+	my $legend = localtime() . "\n\n";
+	$legend .= do { local $/; <OUT> };
+	close(OUT) || die();
+
+	my $url_get = &URL_FETCH("Events");
+	$url_get =~ s/getRecords/getRecordById/g;
+	$url_get =~ s/json/xml/g;
+
+	my $url_post = &URL_FETCH("Events");
+	$url_post =~ s/getRecords/updateRecords/g;
+	$url_post =~ s/json/xml/g;
+
+	my $matches = "0";
+
+	foreach my $event (keys(%{$events})) {
+		if ($events->{$event}{$SUB} eq ${LEGEND_NAME}) {
+			my $post_data = "";
+			$post_data .= '<Events>';
+			$post_data .= '<row no="1">';
+			$post_data .= '<FL val="' . ${UID} . '">' . $events->{$event}{$UID} . '</FL>';
+			$post_data .= '<FL val="Subject"><![CDATA[' . ${LEGEND_NAME} . ']]></FL>';
+			$post_data .= '<FL val="Description"><![CDATA[' . ${legend} . ']]></FL>';
+			$post_data .= '</row>';
+			$post_data .= '</Events>';
+
+			$mech->get(${url_get}
+				. "?scope=${URL_SCOPE}"
+				. "&authtoken=${APITOKEN}"
+				. "&id=" . $events->{$event}{$UID}
+			) && $API_REQUEST_COUNT++;
+#>>>			print STDERR "\tGET[" . $mech->content() . "]\n";
+
+#>>>			print STDERR "\tPOST[" . ${post_data} . "]\n";
+			$mech->post(${url_post}, {
+				"scope"		=> ${URL_SCOPE},
+				"authtoken"	=> ${APITOKEN},
+				"newFormat"	=> 1,
+				"id"		=> $events->{$event}{$UID},
+				"xmlData"	=> ${post_data},
+			}) && $API_REQUEST_COUNT++;
+#>>>			print STDERR "\tRESULT[" . $mech->content() . "]\n";
+
+			print STDERR "\n\t[$events->{$event}{$SUB}]: $events->{$event}{$UID}\n";
+
+			${matches}++;
+		};
+	};
+
+	print STDERR "\n";
+	print STDERR "\tMatches: " . ${matches} . "\n";
+	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
+
+	return(0);
+};
 
 ########################################
 
@@ -605,6 +666,12 @@ foreach my $event (keys(%{$events})) {
 	if ($events->{$event}{$RID}) {
 		$related_list->{ $events->{$event}{$RID} } = "1";
 	};
+};
+
+########################################
+
+if (%{$events}) {
+	&update_legend();
 };
 
 ########################################
