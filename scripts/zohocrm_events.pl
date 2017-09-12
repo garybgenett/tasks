@@ -60,6 +60,8 @@ my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
+my $NON_ASCII	= "#";
+
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
 
@@ -527,6 +529,7 @@ sub print_fields {
 		if ($vals->{$LOC})			{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
 		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
 		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
+		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
 	};
 
 	my $output = "";
