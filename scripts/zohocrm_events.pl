@@ -60,6 +60,7 @@ my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
+my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "#";
 
 my $S_UID	= "%-19.19s";
@@ -234,8 +235,8 @@ sub print_leads {
 		print STDERR "### Broken Leads\n";
 		print STDERR "\n";
 
-		print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}]\n";
-		print STDERR "|:---|:---|:---|\n";
+		print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}] | ${DSC}\n";
+		print STDERR "|:---|:---|:---|:---|\n";
 	};
 
 	my $err_date_list = {};
@@ -254,6 +255,10 @@ sub print_leads {
 		$name .= "[ " . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "") . " ]";
 		$name .= "[ " . ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . " ]";
 		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
+
+		my $text = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
+		$text = "[${text}]"; $text =~ s/\n+/\]\[/g;
+		$text =~ s/[^[:ascii:]]/${NON_ASCII}/g;
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -282,9 +287,12 @@ sub print_leads {
 					($leads->{$lead}{$STS} ne "Initial Call") &&
 					($leads->{$lead}{$STS} ne "Not Interested") &&
 					(!$related_list->{ $leads->{$lead}{$LID} })
+				) || (
+					($leads->{$lead}{$DSC}) &&
+					($leads->{$lead}{$DSC} =~ m/${DSC_FLAG}/)
 				)
 			) {
-				print STDERR "| ${src} | ${sts} | ${name}\n";
+				print STDERR "| ${src} | ${sts} | ${name} | ${text}\n";
 
 				$entries++;
 			};
