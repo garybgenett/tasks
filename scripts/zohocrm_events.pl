@@ -165,14 +165,14 @@ sub fetch_entries {
 			last();
 		};
 
-		if (ref( $output->{"response"}{"result"}{${type}}{"row"} ) eq "ARRAY") {
-			$found = $#{		$output->{"response"}{"result"}{${type}}{"row"} };
-			foreach my $event (@{	$output->{"response"}{"result"}{${type}}{"row"} }) {
+		if (ref( $output->{"response"}{"result"}{$type}{"row"} ) eq "ARRAY") {
+			$found = $#{		$output->{"response"}{"result"}{$type}{"row"} };
+			foreach my $event (@{	$output->{"response"}{"result"}{$type}{"row"} }) {
 				${last_mod} = &parse_entry( $event->{"FL"} );
 			};
 		} else {
-			$found = $#{			$output->{"response"}{"result"}{${type}}{"row"}{"FL"} };
-			${last_mod} = &parse_entry(	$output->{"response"}{"result"}{${type}}{"row"}{"FL"} );
+			$found = $#{			$output->{"response"}{"result"}{$type}{"row"}{"FL"} };
+			${last_mod} = &parse_entry(	$output->{"response"}{"result"}{$type}{"row"}{"FL"} );
 		};
 
 		$records += ++${found};
@@ -245,13 +245,13 @@ sub print_leads {
 		(($leads->{$a}{$FNM} ? $leads->{$a}{$FNM} : "") cmp ($leads->{$b}{$FNM} ? $leads->{$b}{$FNM} : "")) ||
 		(($leads->{$a}{$MOD} ? $leads->{$a}{$MOD} : "") cmp ($leads->{$b}{$MOD} ? $leads->{$b}{$MOD} : ""))
 	} keys(%{$leads}))) {
-		my $src = ($leads->{$lead}{${SRC}} ? $leads->{$lead}{${SRC}} : "");
-		my $sts = ($leads->{$lead}{${STS}} ? $leads->{$lead}{${STS}} : "");
+		my $src = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
+		my $sts = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
 
 		my $name = "";
-		$name .= "[ " . ($leads->{$lead}{${LNM}} ? $leads->{$lead}{${LNM}} : "") . " ]";
-		$name .= "[ " . ($leads->{$lead}{${FNM}} ? $leads->{$lead}{${FNM}} : "") . " ]";
-		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{${LID}}) . ")";
+		$name .= "[ " . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "") . " ]";
+		$name .= "[ " . ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . " ]";
+		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -526,7 +526,7 @@ sub print_fields {
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
 		if ($vals->{$LOC})			{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
 		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
-		if ($vals->{$DSC})			{ $details = "[ ${details} ]"; $details =~ s/\n+/\]\[/g; };
+		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
 	};
 
 	my $output = "";
