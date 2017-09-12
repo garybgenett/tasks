@@ -11,9 +11,9 @@ use Data::Dumper;
 sub DUMPER {
 	my $DUMP = shift;
 	local $Data::Dumper::Purity = 1;
-	print "<-- DUMPER " . ("-" x 30) . ">\n";
-	print Dumper(${DUMP});
-	print "<-- DUMPER " . ("-" x 30) . ">\n";
+	print STDERR "<-- DUMPER " . ("-" x 30) . ">\n";
+	print STDERR Dumper(${DUMP});
+	print STDERR "<-- DUMPER " . ("-" x 30) . ">\n";
 	return(0);
 };
 
@@ -156,6 +156,7 @@ sub fetch_entries {
 		$mech->get(&URL_FETCH(${type})
 			. "?scope=${URL_SCOPE}"
 			. "&authtoken=${APITOKEN}"
+			. "&lastModifiedTime=${last_mod}"
 			. "&sortColumnString=${SORT_COLUMN}"
 			. "&sortOrderString=${SORT_ORDER}"
 			. "&fromIndex=${index_no}"
@@ -308,8 +309,8 @@ sub print_leads {
 
 				my $is_day = ${date};
 				$is_day =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2})$/;
-				$is_day = timelocal(0,0,0,${3},(${2}-1),${1});
-				$is_day = strftime("%a", localtime(${is_day}));
+				$is_day = &timelocal(0,0,0,${3},(${2}-1),${1});
+				$is_day = &strftime("%a", localtime(${is_day}));
 
 				my $err = "0";
 				if (defined($err_date_list->{$date}{"NULL"})) {
@@ -473,7 +474,7 @@ sub print_events {
 	foreach my $field (@{$keep}) {
 		$fields->{$field} = ${field};
 	};
-	&print_fields(${stderr}, "1", ${keep}, ${fields});
+	&print_event_fields(${stderr}, "1", ${keep}, ${fields});
 
 	my $entries = "0";
 
@@ -483,7 +484,7 @@ sub print_events {
 		(($events->{$a}{$SUB} ? $events->{$a}{$SUB} : "") cmp ($events->{$b}{$SUB} ? $events->{$b}{$SUB} : ""))
 	} keys(%{$list}))) {
 		if (
-			($list->{$event}{$BEG} ge ${START_DATE}) &&
+#>>>			($list->{$event}{$BEG} ge ${START_DATE}) &&
 			($list->{$event}{$SUB} =~ m/${find}/i) &&
 			(
 				(!${case}) ||
@@ -500,7 +501,7 @@ sub print_events {
 				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
 			};
 
-			&print_fields("${stderr}", "", ${keep}, $list->{$event});
+			&print_event_fields("${stderr}", "", ${keep}, $list->{$event});
 
 			$entries++;
 		};
@@ -522,7 +523,7 @@ sub print_events {
 
 ########################################
 
-sub print_fields {
+sub print_event_fields {
 	my $stderr = shift() || "";
 	my $header = shift() || "";
 	my $keep = shift() || [];
