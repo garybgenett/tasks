@@ -158,7 +158,7 @@ sub fetch_entries {
 		$mech->get(&URL_FETCH(${type})
 			. "?scope=${URL_SCOPE}"
 			. "&authtoken=${APITOKEN}"
-			. "&lastModifiedTime=${last_mod}"
+#>>>			. "&lastModifiedTime=${last_mod}"
 			. "&sortColumnString=${SORT_COLUMN}"
 			. "&sortOrderString=${SORT_ORDER}"
 			. "&fromIndex=${index_no}"
@@ -545,7 +545,7 @@ sub print_events {
 		(($events->{$a}{$SUB} ? $events->{$a}{$SUB} : "") cmp ($events->{$b}{$SUB} ? $events->{$b}{$SUB} : ""))
 	} keys(%{$list}))) {
 		if (
-#>>>			($list->{$event}{$BEG} ge ${START_DATE}) &&
+			($list->{$event}{$BEG} ge ${START_DATE}) &&
 			($list->{$event}{$SUB} =~ m/${find}/i) &&
 			(
 				(!${case}) ||
