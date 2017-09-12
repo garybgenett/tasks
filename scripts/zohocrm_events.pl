@@ -408,10 +408,10 @@ sub print_tasks {
 		};
 
 		print STDERR "| " . ($tasks->{$task}{$DUE} ? $tasks->{$task}{$DUE} : "");
-		print STDERR "| " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
-		print STDERR "| " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
-		print STDERR "| ${related}";
-		print STDERR "| ${subject}";
+		print STDERR " | " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
+		print STDERR " | " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
+		print STDERR " | ${related}";
+		print STDERR " | ${subject}";
 		print STDERR "\n";
 
 		$entries++;
