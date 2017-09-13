@@ -231,6 +231,7 @@ sub update_legend {
 	open(OUT, "<" . ${LEGEND_FILE}) || die();
 	my $legend = localtime() . "\n\n";
 	$legend .= do { local $/; <OUT> };
+	$legend =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
 	close(OUT) || die();
 
 	my $url_get = &URL_FETCH("Events");
