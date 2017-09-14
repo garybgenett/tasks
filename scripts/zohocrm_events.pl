@@ -33,6 +33,9 @@ sub mech_fail {
 };
 
 use JSON::PP;
+my $json = JSON::PP->new();
+$json->ascii(1);
+$json->canonical(1);
 
 use POSIX qw(strftime);
 use Time::Local qw(timelocal);
@@ -56,6 +59,7 @@ my $APP_NAME	= "Event_Download";
 
 my $LEGEND_NAME	= "Marker: Legend";
 my $LEGEND_FILE	= ".zoho.reports";
+my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
@@ -655,6 +659,12 @@ foreach my $type (
 	my $var = lc(${type});
 
 	%{ $z->{$var} } = &fetch_entries(${type});
+
+	open(JSON, ">${JSON_BASE}.${var}.json") || die();
+	foreach my $key (sort(keys(%{ $z->{$var} }))) {
+		print JSON $json->encode($z->{$var}{$key}) . "\n";
+	};
+	close(JSON) || die();
 };
 
 ########################################
