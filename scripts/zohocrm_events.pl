@@ -62,6 +62,7 @@ my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
+my $NAME_DIV	= " ";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "#";
 
@@ -70,8 +71,8 @@ my $S_DATE	= "%-19.19s";
 
 my $LID		= "LEADID";
 my $CMP		= "Company";
-my $LNM		= "Last Name";
 my $FNM		= "First Name";
+my $LNM		= "Last Name";
 my $SRC		= "Lead Source";
 my $STS		= "Lead Status";
 
@@ -291,14 +292,14 @@ sub print_leads {
 	my $report = shift() || "";
 
 	if (${report} eq "CSV") {
-		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"[ ${LNM} ][ ${FNM} ]\",\n";
+		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
 		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
 	} else {
 		print STDERR "\n";
 		print STDERR "### Broken Leads\n";
 		print STDERR "\n";
 
-		print STDERR "| ${SRC} | ${STS} | [ ${LNM} ][ ${FNM}] | ${DSC}\n";
+		print STDERR "| ${SRC} | ${STS} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n";
 		print STDERR "|:---|:---|:---|:---|\n";
 	};
 
@@ -307,16 +308,14 @@ sub print_leads {
 	my $entries = "0";
 
 	foreach my $lead (sort({
-		(($leads->{$a}{$LNM} ? $leads->{$a}{$LNM} : "") cmp ($leads->{$b}{$LNM} ? $leads->{$b}{$LNM} : "")) ||
 		(($leads->{$a}{$FNM} ? $leads->{$a}{$FNM} : "") cmp ($leads->{$b}{$FNM} ? $leads->{$b}{$FNM} : "")) ||
+		(($leads->{$a}{$LNM} ? $leads->{$a}{$LNM} : "") cmp ($leads->{$b}{$LNM} ? $leads->{$b}{$LNM} : "")) ||
 		(($leads->{$a}{$MOD} ? $leads->{$a}{$MOD} : "") cmp ($leads->{$b}{$MOD} ? $leads->{$b}{$MOD} : ""))
 	} keys(%{$leads}))) {
 		my $src = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
 		my $sts = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
 
-		my $name = "";
-		$name .= "[ " . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "") . " ]";
-		$name .= "[ " . ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . " ]";
+		my $name = ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "");
 		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 
 		my $text = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
@@ -597,7 +596,7 @@ sub print_event_fields {
 	if (!${header}) {
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
-		if ($vals->{$LOC})			{ $subject = "[ ${subject} ][ $vals->{$LOC} ]"; };
+		if ($vals->{$LOC})			{ $subject = "[${subject}][$vals->{$LOC}]"; };
 		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
 		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
 		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
