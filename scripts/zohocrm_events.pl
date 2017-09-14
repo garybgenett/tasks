@@ -63,6 +63,7 @@ my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
+my $NULL_CNAME	= "0 NULL";
 my $NAME_DIV	= " ";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "#";
@@ -302,8 +303,8 @@ sub print_leads {
 		print STDERR "### Broken Leads\n";
 		print STDERR "\n";
 
-		print STDERR "| ${SRC} | ${STS} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n";
-		print STDERR "|:---|:---|:---|:---|\n";
+		print STDERR "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n";
+		print STDERR "|:---|:---|:---|:---|:---|\n";
 	};
 
 	my $err_date_list = {};
@@ -318,6 +319,7 @@ sub print_leads {
 		my $source = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
 		my $status = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
 
+		my $related = ($related_list->{ $leads->{$lead}{$LID} } ? $related_list->{ $leads->{$lead}{$LID} } : "");
 		my $subject = ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "");
 		my $details = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
 		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
@@ -353,10 +355,20 @@ sub print_leads {
 					($leads->{$lead}{$STS} ne "Not Interested")
 				)
 			) || (
+				($related_list->{ $leads->{$lead}{$LID} }) && (
+					($related_list->{ $leads->{$lead}{$LID} } > "1") ||
+					($leads->{$lead}{$CMP} eq ${NULL_CNAME})
+				)
+			) || (
+				(!$leads->{$lead}{$FNM}) ||
+				($leads->{$lead}{$FNM} eq $leads->{$lead}{$LNM}) ||
+				($leads->{$lead}{$FNM} eq $leads->{$lead}{$CMP}) ||
+				($leads->{$lead}{$LNM} ne $leads->{$lead}{$CMP})
+			) || (
 				($leads->{$lead}{$DSC}) &&
 				($leads->{$lead}{$DSC} =~ m/${DSC_FLAG}/)
 			)) {
-				print STDERR "| ${source} | ${status} | ${subject} | ${details}\n";
+				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
 
 				$entries++;
 			};
