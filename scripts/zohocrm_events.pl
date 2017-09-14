@@ -69,6 +69,7 @@ my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
 my $NULL_CNAME	= "0 NULL";
+my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "#";
@@ -155,6 +156,7 @@ my $events	= $z->{"events"};
 
 my $closed_list = {};
 my $related_list = {};
+my $null_events = {};
 
 ########################################
 
@@ -683,6 +685,18 @@ foreach my $lead (keys(%{$leads})) {
 foreach my $event (keys(%{$events})) {
 	if ($events->{$event}{$RID}) {
 		$related_list->{ $events->{$event}{$RID} }++;
+	};
+
+	if ($events->{$event}{$SUB} eq ${NULL_ENAME}) {
+		$null_events->{ $events->{$event}{$BEG} }++;
+	};
+};
+
+if (%{$null_events}) {
+	print STDERR "\n";
+	print STDERR "\tEmpty Events:\n";
+	foreach my $entry (sort(keys(%{$null_events}))) {
+		print STDERR "\t\t${entry} = $null_events->{$entry}\n";
 	};
 };
 
