@@ -70,8 +70,13 @@ my $NON_ASCII	= "#";
 
 ########################################
 
+my $LEVEL_1	= "#" x 3;
+my $LEVEL_2	= "#" x 4;
+
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
+
+########################################
 
 my $LID		= "LEADID";
 my $SRC		= "Lead Source";
@@ -128,7 +133,7 @@ if (!${APITOKEN}) {
 
 ########################################
 
-print STDERR "### Processing Log\n";
+print STDERR "${LEVEL_1} Processing Log\n";
 #>>>print STDERR "\n";
 #>>>print STDERR "\tTOKEN: ${APITOKEN}\n";
 
@@ -300,7 +305,7 @@ sub print_leads {
 		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
 	} else {
 		print STDERR "\n";
-		print STDERR "### Broken Leads\n";
+		print STDERR "${LEVEL_2} Broken Leads\n";
 		print STDERR "\n";
 
 		print STDERR "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n";
@@ -425,9 +430,9 @@ sub print_tasks {
 
 	print STDERR "\n";
 	if (!${report}) {
-		print STDERR "### Open Tasks\n";
+		print STDERR "${LEVEL_2} Open Tasks\n";
 	} else {
-		print STDERR "### ${report} Tasks\n";
+		print STDERR "${LEVEL_2} ${report} Tasks\n";
 	};
 	print STDERR "\n";
 
@@ -520,11 +525,11 @@ sub print_events {
 
 	if (${stderr}) {
 		print STDERR "\n";
-		print STDERR "### ${label}\n";
+		print STDERR "${LEVEL_2} ${label}\n";
 		print STDERR "\n";
 	} else {
 		print "\n";
-		print "### ${label}\n";
+		print "${LEVEL_2} ${label}\n";
 		print "\n";
 	};
 
@@ -676,6 +681,9 @@ if (%{$leads}) {
 	&print_leads("CSV");
 };
 
+print "\n";
+print "${LEVEL_1} Core Reports\n";
+
 if (%{$events}) {
 	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
 };
@@ -711,6 +719,9 @@ if (%{$tasks}) {
 if (%{$events}) {
 	&print_events(${events}, "Active", [ $BEG, $REL, $SUB, ]);
 };
+
+print "\n";
+print "${LEVEL_1} Custom Reports\n";
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
