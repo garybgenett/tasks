@@ -445,7 +445,9 @@ sub print_tasks {
 					($tasks->{$task}{$TST} ne "Deferred") &&
 					($tasks->{$task}{$TST} ne "Completed")
 				)) ||
-				($tasks->{$task}{$PRI} ne "High")
+				($tasks->{$task}{$PRI} ne "High") ||
+				(!$tasks->{$task}{$REL}) ||
+				($tasks->{$task}{$DSC})
 			)
 		) || (
 			(${report} eq "Deferred") &&
