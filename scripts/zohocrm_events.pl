@@ -54,6 +54,7 @@ my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
 my $APP_NAME	= "Event_Download";
+my $THOROUGH	= "1";
 
 ########################################
 
@@ -171,13 +172,17 @@ sub fetch_entries {
 		if ($last_mod =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
 			$last_mod .= " 00:00:00";
 		};
+		if (!${THOROUGH}) {
+			$last_mod =~ s/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}).*$/${1} 00:00:00/g;
+			$index_no = "1";
+		};
 
 		print STDERR "\n\tProcessing: ${last_mod} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
 
 		$mech->get(&URL_FETCH(${type})
 			. "?scope=${URL_SCOPE}"
 			. "&authtoken=${APITOKEN}"
-#>>>			. "&lastModifiedTime=${last_mod}"
+			. (!${THOROUGH} ? "&lastModifiedTime=${last_mod}" : "")
 			. "&sortColumnString=${SORT_COLUMN}"
 			. "&sortOrderString=${SORT_ORDER}"
 			. "&fromIndex=${index_no}"
