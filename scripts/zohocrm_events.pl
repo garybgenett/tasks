@@ -50,12 +50,13 @@ sub URL_LINK	{ "https://crm.zoho.com/crm/EntityInfo.do?module=" . shift() . "&id
 my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
+my $APP_NAME	= "Event_Download";
+
 ########################################
 
-my $APP_NAME	= "Event_Download";
-my $CSV_FILE	= "zoho-data.csv";
-my $LEGEND_FILE	= ".zoho.reports";
 my $LEGEND_NAME	= "Marker: Legend";
+my $LEGEND_FILE	= ".zoho.reports";
+my $CSV_FILE	= "zoho-data.csv";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
 my $SORT_COLUMN	= "Modified DateTime";
@@ -66,15 +67,17 @@ my $NAME_DIV	= " ";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "#";
 
+########################################
+
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
 
 my $LID		= "LEADID";
-my $CMP		= "Company";
-my $FNM		= "First Name";
-my $LNM		= "Last Name";
 my $SRC		= "Lead Source";
 my $STS		= "Lead Status";
+my $FNM		= "First Name";
+my $LNM		= "Last Name";
+my $CMP		= "Company";
 
 my $TID		= "ACTIVITYID";
 my $DUE		= "Due Date";
@@ -312,15 +315,14 @@ sub print_leads {
 		(($leads->{$a}{$LNM} ? $leads->{$a}{$LNM} : "") cmp ($leads->{$b}{$LNM} ? $leads->{$b}{$LNM} : "")) ||
 		(($leads->{$a}{$MOD} ? $leads->{$a}{$MOD} : "") cmp ($leads->{$b}{$MOD} ? $leads->{$b}{$MOD} : ""))
 	} keys(%{$leads}))) {
-		my $src = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
-		my $sts = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
+		my $source = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
+		my $status = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
 
-		my $name = ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "");
-		$name = "[${name}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
-
-		my $text = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
-		$text = "[${text}]"; $text =~ s/\n+/\]\[/g;
-		$text =~ s/[^[:ascii:]]/${NON_ASCII}/g;
+		my $subject = ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "");
+		my $details = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
+		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
+		$details = "[${details}]"; $details =~ s/\n+/\]\[/g;
+		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -330,9 +332,9 @@ sub print_leads {
 						my $day = ${2};
 						$day =~ s/^[,][ ]//g;
 
-						$name =~ s/\"/\'/g;
+						$subject =~ s/\"/\'/g;
 
-						print CSV "\"${date}\",\"${day}\",\"\",\"${src}\",\"${sts}\",\"${name}\",\n";
+						print CSV "\"${date}\",\"${day}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 
 						if (!${day}) {
 							$day = "NULL";
@@ -342,19 +344,19 @@ sub print_leads {
 				};
 			};
 		} else {
-			if (
+			if ((
 				(!$leads->{$lead}{$SRC}) ||
-				(!$leads->{$lead}{$STS}) ||
-				(
+				(!$leads->{$lead}{$STS})
+			) || (
+				(!$related_list->{ $leads->{$lead}{$LID} }) && (
 					($leads->{$lead}{$STS} ne "Initial Call") &&
-					($leads->{$lead}{$STS} ne "Not Interested") &&
-					(!$related_list->{ $leads->{$lead}{$LID} })
-				) || (
-					($leads->{$lead}{$DSC}) &&
-					($leads->{$lead}{$DSC} =~ m/${DSC_FLAG}/)
+					($leads->{$lead}{$STS} ne "Not Interested")
 				)
-			) {
-				print STDERR "| ${src} | ${sts} | ${name} | ${text}\n";
+			) || (
+				($leads->{$lead}{$DSC}) &&
+				($leads->{$lead}{$DSC} =~ m/${DSC_FLAG}/)
+			)) {
+				print STDERR "| ${source} | ${status} | ${subject} | ${details}\n";
 
 				$entries++;
 			};
@@ -373,18 +375,11 @@ sub print_leads {
 				$is_day = &timelocal(0,0,0,${3},(${2}-1),${1});
 				$is_day = &strftime("%a", localtime(${is_day}));
 
-				my $err = "0";
-				if (defined($err_date_list->{$date}{"NULL"})) {
-					$err = "1";
-				};
-				if (!defined($err_date_list->{$date}{$is_day})) {
-					$err = "1";
-				};
-				if ($#{$date_list} >= 1) {
-					$err = "1";
-				};
-
-				if (${err}) {
+				if (
+					(defined($err_date_list->{$date}{"NULL"})) ||
+					(!defined($err_date_list->{$date}{$is_day})) ||
+					($#{$date_list} >= 1)
+				) {
 					my $entry = "${date}, ${is_day} =";
 					foreach my $day (@{$date_list}) {
 						$entry .= " [${day}]{$err_date_list->{$date}{$day}}";
@@ -439,44 +434,32 @@ sub print_tasks {
 		if ($tasks->{$task}{$REL} && $tasks->{$task}{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$tasks->{$task}{$RID}) . ")"; };
 		if ($tasks->{$task}{$SUB} && $tasks->{$task}{$TID})	{ $subject = "[${subject}](" . &URL_LINK("Tasks",	$tasks->{$task}{$TID}) . ")"; };
 
-		if (${report}) {
-			if (${report} eq "Broken") {
-				if (
-					($tasks->{$task}{$DUE}) &&
-					(
-						($tasks->{$task}{$TST}) && (
-							($tasks->{$task}{$TST} eq "Not Started") ||
-							($tasks->{$task}{$TST} eq "Deferred") ||
-							($tasks->{$task}{$TST} eq "Completed")
-						)
-					) &&
-					($tasks->{$task}{$PRI} eq "High")
-				) {
-					next();
-				};
-			}
-			elsif (${report} eq "Deferred") {
-				if ($tasks->{$task}{$TST} ne ${report}) {
-					next();
-				};
-			}
-			else {
-				next();
-			};
-		} else {
-			if ($tasks->{$task}{$TST} ne "Not Started") {
-				next();
-			};
+		if ((
+			(!${report}) &&
+			($tasks->{$task}{$TST} eq "Not Started")
+		) || (
+			(${report} eq "Broken") && (
+				(!$tasks->{$task}{$DUE}) ||
+				((!$tasks->{$task}{$TST}) || (
+					($tasks->{$task}{$TST} ne "Not Started") &&
+					($tasks->{$task}{$TST} ne "Deferred") &&
+					($tasks->{$task}{$TST} ne "Completed")
+				)) ||
+				($tasks->{$task}{$PRI} ne "High")
+			)
+		) || (
+			(${report} eq "Deferred") &&
+			($tasks->{$task}{$TST} eq ${report})
+		)) {
+			print STDERR "| " . ($tasks->{$task}{$DUE} ? $tasks->{$task}{$DUE} : "");
+			print STDERR " | " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
+			print STDERR " | " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
+			print STDERR " | ${related}";
+			print STDERR " | ${subject}";
+			print STDERR "\n";
+
+			$entries++;
 		};
-
-		print STDERR "| " . ($tasks->{$task}{$DUE} ? $tasks->{$task}{$DUE} : "");
-		print STDERR " | " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
-		print STDERR " | " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
-		print STDERR " | ${related}";
-		print STDERR " | ${subject}";
-		print STDERR "\n";
-
-		$entries++;
 	};
 
 	if (!${entries}) {
@@ -544,20 +527,17 @@ sub print_events {
 		(($events->{$a}{$END} ? $events->{$a}{$END} : "") cmp ($events->{$b}{$END} ? $events->{$b}{$END} : "")) ||
 		(($events->{$a}{$SUB} ? $events->{$a}{$SUB} : "") cmp ($events->{$b}{$SUB} ? $events->{$b}{$SUB} : ""))
 	} keys(%{$list}))) {
-		if (
-			($list->{$event}{$BEG} ge ${START_DATE}) &&
-			($list->{$event}{$SUB} =~ m/${find}/i) &&
-			(
-				(!${case}) ||
-				($list->{$event}{$SUB} =~ m/${find}/)
-			) && (
-				(${report} ne "Closed!") ||
-				(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} }))
-			) && (
-				(${report} ne "Active") ||
-				($list->{$event}{$RID})
-			)
-		) {
+		if ((
+			(!${report}) &&
+			(($list->{$event}{$BEG} ge ${START_DATE})	&& ($list->{$event}{$SUB} =~ m/${find}/i)) &&
+			((!${case})					|| ($list->{$event}{$SUB} =~ m/${find}/))
+		) || (
+			(${report} eq "Closed!") &&
+			(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} }))
+		) || (
+			(${report} eq "Active") &&
+			($list->{$event}{$RID})
+		)) {
 			if (${report} eq "Closed!") {
 				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
 			};
@@ -658,13 +638,13 @@ $fetches = {};
 
 foreach my $lead (keys(%{$leads})) {
 	if ($leads->{$lead}{$STS} && $leads->{$lead}{$STS} eq "Closed Won") {
-		$closed_list->{$lead} = "1";
+		$closed_list->{$lead}++;
 	};
 };
 
 foreach my $event (keys(%{$events})) {
 	if ($events->{$event}{$RID}) {
-		$related_list->{ $events->{$event}{$RID} } = "1";
+		$related_list->{ $events->{$event}{$RID} }++;
 	};
 };
 
