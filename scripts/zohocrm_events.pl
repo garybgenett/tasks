@@ -139,10 +139,14 @@ print STDERR "${LEVEL_1} Processing Log\n";
 
 ################################################################################
 
-my $fetches = {};
-my $leads = {};
-my $tasks = {};
-my $events = {};
+my $z = {
+	"leads"		=> {},
+	"tasks"		=> {},
+	"events"	=> {},
+};
+my $leads	= $z->{"leads"};
+my $tasks	= $z->{"tasks"};
+my $events	= $z->{"events"};
 
 my $closed_list = {};
 my $related_list = {};
@@ -154,6 +158,7 @@ sub fetch_entries {
 	my $last_mod	= ${START_DATE};
 	my $index_no	= "1";
 	my $records	= "0";
+	my $fetches	= {};
 	my $found;
 
 	print STDERR "\n\tFetching ${type}...";
@@ -181,14 +186,17 @@ sub fetch_entries {
 			last();
 		};
 
+		my($uid, $new);
 		if (ref( $output->{"response"}{"result"}{$type}{"row"} ) eq "ARRAY") {
 			$found = $#{		$output->{"response"}{"result"}{$type}{"row"} };
 			foreach my $event (@{	$output->{"response"}{"result"}{$type}{"row"} }) {
-				${last_mod} = &parse_entry( $event->{"FL"} );
+				(${last_mod}, ${uid}, ${new}) = &parse_entry( $event->{"FL"} );
+				$fetches->{$uid} = ${new};
 			};
 		} else {
-			$found = $#{			$output->{"response"}{"result"}{$type}{"row"}{"FL"} };
-			${last_mod} = &parse_entry(	$output->{"response"}{"result"}{$type}{"row"}{"FL"} );
+			$found = $#{					$output->{"response"}{"result"}{$type}{"row"}{"FL"} };
+			(${last_mod}, ${uid}, ${new}) = &parse_entry(	$output->{"response"}{"result"}{$type}{"row"}{"FL"} );
+			$fetches->{$uid} = ${new};
 		};
 
 		$records += ++${found};
@@ -208,7 +216,7 @@ sub fetch_entries {
 	print STDERR "\tTotal ${type}: " . scalar(keys(%{$fetches})) . "\n";
 	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
 
-	return(0);
+	return(%{$fetches});
 };
 
 ########################################
@@ -217,28 +225,26 @@ sub parse_entry {
 	my $event = shift();
 	my $new = {};
 	my $uid;
-	my $last;
+	my $mod;
 
 	foreach my $value (@{$event}) {
 		if ($value->{"val"} eq ${LID} || $value->{"val"} eq ${TID} || $value->{"val"} eq ${UID}) {
 			$uid = $value->{"content"};
 		};
 		if ($value->{"val"} eq ${MOD}) {
-			$last = $value->{"content"};
+			$mod = $value->{"content"};
 		};
 
 		$new->{ $value->{"val"} } = $value->{"content"};
 	};
 
-	$fetches->{$uid} = ${new};
-
-	return($last);
+	return(${mod}, ${uid}, ${new});
 }
 
 ########################################
 
 sub update_legend {
-	open(OUT, "<" . ${LEGEND_FILE}) || die();
+	open(OUT, "<${LEGEND_FILE}") || die();
 	my $legend = localtime() . "\n\n";
 	$legend .= do { local $/; <OUT> };
 	$legend =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
@@ -268,7 +274,7 @@ sub update_legend {
 			$mech->get(${url_get}
 				. "?scope=${URL_SCOPE}"
 				. "&authtoken=${APITOKEN}"
-				. "&id=" . $events->{$event}{$UID}
+				. "&id=$events->{$event}{$UID}"
 			) && $API_REQUEST_COUNT++;
 #>>>			print STDERR "\tGET[" . $mech->content() . "]\n";
 
@@ -289,7 +295,7 @@ sub update_legend {
 	};
 
 	print STDERR "\n";
-	print STDERR "\tMatches: " . ${matches} . "\n";
+	print STDERR "\tMatches: ${matches}\n";
 	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
 
 	return(0);
@@ -641,17 +647,15 @@ sub print_event_fields {
 
 ################################################################################
 
-&fetch_entries("Leads");
-$leads = \%{ ${fetches} };
-$fetches = {};
+foreach my $type (
+	"Leads",
+	"Tasks",
+	"Events",
+) {
+	my $var = lc(${type});
 
-&fetch_entries("Tasks");
-$tasks = \%{ ${fetches} };
-$fetches = {};
-
-&fetch_entries("Events");
-$events = \%{ ${fetches} };
-$fetches = {};
+	%{ $z->{$var} } = &fetch_entries(${type});
+};
 
 ########################################
 
@@ -675,7 +679,7 @@ if (%{$events}) {
 
 ########################################
 
-open(CSV, ">" . ${CSV_FILE}) || die();
+open(CSV, ">${CSV_FILE}") || die();
 
 if (%{$leads}) {
 	&print_leads("CSV");
