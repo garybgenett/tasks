@@ -78,6 +78,7 @@ my $NON_ASCII	= "#";
 
 my $LEVEL_1	= "#" x 3;
 my $LEVEL_2	= "#" x 4;
+my $HEAD_MARKER	= "#";
 
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
@@ -753,12 +754,16 @@ if (%{$events}) {
 	&print_events(${events}, "Active", [ $BEG, $REL, $SUB, ]);
 };
 
-print "\n";
-print "${LEVEL_1} Custom Reports\n";
-
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
-		&print_events(${events}, ${search}, [ $BEG, $REL, $SUB, ]);
+		if (${search} =~ m/^[${HEAD_MARKER}][ ]/) {
+			$search =~ s/^[${HEAD_MARKER}][ ]//g;
+			print "\n";
+			print "${LEVEL_1} ${search}\n";
+			print "\n";
+		} else {
+			&print_events(${events}, ${search}, [ $BEG, $REL, $SUB, ]);
+		};
 	};
 };
 
