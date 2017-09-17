@@ -132,6 +132,7 @@ color.calendar.weekend=			magenta
 default.command=			view
 
 alias.cal=				calendar
+alias.ll=				skim
 
 ########################################
 
@@ -193,6 +194,12 @@ report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
 report.read.sort=			project+,kind+,depends+,description+,entry+
+
+report.skim.description=		Custom [Skim]: List view (Read), condensed for reporting
+report.skim.columns=			uuid.short,project,tags,due,end,kind,description.count
+report.skim.labels=			+UUID,PROJECT,TAGS,+DEAD,+DIED,KIND,DESCRIPTION
+report.skim.filter=			#>>>
+report.skim.sort=			project+,kind+,depends+,description+,entry+
 
 report.sort.description=		Custom [Sort]: List view, unfiltered and sorted by dates
 report.sort.columns=			entry,modified,due,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,imask
