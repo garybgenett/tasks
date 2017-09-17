@@ -74,7 +74,7 @@ task read status:pending tag:.research;
 task read status:pending tag:.waiting;
 task projects;
 task projects status:pending;
-for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done;
+for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; IMPERSONATE_NAME=task .bashrc task-depends project:${FILE} project.not:${FILE}.; done;
 task read status:pending project:;
 task udas;
 for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE}; done;
@@ -86,9 +86,9 @@ task read project:.someday;
 task fail;
 task data;
 task meta status:pending;
-eval ${MARKER}; task-recur status:recurring;
-eval ${MARKER}; task-recur status.not:recurring;
-eval ${MARKER}; impersonate_command repo;
+eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status:recurring;
+eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status.not:recurring;
+eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 
 #[ Markdown Source ]
 #]### Weekly Report
