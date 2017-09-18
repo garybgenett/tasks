@@ -335,16 +335,16 @@ sub print_leads {
 	my $entries = "0";
 
 	foreach my $lead (sort({
-		(($leads->{$a}{$FNM} ? $leads->{$a}{$FNM} : "") cmp ($leads->{$b}{$FNM} ? $leads->{$b}{$FNM} : "")) ||
-		(($leads->{$a}{$LNM} ? $leads->{$a}{$LNM} : "") cmp ($leads->{$b}{$LNM} ? $leads->{$b}{$LNM} : "")) ||
-		(($leads->{$a}{$MOD} ? $leads->{$a}{$MOD} : "") cmp ($leads->{$b}{$MOD} ? $leads->{$b}{$MOD} : ""))
+		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
+		(($leads->{$a}{$LNM} || "") cmp ($leads->{$b}{$LNM} || "")) ||
+		(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
 	} keys(%{$leads}))) {
-		my $source = ($leads->{$lead}{$SRC} ? $leads->{$lead}{$SRC} : "");
-		my $status = ($leads->{$lead}{$STS} ? $leads->{$lead}{$STS} : "");
+		my $source = ($leads->{$lead}{$SRC} || "");
+		my $status = ($leads->{$lead}{$STS} || "");
 
-		my $related = ($related_list->{ $leads->{$lead}{$LID} } ? $related_list->{ $leads->{$lead}{$LID} } : "");
-		my $subject = ($leads->{$lead}{$FNM} ? $leads->{$lead}{$FNM} : "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} ? $leads->{$lead}{$LNM} : "");
-		my $details = ($leads->{$lead}{$DSC} ? $leads->{$lead}{$DSC} : "");
+		my $related = ($related_list->{ $leads->{$lead}{$LID} } || "");
+		my $subject = ($leads->{$lead}{$FNM} || "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} || "");
+		my $details = ($leads->{$lead}{$DSC} || "");
 		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 		$details = "[${details}]"; $details =~ s/\n+/\]\[/g;
 		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
@@ -460,12 +460,12 @@ sub print_tasks {
 	my $entries = "0";
 
 	foreach my $task (sort({
-		(($tasks->{$a}{$DUE} ? $tasks->{$a}{$DUE} : "") cmp ($tasks->{$b}{$DUE} ? $tasks->{$b}{$DUE} : "")) ||
-		(($tasks->{$a}{$REL} ? $tasks->{$a}{$REL} : "") cmp ($tasks->{$b}{$REL} ? $tasks->{$b}{$REL} : "")) ||
-		(($tasks->{$a}{$SUB} ? $tasks->{$a}{$SUB} : "") cmp ($tasks->{$b}{$SUB} ? $tasks->{$b}{$SUB} : ""))
+		(($tasks->{$a}{$DUE} || "") cmp ($tasks->{$b}{$DUE} || "")) ||
+		(($tasks->{$a}{$REL} || "") cmp ($tasks->{$b}{$REL} || "")) ||
+		(($tasks->{$a}{$SUB} || "") cmp ($tasks->{$b}{$SUB} || ""))
 	} keys(%{$tasks}))) {
-		my $related = ($tasks->{$task}{$REL} ? $tasks->{$task}{$REL} : "");
-		my $subject = ($tasks->{$task}{$SUB} ? $tasks->{$task}{$SUB} : "");
+		my $related = ($tasks->{$task}{$REL} || "");
+		my $subject = ($tasks->{$task}{$SUB} || "");
 		if ($tasks->{$task}{$REL} && $tasks->{$task}{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$tasks->{$task}{$RID}) . ")"; };
 		if ($tasks->{$task}{$SUB} && $tasks->{$task}{$TID})	{ $subject = "[${subject}](" . &URL_LINK("Tasks",	$tasks->{$task}{$TID}) . ")"; };
 
@@ -488,9 +488,9 @@ sub print_tasks {
 			(${report} eq "Deferred") &&
 			($tasks->{$task}{$TST} eq ${report})
 		)) {
-			print STDERR "| " . ($tasks->{$task}{$DUE} ? $tasks->{$task}{$DUE} : "");
-			print STDERR " | " . ($tasks->{$task}{$TST} ? $tasks->{$task}{$TST} : "");
-			print STDERR " | " . ($tasks->{$task}{$PRI} ? $tasks->{$task}{$PRI} : "");
+			print STDERR "| " . ($tasks->{$task}{$DUE} || "");
+			print STDERR " | " . ($tasks->{$task}{$TST} || "");
+			print STDERR " | " . ($tasks->{$task}{$PRI} || "");
 			print STDERR " | ${related}";
 			print STDERR " | ${subject}";
 			print STDERR "\n";
@@ -560,9 +560,9 @@ sub print_events {
 	my $entries = "0";
 
 	foreach my $event (sort({
-		(($events->{$a}{$BEG} ? $events->{$a}{$BEG} : "") cmp ($events->{$b}{$BEG} ? $events->{$b}{$BEG} : "")) ||
-		(($events->{$a}{$END} ? $events->{$a}{$END} : "") cmp ($events->{$b}{$END} ? $events->{$b}{$END} : "")) ||
-		(($events->{$a}{$SUB} ? $events->{$a}{$SUB} : "") cmp ($events->{$b}{$SUB} ? $events->{$b}{$SUB} : ""))
+		(($events->{$a}{$BEG} || "") cmp ($events->{$b}{$BEG} || "")) ||
+		(($events->{$a}{$END} || "") cmp ($events->{$b}{$END} || "")) ||
+		(($events->{$a}{$SUB} || "") cmp ($events->{$b}{$SUB} || ""))
 	} keys(%{$list}))) {
 		if ((
 			(!${report}) &&
@@ -607,9 +607,9 @@ sub print_event_fields {
 	my $keep = shift() || [];
 	my $vals = shift() || {};
 
-	my $related = ($vals->{$REL} ? $vals->{$REL} : "");
-	my $subject = ($vals->{$SUB} ? $vals->{$SUB} : "");
-	my $details = ($vals->{$DSC} ? $vals->{$DSC} : "");
+	my $related = ($vals->{$REL} || "");
+	my $subject = ($vals->{$SUB} || "");
+	my $details = ($vals->{$DSC} || "");
 	if (!${header}) {
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
