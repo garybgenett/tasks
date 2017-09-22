@@ -378,10 +378,13 @@ sub print_leads {
 					($leads->{$lead}{$STS} ne "Not Interested")
 				)
 			) || (
-				($related_list->{ $leads->{$lead}{$LID} }) && (
-					($related_list->{ $leads->{$lead}{$LID} } > "1") ||
-					($leads->{$lead}{$CMP} eq ${NULL_CNAME})
-				)
+				($related_list->{ $leads->{$lead}{$LID} }) && ((
+						($related_list->{ $leads->{$lead}{$LID} } > "0") &&
+						($leads->{$lead}{$CMP} eq ${NULL_CNAME})
+					) || (
+						($related_list->{ $leads->{$lead}{$LID} } > "1") &&
+						($leads->{$lead}{$CMP} ne ${NULL_CNAME})
+				))
 			) || (
 				(!$leads->{$lead}{$FNM}) ||
 				($leads->{$lead}{$FNM} eq $leads->{$lead}{$LNM}) ||
