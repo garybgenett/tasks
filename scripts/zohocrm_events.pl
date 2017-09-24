@@ -364,7 +364,7 @@ sub print_leads {
 						if (!${day}) {
 							$day = "NULL";
 						};
-						$err_date_list->{$date}{$day}++;
+						push(@{ $err_date_list->{$date}{$day} }, ${subject});
 					};
 				};
 			};
@@ -418,9 +418,12 @@ sub print_leads {
 					(!defined($err_date_list->{$date}{$is_day})) ||
 					($#{$date_list} >= 1)
 				) {
-					my $entry = "${date}, ${is_day} =";
-					foreach my $day (@{$date_list}) {
-						$entry .= " [${day}]{$err_date_list->{$date}{$day}}";
+					my $entry = "${date}, ${is_day}\n";
+					foreach my $day (sort(@{$date_list})) {
+						$entry .= "\t\t\t[${day}]\n";
+						foreach my $item (sort(@{ $err_date_list->{$date}{$day} })) {
+							$entry .= "\t\t\t\t${item}\n";
+						};
 					};
 					push(@{$err_dates}, ${entry});
 				};
