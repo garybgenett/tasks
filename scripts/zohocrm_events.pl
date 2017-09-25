@@ -764,7 +764,7 @@ if (%{$leads}) {
 	&print_leads("CSV");
 };
 
-&printer("\n");
+&printer("1", "\n");
 &printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
