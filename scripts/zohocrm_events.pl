@@ -393,9 +393,17 @@ sub print_leads {
 				($leads->{$lead}{$LNM} ne $leads->{$lead}{$CMP})
 			) || (
 				($leads->{$lead}{$DSC}) &&
-				($leads->{$lead}{$DSC} =~ m/${DSC_FLAG}/)
+				($leads->{$lead}{$DSC} =~ m/(${DSC_FLAG}|${NON_ASCII_M})/)
 			)) {
-				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
+				$details = ($leads->{$lead}{$DSC} || "");
+				my $matching = "";
+				while ($details =~ m/^(.*(${DSC_FLAG}|${NON_ASCII_M}).*)$/gm) {
+					$matching .= "[${1}]";
+				};
+				$matching =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+
+#>>>				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
+				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${matching}\n";
 
 				$entries++;
 			};
