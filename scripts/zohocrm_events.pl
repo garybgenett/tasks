@@ -653,7 +653,7 @@ sub print_event_fields {
 		$output .= "| ${value} ";
 	};
 
-	chomp(${output});
+	$output =~ s/\s*$//g;
 	$output .= "\n";
 
 	if (${header}) {
