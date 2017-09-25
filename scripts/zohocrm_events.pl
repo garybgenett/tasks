@@ -403,10 +403,10 @@ sub print_leads {
 				$matching =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
 				$details = ${matching};
 
-				if (${details}) {
-					$details = " " . ${details};
+				if (!${details}) {
+					$details = ".";
 				};
-				print STDERR "| ${source} | ${status} | ${related} | ${subject} |${details}\n";
+				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
 
 				$entries++;
 			};
