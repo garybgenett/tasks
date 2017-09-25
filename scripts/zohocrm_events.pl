@@ -401,9 +401,12 @@ sub print_leads {
 					$matching .= "[${1}]";
 				};
 				$matching =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+				$details = ${matching};
 
-#>>>				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
-				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${matching}\n";
+				if (${details}) {
+					$details = " " . ${details};
+				};
+				print STDERR "| ${source} | ${status} | ${related} | ${subject} |${details}\n";
 
 				$entries++;
 			};
