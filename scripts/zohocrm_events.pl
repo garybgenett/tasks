@@ -11,9 +11,9 @@ use Data::Dumper;
 sub DUMPER {
 	my $DUMP = shift;
 	local $Data::Dumper::Purity = 1;
-	print STDERR "<-- DUMPER " . ("-" x 30) . ">\n";
-	print STDERR Dumper(${DUMP});
-	print STDERR "<-- DUMPER " . ("-" x 30) . ">\n";
+	&printer(2, "<-- DUMPER " . ("-" x 30) . ">\n");
+	&printer(2, Dumper(${DUMP}));
+	&printer(2, "<-- DUMPER " . ("-" x 30) . ">\n");
 	return(0);
 };
 
@@ -62,6 +62,8 @@ my $LEGEND_NAME	= "Marker: Legend";
 my $LEGEND_FILE	= ".zoho.reports";
 my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
+my $ALL_FILE	= "zoho.all.md";
+my $OUT_FILE	= "zoho.md";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
 my $SORT_COLUMN	= "Modified DateTime";
@@ -141,9 +143,52 @@ if (!${APITOKEN}) {
 
 ########################################
 
-print STDERR "${LEVEL_1} Processing Log\n";
-#>>>print STDERR "\n";
-#>>>print STDERR "\tTOKEN: ${APITOKEN}\n";
+open(ALL_FILE, ">", ${ALL_FILE}) || die();
+open(OUT_FILE, ">", ${OUT_FILE}) || die();
+
+sub printer {
+	my $output = shift() || "";
+	my $stderr = "0";
+
+	if (${output} =~ m/^[012]$/) {
+		$stderr = ${output};
+		$output = "";
+	};
+	$output .= join("", @{_});
+
+	if (${stderr} == 2) {
+		print ALL_FILE ${output};
+		print STDERR ${output};
+	}
+	elsif (${stderr}) {
+		print ALL_FILE ${output};
+	}
+	else {
+		print ALL_FILE ${output};
+		print OUT_FILE ${output};
+	};
+};
+
+sub printer_test {
+	&DUMPER("DUMPER");
+
+	&printer("2", "output\n");
+	&printer("1", "stderr\n");
+	&printer("0", "stdout\n");
+	&printer("no_std\n");
+
+	&printer("2", "output",	"multiple", "arguments", "\n");
+	&printer("1", "stderr",	"multiple", "arguments", "\n");
+	&printer("0", "stdout",	"multiple", "arguments", "\n");
+	&printer("no_std",	"multiple", "arguments", "\n");
+};
+#>>>&printer_test();
+
+########################################
+
+&printer(2, "${LEVEL_1} Processing Log\n");
+#>>>&printer(2, "\n");
+#>>>&printer(2, "\tTOKEN: ${APITOKEN}\n");
 
 ################################################################################
 
@@ -170,7 +215,7 @@ sub fetch_entries {
 	my $fetches	= {};
 	my $found;
 
-	print STDERR "\n\tFetching ${type}...";
+	&printer(2, "\n\tFetching ${type}...");
 
 	while (1) {
 		if ($last_mod =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
@@ -181,7 +226,7 @@ sub fetch_entries {
 			$index_no = "1";
 		};
 
-		print STDERR "\n\tProcessing: ${last_mod} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ";
+		&printer(2, "\n\tProcessing: ${last_mod} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ");
 
 		$mech->get(&URL_FETCH(${type})
 			. "?scope=${URL_SCOPE}"
@@ -195,7 +240,7 @@ sub fetch_entries {
 		my $output = decode_json($mech->content());
 
 		if ( $output->{"response"}{"nodata"} ) {
-			print STDERR "\n\tNo Data!";
+			&printer(2, "\n\tNo Data!");
 			last();
 		};
 
@@ -213,21 +258,21 @@ sub fetch_entries {
 		};
 
 		$records += ++${found};
-		print STDERR "${found} records found (${records} total).";
+		&printer(2, "${found} records found (${records} total).");
 
 		if (${found} < ${MAX_RECORDS}) {
-			print STDERR "\n\tCompleted!";
+			&printer(2, "\n\tCompleted!");
 			last();
 		};
 
 		$index_no += ${MAX_RECORDS};
 	};
 
-	print STDERR "\n";
+	&printer(2, "\n");
 
-	print STDERR "\n";
-	print STDERR "\tTotal ${type}: " . scalar(keys(%{$fetches})) . "\n";
-	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
+	&printer(2, "\n");
+	&printer(2, "\tTotal ${type}: " . scalar(keys(%{$fetches})) . "\n");
+	&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
 
 	return(%{$fetches});
 };
@@ -289,9 +334,9 @@ sub update_legend {
 				. "&authtoken=${APITOKEN}"
 				. "&id=$events->{$event}{$UID}"
 			) && $API_REQUEST_COUNT++;
-#>>>			print STDERR "\tGET[" . $mech->content() . "]\n";
+#>>>			&printer(2, "\tGET[" . $mech->content() . "]\n");
 
-#>>>			print STDERR "\tPOST[" . ${post_data} . "]\n";
+#>>>			&printer(2, "\tPOST[" . ${post_data} . "]\n");
 			$mech->post(${url_post}, {
 				"scope"		=> ${URL_SCOPE},
 				"authtoken"	=> ${APITOKEN},
@@ -299,17 +344,17 @@ sub update_legend {
 				"id"		=> $events->{$event}{$UID},
 				"xmlData"	=> ${post_data},
 			}) && $API_REQUEST_COUNT++;
-#>>>			print STDERR "\tRESULT[" . $mech->content() . "]\n";
+#>>>			&printer(2, "\tRESULT[" . $mech->content() . "]\n");
 
-			print STDERR "\n\t[$events->{$event}{$SUB}]: $events->{$event}{$UID}\n";
+			&printer(2, "\n\t[$events->{$event}{$SUB}]: $events->{$event}{$UID}\n");
 
 			${matches}++;
 		};
 	};
 
-	print STDERR "\n";
-	print STDERR "\tMatches: ${matches}\n";
-	print STDERR "\tRequests: ${API_REQUEST_COUNT}\n";
+	&printer(2, "\n");
+	&printer(2, "\tMatches: ${matches}\n");
+	&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
 
 	return(0);
 };
@@ -323,12 +368,12 @@ sub print_leads {
 		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
 		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
 	} else {
-		print STDERR "\n";
-		print STDERR "${LEVEL_2} Broken Leads\n";
-		print STDERR "\n";
+		&printer(1, "\n");
+		&printer(1, "${LEVEL_2} Broken Leads\n");
+		&printer(1, "\n");
 
-		print STDERR "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n";
-		print STDERR "|:---|:---|:---|:---|:---|\n";
+		&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
+		&printer(1, "|:---|:---|:---|:---|:---|\n");
 	};
 
 	my $err_date_list = {};
@@ -406,7 +451,7 @@ sub print_leads {
 				if (!${details}) {
 					$details = ".";
 				};
-				print STDERR "| ${source} | ${status} | ${related} | ${subject} | ${details}\n";
+				&printer(1, "| ${source} | ${status} | ${related} | ${subject} | ${details}\n");
 
 				$entries++;
 			};
@@ -442,18 +487,18 @@ sub print_leads {
 			};
 
 			if (@{$err_dates}) {
-				print STDERR "\n";
-				print STDERR "\tBroken Dates:\n";
+				&printer(2, "\n");
+				&printer(2, "\tBroken Dates:\n");
 				foreach my $entry (@{$err_dates}) {
-					print STDERR "\t\t${entry}\n";
+					&printer(2, "\t\t${entry}\n");
 				};
 			};
 		};
 	} else {
 		if (!${entries}) {
-			print STDERR "|\n";
+			&printer(1, "|\n");
 		};
-		print STDERR "\nEntries: ${entries}\n";
+		&printer(1, "\nEntries: ${entries}\n");
 	};
 
 	return(0);
@@ -464,16 +509,16 @@ sub print_leads {
 sub print_tasks {
 	my $report = shift() || "";
 
-	print STDERR "\n";
+	&printer(1, "\n");
 	if (!${report}) {
-		print STDERR "${LEVEL_2} Open Tasks\n";
+		&printer(1, "${LEVEL_2} Open Tasks\n");
 	} else {
-		print STDERR "${LEVEL_2} ${report} Tasks\n";
+		&printer(1, "${LEVEL_2} ${report} Tasks\n");
 	};
-	print STDERR "\n";
+	&printer(1, "\n");
 
-	print STDERR "| ${DUE} | ${TST} | ${PRI} | ${REL} | ${SUB}\n";
-	print STDERR "|:---|:---|:---|:---|:---|\n";
+	&printer(1, "| ${DUE} | ${TST} | ${PRI} | ${REL} | ${SUB}\n");
+	&printer(1, "|:---|:---|:---|:---|:---|\n");
 
 	my $entries = "0";
 
@@ -506,21 +551,21 @@ sub print_tasks {
 			(${report} eq "Deferred") &&
 			($tasks->{$task}{$TST} eq ${report})
 		)) {
-			print STDERR "| " . ($tasks->{$task}{$DUE} || "");
-			print STDERR " | " . ($tasks->{$task}{$TST} || "");
-			print STDERR " | " . ($tasks->{$task}{$PRI} || "");
-			print STDERR " | ${related}";
-			print STDERR " | ${subject}";
-			print STDERR "\n";
+			&printer(1, "| " . ($tasks->{$task}{$DUE} || ""));
+			&printer(1, " | " . ($tasks->{$task}{$TST} || ""));
+			&printer(1, " | " . ($tasks->{$task}{$PRI} || ""));
+			&printer(1, " | ${related}");
+			&printer(1, " | ${subject}");
+			&printer(1, "\n");
 
 			$entries++;
 		};
 	};
 
 	if (!${entries}) {
-		print STDERR "|\n";
+		&printer(1, "|\n");
 	};
-	print STDERR "\nEntries: ${entries}\n";
+	&printer(1, "\nEntries: ${entries}\n");
 
 	return(0);
 };
@@ -559,15 +604,9 @@ sub print_events {
 		$find = ".";
 	};
 
-	if (${stderr}) {
-		print STDERR "\n";
-		print STDERR "${LEVEL_2} ${label}\n";
-		print STDERR "\n";
-	} else {
-		print "\n";
-		print "${LEVEL_2} ${label}\n";
-		print "\n";
-	};
+	&printer(${stderr}, "\n");
+	&printer(${stderr}, "${LEVEL_2} ${label}\n");
+	&printer(${stderr}, "\n");
 
 	my $fields = {};
 	foreach my $field (@{$keep}) {
@@ -597,7 +636,7 @@ sub print_events {
 				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
 			};
 
-			&print_event_fields("${stderr}", "", ${keep}, $list->{$event});
+			&print_event_fields(${stderr}, "", ${keep}, $list->{$event});
 
 			$entries++;
 		};
@@ -608,11 +647,7 @@ sub print_events {
 		$output .= "|\n";
 	};
 	$output .= "\nEntries: ${entries}\n";
-	if (${stderr}) {
-		print STDERR ${output};
-	} else {
-		print ${output};
-	};
+	&printer(${stderr}, ${output});
 
 	return(0);
 };
@@ -666,11 +701,7 @@ sub print_event_fields {
 		$output .= "|\n";
 	};
 
-	if (${stderr}) {
-		print STDERR ${output};
-	} else {
-		print ${output};
-	};
+	&printer(${stderr}, ${output});
 
 	return(0);
 };
@@ -712,10 +743,10 @@ foreach my $event (keys(%{$events})) {
 };
 
 if (%{$null_events}) {
-	print STDERR "\n";
-	print STDERR "\tEmpty Events:\n";
+	&printer(2, "\n");
+	&printer(2, "\tEmpty Events:\n");
 	foreach my $entry (sort(keys(%{$null_events}))) {
-		print STDERR "\t\t${entry} = $null_events->{$entry}\n";
+		&printer(2, "\t\t${entry} = $null_events->{$entry}\n");
 	};
 };
 
@@ -733,8 +764,8 @@ if (%{$leads}) {
 	&print_leads("CSV");
 };
 
-print "\n";
-print "${LEVEL_1} Core Reports\n";
+&printer("\n");
+&printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
 	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
@@ -776,9 +807,8 @@ if (%{$events}) {
 	foreach my $search (@{ARGV}) {
 		if (${search} =~ m/^[${HEAD_MARKER}][ ]/) {
 			$search =~ s/^[${HEAD_MARKER}][ ]//g;
-			print "\n";
-			print "${LEVEL_1} ${search}\n";
-			print "\n";
+			&printer("\n");
+			&printer("${LEVEL_1} ${search}\n");
 		} else {
 			&print_events(${events}, ${search}, [ $BEG, $REL, $SUB, ]);
 		};
@@ -786,6 +816,9 @@ if (%{$events}) {
 };
 
 ########################################
+
+close(ALL_FILE) || die();
+close(OUT_FILE) || die();
 
 exit(0);
 
