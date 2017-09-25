@@ -72,7 +72,8 @@ my $NULL_CNAME	= "0 NULL";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_FLAG	= "WORK[:]";
-my $NON_ASCII	= "#";
+my $NON_ASCII	= "###";
+my $NON_ASCII_M	= "[^[:ascii:]]";
 
 ########################################
 
@@ -347,7 +348,7 @@ sub print_leads {
 		my $details = ($leads->{$lead}{$DSC} || "");
 		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 		$details = "[${details}]"; $details =~ s/\n+/\]\[/g;
-		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
+		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -622,7 +623,7 @@ sub print_event_fields {
 		if ($vals->{$LOC})			{ $subject = "[${subject}][$vals->{$LOC}]"; };
 		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
 		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
-		$details =~ s/[^[:ascii:]]/${NON_ASCII}/g;
+		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
 	};
 
 	my $output = "";
@@ -644,7 +645,7 @@ sub print_event_fields {
 		$output .= "| ${value} ";
 	};
 
-	$output =~ s/[[:space:]]*$//g;
+	chomp(${output});
 	$output .= "\n";
 
 	if (${header}) {
