@@ -328,7 +328,7 @@ sub api_get {
 	$url .= "?maxResults=100";
 
 	if (defined(${fields})) {
-		foreach my $field (keys(${fields})) {
+		foreach my $field (keys(%{$fields})) {
 			$url .= "&" . ${field} . "=" . $fields->{$field};
 		};
 	};
@@ -340,7 +340,7 @@ sub api_get {
 		my $out = decode_json($mech->content());
 
 		#>>> http://www.perlmonks.org/?node_id=995613
-		foreach my $key (keys(${out})) {
+		foreach my $key (keys(%{$out})) {
 			if (exists($output->{$key}) && $output->{$key} ne $out->{$key}) {
 				if (ref($output->{$key}) eq "ARRAY") {
 					push(@{$output->{$key}}, @{$out->{$key}});
@@ -734,7 +734,7 @@ sub manage_links {
 		};
 	};
 
-	foreach my $key (sort({$a cmp $b} keys($links->{$MLINK_SRC}))) {
+	foreach my $key (sort({$a cmp $b} keys(%{ $links->{$MLINK_SRC} }))) {
 		foreach my $val (@{$links->{$MLINK_SRC}->{ $key }}) {
 			my $match = 0;
 			foreach my $cmp (@{$links->{$MLINK_DST}->{ $key }}) {
@@ -747,7 +747,7 @@ sub manage_links {
 			};
 		};
 	};
-	foreach my $key (sort({$a cmp $b} keys($links->{$MLINK_DST}))) {
+	foreach my $key (sort({$a cmp $b} keys(%{ $links->{$MLINK_DST} }))) {
 		foreach my $val (@{$links->{$MLINK_DST}->{ $key }}) {
 			my $match = 0;
 			foreach my $cmp (@{$links->{$MLINK_SRC}->{ $key }}) {
@@ -763,14 +763,14 @@ sub manage_links {
 
 	print "\n";
 	print "NO ${MLINK_DST}\n";
-	foreach my $key (sort({$a cmp $b} keys($links->{"NONE_$MLINK_DST"}))) {
+	foreach my $key (sort({$a cmp $b} keys(%{ $links->{"NONE_$MLINK_DST"} }))) {
 		print "\t${key}\n";
 		foreach my $val (@{$links->{"NONE_$MLINK_DST"}->{ $key }}) {
 			print "\t\t${val}\n";
 		};
 	};
 	print "NO ${MLINK_SRC}\n";
-	foreach my $key (sort({$a cmp $b} keys($links->{"NONE_$MLINK_SRC"}))) {
+	foreach my $key (sort({$a cmp $b} keys(%{ $links->{"NONE_$MLINK_SRC"} }))) {
 		foreach my $val (@{$links->{"NONE_$MLINK_SRC"}->{ $key }}) {
 			print "\t${key}${PROJ_LINK_SEPARATE}${val}\n";
 		};
@@ -1222,13 +1222,13 @@ sub export_files_list_tree {
 	my $indent	= shift;
 	my $key;
 
-	foreach $key (keys(${tree})) {
+	foreach $key (keys(%{$tree})) {
 		if (!exists($tree->{$key}->{"pos"})) {
 			$tree->{$key}->{"pos"} = "";
 		};
 	};
 
-	foreach $key (sort({$tree->{$a}{"pos"} cmp $tree->{$b}{"pos"}} keys(${tree}))) {
+	foreach $key (sort({$tree->{$a}{"pos"} cmp $tree->{$b}{"pos"}} keys(%{$tree}))) {
 		if ($tree->{$key}->{"pos"}) {
 			&export_files_item($tree->{$key}{"node"}, ${indent}, "");
 			if (exists($root_tree->{$key}{"sub"})) {
