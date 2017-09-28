@@ -132,7 +132,7 @@ color.calendar.weekend=			magenta
 default.command=			view
 
 alias.cal=				calendar
-alias.ll=				skim
+alias.ll=				zoom
 
 ########################################
 
@@ -220,6 +220,12 @@ report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
 report.view.filter=			((project.not:_data project.not:_journal project.not:.someday kind.none: (status:pending (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))) or +ACTIVE)
 report.view.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
+
+report.zoom.description=		Custom [Zoom]: Default list view (View), condensed for reporting
+report.zoom.columns=			uuid.short,project,tags,priority,due,end,kind,description.count
+report.zoom.labels=			+UUID,PROJECT,TAGS,+P,+DEAD,+DIED,KIND,DESCRIPTION
+report.zoom.filter=			((project.not:_data project.not:_journal project.not:.someday kind.none: (status:pending (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))) or +ACTIVE)
+report.zoom.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
 
