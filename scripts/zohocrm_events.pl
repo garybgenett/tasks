@@ -77,6 +77,9 @@ my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
 
+my $SEC_IN_DAY	= 60 * 60 * 24;
+my $AGING_DAYS	= 28 * 5;
+
 ########################################
 
 my $LEVEL_1	= "#" x 3;
@@ -367,7 +370,16 @@ sub print_leads {
 	if (${report} eq "CSV") {
 		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
 		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
-	} else {
+	}
+	elsif (${report} eq "Aging") {
+		&printer("\n");
+		&printer("${LEVEL_2} QC Aging\n");
+		&printer("\n");
+
+		&printer("| ${MOD} | Modified Overdue | Last Note | QC Overdue | ${FNM}${NAME_DIV}${LNM}\n");
+		&printer("|:---|:---|:---|:---|:---|\n");
+	}
+	else {
 		&printer(1, "\n");
 		&printer(1, "${LEVEL_2} Broken Leads\n");
 		&printer(1, "\n");
@@ -381,6 +393,10 @@ sub print_leads {
 	my $entries = "0";
 
 	foreach my $lead (sort({
+		(
+			(${report} eq "Aging") &&
+			(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
+		) ||
 		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
 		(($leads->{$a}{$LNM} || "") cmp ($leads->{$b}{$LNM} || "")) ||
 		(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
@@ -414,7 +430,52 @@ sub print_leads {
 					};
 				};
 			};
-		} else {
+		}
+		elsif (${report} eq "Aging") {
+			if (
+				(($leads->{$lead}{$STS}) && ($leads->{$lead}{$STS} eq "Closed Won")) &&
+				(($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} !~ m/CANCELLED/))
+			) {
+				my $modified = $leads->{$lead}{$MOD} || "";
+				my $mod_days = $modified;
+				my $last_log = "";
+				my $overdue = "-1";
+				my $logs = {};
+				while ($leads->{$lead}{$DSC} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm) {
+					if (${1}) {
+						my $date = ${1};
+						$logs->{$date}++;
+					};
+				};
+				foreach my $date (sort(keys(%{$logs}))) {
+					$last_log = ${date};
+					$overdue = ${date};
+				};
+				if ($mod_days =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2}).*$/) {
+					$mod_days = &timelocal(0,0,0,${3},(${2}-1),${1});
+					$mod_days = (time() - (${AGING_DAYS} * ${SEC_IN_DAY})) - ${mod_days};
+					$mod_days = int(${mod_days} / ${SEC_IN_DAY});
+				};
+				if ($overdue =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2}).*$/) {
+					$overdue = &timelocal(0,0,0,${3},(${2}-1),${1});
+					$overdue = (time() - (${AGING_DAYS} * ${SEC_IN_DAY})) - ${overdue};
+					$overdue = int(${overdue} / ${SEC_IN_DAY});
+				};
+				if (
+					(${mod_days}	>= 0) ||
+					(${overdue}	>= 0) ||
+					(!${last_log})
+				) {
+					${mod_days}	.= " days";
+					${overdue}	.= " days";
+
+					&printer("| ${modified} | ${mod_days} | " . (${last_log} || "-") . " | ${overdue} | ${subject}\n");
+
+					$entries++;
+				};
+			};
+		}
+		else {
 			if ((
 				(!$leads->{$lead}{$SRC}) ||
 				(!$leads->{$lead}{$STS})
@@ -782,6 +843,10 @@ if (%{$events}) {
 close(CSV) || die();
 
 ########################################
+
+if (%{$leads}) {
+	&print_leads("Aging");
+};
 
 if (%{$leads}) {
 	&print_leads();
