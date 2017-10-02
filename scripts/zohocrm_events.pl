@@ -172,14 +172,14 @@ sub printer {
 sub printer_test {
 	&DUMPER("DUMPER");
 
-	&printer("2", "output\n");
-	&printer("1", "stderr\n");
-	&printer("0", "stdout\n");
+	&printer(2, "output\n");
+	&printer(1, "stderr\n");
+	&printer(0, "stdout\n");
 	&printer("no_std\n");
 
-	&printer("2", "output",	"multiple", "arguments", "\n");
-	&printer("1", "stderr",	"multiple", "arguments", "\n");
-	&printer("0", "stdout",	"multiple", "arguments", "\n");
+	&printer(2, "output",	"multiple", "arguments", "\n");
+	&printer(1, "stderr",	"multiple", "arguments", "\n");
+	&printer(0, "stdout",	"multiple", "arguments", "\n");
 	&printer("no_std",	"multiple", "arguments", "\n");
 };
 #>>>&printer_test();
@@ -764,7 +764,7 @@ if (%{$leads}) {
 	&print_leads("CSV");
 };
 
-&printer("1", "\n");
+&printer(1, "\n");
 &printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
