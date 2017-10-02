@@ -634,6 +634,14 @@ sub print_events {
 		)) {
 			if (${report} eq "Closed!") {
 				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
+				if (
+					($leads->{ $list->{$event}{$RID} }{$DSC}) &&
+					($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/CANCELLED/)
+				) {
+					while ($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/CANCELLED[:]?(.*)$/gm) {
+						$list->{$event}{"CANCELLED"} = ${1};
+					};
+				};
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $list->{$event});
@@ -684,7 +692,7 @@ sub print_event_fields {
 		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
-		if (${val} eq $REL) { $value = ${related}; };
+		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{"CANCELLED"})) { $value = "**[X][" . ($vals->{"CANCELLED"} || "") . "]** " . ${value}; }; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
 
