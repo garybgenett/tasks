@@ -742,18 +742,18 @@ foreach my $event (keys(%{$events})) {
 	};
 };
 
+########################################
+
+if (%{$events}) {
+	&update_legend();
+};
+
 if (%{$null_events}) {
 	&printer(2, "\n");
 	&printer(2, "\tEmpty Events:\n");
 	foreach my $entry (sort(keys(%{$null_events}))) {
 		&printer(2, "\t\t${entry} = $null_events->{$entry}\n");
 	};
-};
-
-########################################
-
-if (%{$events}) {
-	&update_legend();
 };
 
 ########################################
