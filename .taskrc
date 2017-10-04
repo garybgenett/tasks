@@ -213,7 +213,7 @@ report.sort.sort=			end+,due+,modified+,entry+
 report.todo.description=		Custom [Todo]: Due and priority tasks
 report.todo.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status
 report.todo.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT
-report.todo.filter=			((status:pending (priority.any: or (kind.none: +ANNOTATED) or (+DUE or +TODAY or +OVERDUE))) or +ACTIVE)
+report.todo.filter=			((status:pending (priority.any: or (project:.gtd kind.none: ) or (kind.none: +ANNOTATED) or (+DUE or +TODAY or +OVERDUE))) or +ACTIVE)
 report.todo.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 report.view.description=		Custom [View]: Default list view
