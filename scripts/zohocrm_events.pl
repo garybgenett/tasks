@@ -389,6 +389,7 @@ sub print_leads {
 	};
 
 	my $err_date_list = {};
+	my $err_dates = [];
 
 	my $entries = "0";
 
@@ -413,20 +414,25 @@ sub print_leads {
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
-				while ($leads->{$lead}{$DSC} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm) {
+				while ($leads->{$lead}{$DSC} =~ m/^([0-9][0-9-]+[,]?[ ]?[A-Za-z]*)$/gm) {
 					if (${1}) {
-						my $date = ${1};
-						my $day = ${2};
-						$day =~ s/^[,][ ]//g;
+						my $match = ${1};
+						if (${match} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm) {
+							my $date = ${1};
+							my $day = ${2};
+							$day =~ s/^[,][ ]//g;
 
-						$subject =~ s/\"/\'/g;
+							$subject =~ s/\"/\'/g;
 
-						print CSV "\"${date}\",\"${day}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+							print CSV "\"${date}\",\"${day}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 
-						if (!${day}) {
-							$day = "NULL";
+							if (!${day}) {
+								$day = "NULL";
+							};
+							push(@{ $err_date_list->{$date}{$day} }, ${subject});
+						} else {
+							push(@{$err_dates}, "${match} = ${subject}");
 						};
-						push(@{ $err_date_list->{$date}{$day} }, ${subject});
 					};
 				};
 			};
@@ -520,8 +526,7 @@ sub print_leads {
 	};
 
 	if (${report} eq "CSV") {
-		if (${err_date_list}) {
-			my $err_dates = [];
+		if ((${err_date_list}) || (${err_dates})) {
 			foreach my $date (sort(keys(%{$err_date_list}))) {
 				my $date_list = [];
 				@{$date_list} = sort(keys(%{ $err_date_list->{$date} }));
