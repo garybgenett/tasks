@@ -156,7 +156,7 @@ report.dump.sort=			entry+
 report.fail.description=		Custom [Fail]: Finds non-conforming tasks
 report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,status,priority,entry,wait,scheduled,until,due,end,imask
 report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,STAT,+P,+BORN,+WAIT,+HOLD,+REAP,+DEAD,+DIED,+I
-report.fail.filter=			(((project:_data or project:_journal or project:.someday) kind.not:notes) or ((pro.not:_gtd pro.not:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area:work area.not:work- area.not:work.) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
+report.fail.filter=			((project:_gtd (kind.not:track recur.none: )) or ((project:_data or project:_journal or project:.someday) kind.not:notes) or ((pro.not:_gtd pro.not:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area:work area.not:work- area.not:work.) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
 report.fail.sort=			entry+
 
 ########################################
