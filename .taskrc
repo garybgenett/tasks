@@ -88,7 +88,7 @@ calendar.details.report=		mind
 include					/usr/share/task/rc/dark-16.theme
 color=					1
 
-rule.precedence.color=			active,due.today,due,overdue,completed,deleted,recurring,blocking,blocked,scheduled,tagged,keyword.,pri.,project.,tag.,uda.
+rule.precedence.color=			active,overdue,due.today,due,deleted,completed,recurring,pri.,scheduled,until,keyword.,project.,uda.,tag.,blocked,blocking,tagged
 rule.color.merge=			0
 
 color.debug=				blue on cyan
@@ -97,35 +97,34 @@ color.warning=				cyan on magenta
 
 color.footnote=				cyan
 color.header=				cyan
+color.alternate=			on black
 
 color.active=				white on green
-color.alternate=			on black
+color.overdue=				yellow on red
+color.due.today=			white on red
+color.due=				black on red
+
+color.deleted=				red on blue
+color.completed=			green on blue
+color.recurring=			red
+
+color.uda.priority=			magenta
+color.scheduled=			magenta
+color.until=				magenta
 
 color.blocked=				cyan
 color.blocking=				yellow
-color.completed=			green on blue
-color.deleted=				red on blue
-color.recurring=			red
-color.scheduled=			magenta
 color.tagged=				none
-color.until=				magenta
 
-color.uda.priority.H=			magenta
-color.uda.priority.M=			magenta
-color.uda.priority.L=			magenta
+color.calendar.weeknumber=		cyan
+color.calendar.weekend=			magenta
 
-color.due.today=			white on red
-color.due=				black on red
-color.overdue=				yellow on red
-
+color.calendar.overdue=			yellow on red
 color.calendar.due.today=		white on red
 color.calendar.due=			black on red
-color.calendar.overdue=			yellow on red
 
 color.calendar.today=			white on green
 color.calendar.holiday=			black on yellow
-color.calendar.weeknumber=		cyan
-color.calendar.weekend=			magenta
 
 ################################################################################
 
