@@ -91,9 +91,9 @@ color=					1
 rule.precedence.color=			active,overdue,due.today,due,deleted,completed,recurring,pri.,scheduled,until,keyword.,project.,uda.,tag.,blocked,blocking,tagged
 rule.color.merge=			0
 
-color.debug=				blue on cyan
-color.error=				cyan on red
-color.warning=				cyan on magenta
+color.debug=				black on cyan
+color.warning=				white on cyan
+color.error=				magenta on cyan
 
 color.footnote=				cyan
 color.header=				cyan
