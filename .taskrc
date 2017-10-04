@@ -108,7 +108,9 @@ color.deleted=				red on blue
 color.completed=			green on blue
 color.recurring=			red
 
-color.uda.priority=			magenta
+color.uda.priority.H=			white on magenta
+color.uda.priority.M=			black on magenta
+color.uda.priority.L=			magenta
 color.scheduled=			magenta
 color.until=				magenta
 
