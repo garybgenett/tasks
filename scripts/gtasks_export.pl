@@ -537,7 +537,7 @@ sub taskwarrior_export {
 		my $task_title = $task->{"description"};
 		if (defined($task->{"project"}))	{ $task_title = "[" . $task->{"project"} . "] " . ${task_title}	; };
 		if (defined($task->{"tags"}))		{ $task_title .= " @" . join(" @", @{$task->{"tags"}})		; };
-		if (defined($task->{"uuid"}))		{ $task_title .= " [" . $task->{"uuid"} . "]"			; };
+		if (defined($task->{"uuid"}))		{ $task_title .= " [" . substr($task->{"uuid"}, 0, 8) . "]"	; };
 		my $blob = {
 			"title"		=> ${task_title},
 			"status"	=> $task->{"status"},
