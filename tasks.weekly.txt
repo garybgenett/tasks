@@ -22,8 +22,8 @@
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
 #]    * GTD (`read status:pending project:.gtd`)
-#]    * Research (`read status:pending tag:.research`)
-#]    * Waiting (`read status:pending tag:.waiting`)
+#]    * Research (`read status:pending tags:.research`)
+#]    * Waiting (`read status:pending tags:.waiting`)
 #]    * Projects
 #]        * All (`projects`)
 #]        * Active (`projects status:pending`)
@@ -36,7 +36,7 @@
 #]        * Tags
 #]            * All (`tags`)
 #]            * Active (`tags status:pending`)
-#]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags); do task read status:pending tag:${FILE}; done`)
+#]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE}; done`)
 #]    * Someday (`read project:.someday`)
 #]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
 #]    * Report (`.repo`)
@@ -48,8 +48,8 @@
 #|mind
 #|todo
 #|read status:pending project:.gtd
-#|read status:pending tag:.research
-#|read status:pending tag:.waiting
+#|read status:pending tags:.research
+#|read status:pending tags:.waiting
 #|projects
 #|projects status:pending
 #|+ACTIVE; for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done
@@ -59,7 +59,7 @@
 #|+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE}; done
 #|tags
 #|tags status:pending
-#|+ACTIVE; for FILE in $(task status:pending _unique tags); do task read status:pending tag:${FILE}; done
+#|+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE}; done
 #|read project:.someday
 #|fail
 #|data
@@ -73,8 +73,8 @@ task calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holiday
 task mind;
 task todo;
 task read status:pending project:.gtd;
-task read status:pending tag:.research;
-task read status:pending tag:.waiting;
+task read status:pending tags:.research;
+task read status:pending tags:.waiting;
 task projects;
 task projects status:pending;
 for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; IMPERSONATE_NAME=task .bashrc task-depends project:${FILE} project.not:${FILE}.; done;
@@ -84,7 +84,7 @@ for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | cut -d. -f
 for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE}; done;
 task tags;
 task tags status:pending;
-for FILE in $(task status:pending _unique tags); do task read status:pending tag:${FILE}; done;
+for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE}; done;
 task read project:.someday;
 task fail;
 task data;
