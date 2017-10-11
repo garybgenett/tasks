@@ -17,7 +17,7 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]  * System (`.view`)
-#]    * Reminders (`calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full`, `mind`)
+#]    * Reminders (`calendar`, `mind`)
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
@@ -44,7 +44,7 @@
 #[ _task_parse_cmd :: impersonate_command ]
 #|.in
 #|.view
-#|calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full
+#|calendar
 #|mind
 #|todo
 #|read status:pending project:.gtd
@@ -69,7 +69,7 @@
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
-task calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full;
+task calendar;
 task mind;
 task todo;
 task read status:pending project:.gtd;
@@ -99,8 +99,8 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 #]  * Integrity (`diagnostics`)
 #]  * Projects (`summary`)
 #]  * History
-#]    * Numerical (`rc.defaultwidth=120 rc.defaultheight=40 history.monthly`)
-#]    * Graphical (`rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly`)
+#]    * Numerical (`rc.defaultwidth=120 history.monthly`)
+#]    * Graphical (`rc.defaultwidth=120 ghistory.monthly`)
 #]  * Trending
 #]    * Weekly (`rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly`)
 #]    * Daily (`rc.defaultwidth=120 rc.defaultheight=40 burndown.daily`)
@@ -112,8 +112,8 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 #[ _task_parse_cmd :: impersonate_command ]
 #|diagnostics
 #|summary
-#|rc.defaultwidth=120 rc.defaultheight=40 history.monthly
-#|rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly
+#|rc.defaultwidth=120 history.monthly
+#|rc.defaultwidth=120 ghistory.monthly
 #|rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly
 #|rc.defaultwidth=120 rc.defaultheight=40 burndown.daily
 #|+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
@@ -123,8 +123,8 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 #[ _task_parse_cmd_bash :: bash]
 task diagnostics;
 task summary;
-task rc.defaultwidth=120 rc.defaultheight=40 history.monthly;
-task rc.defaultwidth=120 rc.defaultheight=40 ghistory.monthly;
+task rc.defaultwidth=120 history.monthly;
+task rc.defaultwidth=120 ghistory.monthly;
 task rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly;
 task rc.defaultwidth=120 rc.defaultheight=40 burndown.daily;
 SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \);
