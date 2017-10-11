@@ -75,12 +75,12 @@ dateformat.info=			Y-M-D H:N:S
 
 calendar.offset=			1
 calendar.offset.value=			-1
-monthsperline=				3
+monthsperline=				4
 
 displayweeknumber=			1
 calendar.legend=			1
-calendar.holidays=			sparse
-calendar.details=			sparse
+calendar.holidays=			full
+calendar.details=			full
 calendar.details.report=		mind
 
 ########################################
