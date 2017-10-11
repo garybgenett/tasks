@@ -21,6 +21,7 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
+#]    * GTD (`read status:pending project:.gtd`)
 #]    * Research (`read status:pending tag:.research`)
 #]    * Waiting (`read status:pending tag:.waiting`)
 #]    * Projects
@@ -46,6 +47,7 @@
 #|calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full
 #|mind
 #|todo
+#|read status:pending project:.gtd
 #|read status:pending tag:.research
 #|read status:pending tag:.waiting
 #|projects
@@ -70,6 +72,7 @@
 task calendar rc.calendar.offset.value=-2 rc.monthsperline=6 rc.calendar.holidays=full rc.calendar.details=full;
 task mind;
 task todo;
+task read status:pending project:.gtd;
 task read status:pending tag:.research;
 task read status:pending tag:.waiting;
 task projects;
