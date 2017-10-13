@@ -73,6 +73,7 @@ my $MAX_RECORDS	= "200";
 my $NULL_CNAME	= "0 NULL";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
+my $DSC_IMPORT	= "IMPORTED";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
@@ -486,7 +487,11 @@ sub print_leads {
 				(!$leads->{$lead}{$SRC}) ||
 				(!$leads->{$lead}{$STS})
 			) || (
+				($leads->{$lead}{$STS} eq "Demo") &&
+				($leads->{$lead}{$DSC} !~ m/${DSC_IMPORT}/)
+			) || (
 				(!$related_list->{ $leads->{$lead}{$LID} }) && (
+					($leads->{$lead}{$STS} ne "Demo") &&
 					($leads->{$lead}{$STS} ne "Initial Call") &&
 					($leads->{$lead}{$STS} ne "Not Interested")
 				)
