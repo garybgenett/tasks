@@ -439,10 +439,14 @@ sub print_leads {
 			};
 		}
 		elsif (${report} eq "Aging") {
-			if (
-				(($leads->{$lead}{$STS}) && ($leads->{$lead}{$STS} eq "Closed Won")) &&
+			if ((
+				($leads->{$lead}{$STS}) && (
+					($leads->{$lead}{$STS} eq "Closed Won") ||
+					($leads->{$lead}{$STS} eq "Demo")
+				)
+			) && (
 				(($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} !~ m/CANCELLED/))
-			) {
+			)) {
 				my $modified = $leads->{$lead}{$MOD} || "";
 				my $mod_days = $modified;
 				my $last_log = "";
