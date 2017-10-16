@@ -74,6 +74,7 @@ my $NULL_CNAME	= "0 NULL";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_IMPORT	= "IMPORTED";
+my $DSC_EXPORT	= "CANCELLED";
 my $DSC_FLAG	= "WORK[:]";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
@@ -445,7 +446,7 @@ sub print_leads {
 					($leads->{$lead}{$STS} eq "Demo")
 				)
 			) && (
-				(($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} !~ m/CANCELLED/))
+				(($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} !~ m/${DSC_EXPORT}/))
 			)) {
 				my $modified = $leads->{$lead}{$MOD} || "";
 				my $mod_days = $modified;
@@ -711,10 +712,10 @@ sub print_events {
 				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
 				if (
 					($leads->{ $list->{$event}{$RID} }{$DSC}) &&
-					($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/CANCELLED/)
+					($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}/)
 				) {
-					while ($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/CANCELLED[:]?(.*)$/gm) {
-						$list->{$event}{"CANCELLED"} = ${1};
+					while ($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
+						$list->{$event}{$DSC_EXPORT} = ${1};
 					};
 				};
 			};
@@ -767,7 +768,7 @@ sub print_event_fields {
 		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
-		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{"CANCELLED"})) { $value = "**[X][" . ($vals->{"CANCELLED"} || "") . "]** " . ${value}; }; };
+		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$DSC_EXPORT})) { $value = "**[X][" . ($vals->{$DSC_EXPORT} || "") . "]** " . ${value}; }; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
 
