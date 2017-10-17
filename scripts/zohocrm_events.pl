@@ -502,11 +502,13 @@ sub print_leads {
 				)
 			) || (
 				($related_list->{ $leads->{$lead}{$LID} }) && ((
-						($related_list->{ $leads->{$lead}{$LID} } > "0") &&
-						($leads->{$lead}{$CMP} eq ${NULL_CNAME})
+						($related_list->{ $leads->{$lead}{$LID} } > 2)
 					) || (
-						($related_list->{ $leads->{$lead}{$LID} } > "1") &&
-						($leads->{$lead}{$CMP} ne ${NULL_CNAME})
+						($related_list->{ $leads->{$lead}{$LID} } > 1) &&
+						($leads->{$lead}{$STS} ne "Closed Won")
+					) || (
+						($related_list->{ $leads->{$lead}{$LID} } > 0) &&
+						($leads->{$lead}{$CMP} eq ${NULL_CNAME})
 				))
 			) || (
 				(!$leads->{$lead}{$FNM}) ||
