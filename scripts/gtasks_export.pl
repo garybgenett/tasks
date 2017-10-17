@@ -454,24 +454,26 @@ sub api_fetch_tasks {
 ################################################################################
 
 sub taskwarrior_export {
-	my $title	= shift;
+	my $title	= shift || "Export";
 	my $tasks	= shift || "";
-	my $field_one	= shift || "description";
-	my $field_two	= shift || "entry";
+	my $search	= shift || "";
 	my $links	= [];
 	my $previous	= undef;
+	my $filter;
+	my $fields;
 	my $created;
 	my $listid;
 	my $output;
 
-	my($default_one, $default_two);
-	($field_one, $default_one) = split(",", $field_one);
-	($field_two, $default_two) = split(",", $field_two);
-
 	print "\n${title}: ";
 
-	if (${tasks}) { $tasks = "\"${tasks}\""; };
-	$tasks = qx(task export ${tasks});
+	if (${tasks}) {
+		$filter = qx(task show "report.${tasks}.filter");	$filter =~ m/^report[.]${tasks}[.]filter[ ](.*)$/gm;	$filter = (${1} || "");
+		$fields = qx(task show "report.${tasks}.sort");		$fields =~ m/^report[.]${tasks}[.]sort[ ](.*)$/gm;	$fields = (${1} || "");
+		$tasks = qx(task export "${filter}" "${search}");
+	} else {
+		$tasks = qx(task export);
+	};
 	$tasks =~ s/\n//g;
 	$tasks = decode_json(${tasks});
 
@@ -501,16 +503,73 @@ sub taskwarrior_export {
 #>>> BUG IN PERL!
 #>>> http://www.perlmonks.org/?node_id=490213
 	my @array = @{$tasks};
+	my @yarra = split(/,/, ${fields});
 	foreach my $task (sort({
-		((
-			($a->{$field_one} || ${default_one}) cmp ($b->{$field_one} || ${default_one})
-		) || (
-			($a->{$field_two} || ${default_two}) cmp ($b->{$field_two} || ${default_two})
-		) || (
-			$a->{"description"} cmp $b->{"description"}
-		) || (
-			$a->{"entry"} cmp $b->{"entry"}
-		));
+		my $result = "0";
+		my %pri = ("H" => 3, "M" => 2, "L" => 1);
+		foreach my $field_source (@{yarra}) {
+			my $field = ${field_source};
+			my $order = "";
+			if ($field =~ m/[+-]$/) {
+				$field =~ s/([+-])$//g;
+				$order = ${1};
+			};
+			if (${order} eq "-") {
+				if (${field} eq "priority") {
+					my $aa = ($a->{$field} || "");
+					my $bb = ($b->{$field} || "");
+					$result = ($pri{$bb} || "0") <=> ($pri{$aa} || "0");
+				} elsif (
+					(${field} eq "id") ||
+					(${field} eq "imask") ||
+					(${field} eq "urgency")
+				) {
+					$result = ($b->{$field} || "0") <=> ($a->{$field} || "0");
+				} elsif (
+					(${field} eq "due") ||
+					(${field} eq "end") ||
+					(${field} eq "entry") ||
+					(${field} eq "modified") ||
+					(${field} eq "scheduled") ||
+					(${field} eq "start") ||
+					(${field} eq "until") ||
+					(${field} eq "wait")
+				) {
+					$result = ($b->{$field} || "0") cmp ($a->{$field} || "0");
+				} else {
+					$result = ($b->{$field} || "") cmp ($a->{$field} || "");
+				};
+			} else {
+				if (${field} eq "priority") {
+					my $aa = ($a->{$field} || "");
+					my $bb = ($b->{$field} || "");
+					$result = ($pri{$aa} || "0") <=> ($pri{$bb} || "0");
+				} elsif (
+					(${field} eq "id") ||
+					(${field} eq "imask") ||
+					(${field} eq "urgency")
+				) {
+					$result = ($a->{$field} || "0") <=> ($b->{$field} || "0");
+				} elsif (
+					(${field} eq "due") ||
+					(${field} eq "end") ||
+					(${field} eq "entry") ||
+					(${field} eq "modified") ||
+					(${field} eq "scheduled") ||
+					(${field} eq "start") ||
+					(${field} eq "until") ||
+					(${field} eq "wait")
+				) {
+					$result = ($a->{$field} || "9999") cmp ($b->{$field} || "9999");
+				} else {
+					$result = ($a->{$field} || "") cmp ($b->{$field} || "");
+				};
+			};
+			if (${result} != 0) {
+				last();
+			};
+		};
+		return(${result});
 	} @{array})) {
 #>>>
 		if ($task->{"status"} eq "deleted") {
