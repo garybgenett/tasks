@@ -32,8 +32,8 @@ sub mech_fail {
 	&confess();
 };
 
-use JSON::PP;
-my $json = JSON::PP->new();
+use JSON::XS;
+my $json = JSON::XS->new();
 $json->ascii(1);
 $json->canonical(1);
 

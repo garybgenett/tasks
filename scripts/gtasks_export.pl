@@ -56,8 +56,8 @@ sub mech_fail {
 #>>>
 
 use HTTP::Request;
-use JSON::PP;
-my $json = JSON::PP->new();
+use JSON::XS;
+my $json = JSON::XS->new();
 
 use File::Temp qw(tempfile);
 use MIME::Base64;
@@ -183,23 +183,23 @@ my $CAT_TEXT		= "0";
 	$json->space_after(1);
 	$json->space_before(0);
 
-#>>> JSON:PP Methods
+#>>> JSON::PP Methods
 
-	$json->loose(0);
-
-	$json->escape_slash(0);
-	$json->indent_length(1);
-
-	$json->sort_by(sub {
-		my $order = {};
-		#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
-		@{ $order }{@{ $JSON_FIELDS }} = 0..$#{ $JSON_FIELDS };
-		if (exists($order->{$JSON::PP::a}) && exists($order->{$JSON::PP::b})) {
-			$order->{$JSON::PP::a} <=> $order->{$JSON::PP::b};
-		} else {
-			$JSON::PP::a cmp $JSON::PP::b;
-		};
-	});
+#>	$json->loose(0);
+#>
+#>	$json->escape_slash(0);
+#>	$json->indent_length(1);
+#>
+#>	$json->sort_by(sub {
+#>		my $order = {};
+#>		#>>> http://learn.perl.org/faq/perlfaq4.html#How-do-I-merge-two-hashes-
+#>		@{ $order }{@{ $JSON_FIELDS }} = 0..$#{ $JSON_FIELDS };
+#>		if (exists($order->{$JSON::PP::a}) && exists($order->{$JSON::PP::b})) {
+#>			$order->{$JSON::PP::a} <=> $order->{$JSON::PP::b};
+#>		} else {
+#>			$JSON::PP::a cmp $JSON::PP::b;
+#>		};
+#>	});
 
 ########################################
 
@@ -613,7 +613,7 @@ sub taskwarrior_export {
 			"status"	=> "needsAction",
 			"due"		=> undef,
 			"completed"	=> undef,
-			"deleted"	=> JSON::PP::true,
+			"deleted"	=> JSON::XS::true,
 			"notes"		=> "",
 			"parent"	=> undef,
 			"previous"	=> ${previous},
@@ -1032,7 +1032,7 @@ sub purge_lists {
 #						"action_type"	=> "get_all",
 #						"action_id"	=> "0",
 #						"list_id"	=> ${id},
-#						"get_deleted"	=> JSON::PP::true,
+#						"get_deleted"	=> JSON::XS::true,
 #					}],
 #					"client_version"	=> "0",
 #				}),
