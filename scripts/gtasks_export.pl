@@ -467,13 +467,12 @@ sub taskwarrior_export {
 
 	print "\n${title}: ";
 
-	if (${tasks}) {
-		$filter = qx(task show "report.${tasks}.filter");	$filter =~ m/^report[.]${tasks}[.]filter[ ](.*)$/gm;	$filter = (${1} || "");
-		$fields = qx(task show "report.${tasks}.sort");		$fields =~ m/^report[.]${tasks}[.]sort[ ](.*)$/gm;	$fields = (${1} || "");
-		$tasks = qx(task export "${filter}" "${search}");
-	} else {
-		$tasks = qx(task export);
+	if (!${tasks}) {
+		$tasks = qx(task show "default.command");	$tasks =~ m/^default[.]command[ ](.*)$/gm;		$tasks = (${1} || "");
 	};
+	$filter = qx(task show "report.${tasks}.filter");	$filter =~ m/^report[.]${tasks}[.]filter[ ](.*)$/gm;	$filter = (${1} || "");
+	$fields = qx(task show "report.${tasks}.sort");		$fields =~ m/^report[.]${tasks}[.]sort[ ](.*)$/gm;	$fields = (${1} || "");
+	$tasks = qx(task export "${filter}" "${search}");
 	$tasks =~ s/\n//g;
 	$tasks = decode_json(${tasks});
 
@@ -514,53 +513,42 @@ sub taskwarrior_export {
 				$field =~ s/([+-])$//g;
 				$order = ${1};
 			};
-			if (${order} eq "-") {
-				if (${field} eq "priority") {
-					my $aa = ($a->{$field} || "");
-					my $bb = ($b->{$field} || "");
+			if (${field} eq "priority") {
+				my $aa = ($a->{$field} || "");
+				my $bb = ($b->{$field} || "");
+				if (${order} eq "-") {
 					$result = ($pri{$bb} || "0") <=> ($pri{$aa} || "0");
-				} elsif (
-					(${field} eq "id") ||
-					(${field} eq "imask") ||
-					(${field} eq "urgency")
-				) {
+				} else {
+					$result = ($pri{$aa} || "0") <=> ($pri{$bb} || "0");
+				};
+			} elsif (
+				(${field} eq "id") ||
+				(${field} eq "imask") ||
+				(${field} eq "urgency")
+			) {
+				if (${order} eq "-") {
 					$result = ($b->{$field} || "0") <=> ($a->{$field} || "0");
-				} elsif (
-					(${field} eq "due") ||
-					(${field} eq "end") ||
-					(${field} eq "entry") ||
-					(${field} eq "modified") ||
-					(${field} eq "scheduled") ||
-					(${field} eq "start") ||
-					(${field} eq "until") ||
-					(${field} eq "wait")
-				) {
+				} else {
+					$result = ($a->{$field} || "0") <=> ($b->{$field} || "0");
+				};
+			} elsif (
+				(${field} eq "due") ||
+				(${field} eq "end") ||
+				(${field} eq "entry") ||
+				(${field} eq "modified") ||
+				(${field} eq "scheduled") ||
+				(${field} eq "start") ||
+				(${field} eq "until") ||
+				(${field} eq "wait")
+			) {
+				if (${order} eq "-") {
 					$result = ($b->{$field} || "0") cmp ($a->{$field} || "0");
 				} else {
-					$result = ($b->{$field} || "") cmp ($a->{$field} || "");
+					$result = ($a->{$field} || "9999") cmp ($b->{$field} || "9999");
 				};
 			} else {
-				if (${field} eq "priority") {
-					my $aa = ($a->{$field} || "");
-					my $bb = ($b->{$field} || "");
-					$result = ($pri{$aa} || "0") <=> ($pri{$bb} || "0");
-				} elsif (
-					(${field} eq "id") ||
-					(${field} eq "imask") ||
-					(${field} eq "urgency")
-				) {
-					$result = ($a->{$field} || "0") <=> ($b->{$field} || "0");
-				} elsif (
-					(${field} eq "due") ||
-					(${field} eq "end") ||
-					(${field} eq "entry") ||
-					(${field} eq "modified") ||
-					(${field} eq "scheduled") ||
-					(${field} eq "start") ||
-					(${field} eq "until") ||
-					(${field} eq "wait")
-				) {
-					$result = ($a->{$field} || "9999") cmp ($b->{$field} || "9999");
+				if (${order} eq "-") {
+					$result = ($b->{$field} || "") cmp ($a->{$field} || "");
 				} else {
 					$result = ($a->{$field} || "") cmp ($b->{$field} || "");
 				};
