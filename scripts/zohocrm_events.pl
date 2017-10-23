@@ -75,7 +75,7 @@ my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_IMPORT	= "IMPORTED";
 my $DSC_EXPORT	= "CANCELLED";
-my $DSC_FLAG	= "WORK[:]";
+my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
 
