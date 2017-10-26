@@ -63,6 +63,7 @@ my $AUTH_TOKEN	= ".zoho-token";
 
 my $LEGEND_NAME	= "Marker: Legend";
 my $LEGEND_FILE	= ".zoho.reports";
+my $LEGEND_IMP	= "1";
 
 my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
@@ -315,54 +316,96 @@ sub parse_entry {
 ########################################
 
 sub update_legend {
-	open(OUT, "<${LEGEND_FILE}") || die();
-	my $legend = localtime() . "\n\n";
-	$legend .= do { local $/; <OUT> };
-	$legend =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
-	close(OUT) || die();
+	&update_file(${LEGEND_NAME}, ${LEGEND_FILE}, ${LEGEND_IMP});
 
-	my $url_get = &URL_FETCH("Events");
-	$url_get =~ s/getRecords/getRecordById/g;
-	$url_get =~ s/json/xml/g;
+	return(0);
+};
 
-	my $url_post = &URL_FETCH("Events");
-	$url_post =~ s/getRecords/updateRecords/g;
-	$url_post =~ s/json/xml/g;
+########################################
 
-	my $matches = "0";
+sub update_file {
+	my $title	= shift();
+	my $file	= shift();
+	my $import	= shift();
+
+	my $uid		= "";
+	my $matches	= "0";
+	my $output;
+
+	&printer(2, "\n");
+	&printer(2, "\tMatching '${title}'...\n");
+
+	if (${import}) {
+		open(FILE, "<", ${file}) || die();
+		$output = (stat(${file}))[9];
+		$output = localtime(${output}) . "\n\n";
+		$output .= do { local $/; <FILE> };
+		# this is to make the input used for "&print_events()" pretty: split(/\|/, ${find})
+		$output =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
+		close(FILE) || die();
+	} else {
+		open(FILE, ">", ${file}) || die();
+	};
 
 	foreach my $event (keys(%{$events})) {
-		if ($events->{$event}{$SUB} eq ${LEGEND_NAME}) {
-			my $post_data = "";
-			$post_data .= '<Events>';
-			$post_data .= '<row no="1">';
-			$post_data .= '<FL val="' . ${UID} . '">' . $events->{$event}{$UID} . '</FL>';
-			$post_data .= '<FL val="Subject"><![CDATA[' . ${LEGEND_NAME} . ']]></FL>';
-			$post_data .= '<FL val="Description"><![CDATA[' . ${legend} . ']]></FL>';
-			$post_data .= '</row>';
-			$post_data .= '</Events>';
-
-			$mech->get(${url_get}
-				. "?scope=${URL_SCOPE}"
-				. "&authtoken=${APITOKEN}"
-				. "&id=$events->{$event}{$UID}"
-			) && $API_REQUEST_COUNT++;
-#>>>			&printer(2, "\tGET[" . $mech->content() . "]\n");
-
-#>>>			&printer(2, "\tPOST[" . ${post_data} . "]\n");
-			$mech->post(${url_post}, {
-				"scope"		=> ${URL_SCOPE},
-				"authtoken"	=> ${APITOKEN},
-				"newFormat"	=> 1,
-				"id"		=> $events->{$event}{$UID},
-				"xmlData"	=> ${post_data},
-			}) && $API_REQUEST_COUNT++;
-#>>>			&printer(2, "\tRESULT[" . $mech->content() . "]\n");
-
-			&printer(2, "\n\t[$events->{$event}{$SUB}]: $events->{$event}{$UID}\n");
+		if ($events->{$event}{$SUB} eq ${title}) {
+			$uid = $events->{$event}{$UID};
+			&printer(2, "\t${uid}: $events->{$event}{$MOD}\n");
 
 			${matches}++;
 		};
+	};
+
+	if (${import}) {
+		&printer(2, "\tImporting: ${uid}\n");
+
+		my $url_post = &URL_FETCH("Events");
+		$url_post =~ s/getRecords/updateRecords/g;
+		$url_post =~ s/json/xml/g;
+
+		my $post_data = "";
+		$post_data .= '<Events>';
+		$post_data .= '<row no="1">';
+		$post_data .= '<FL val="' . ${UID} . '">' . ${uid} . '</FL>';
+		$post_data .= '<FL val="Subject"><![CDATA[' . ${title} . ']]></FL>';
+		$post_data .= '<FL val="Description"><![CDATA[' . ${output} . ']]></FL>';
+		$post_data .= '</row>';
+		$post_data .= '</Events>';
+
+		$mech->post(${url_post}, {
+			"scope"		=> ${URL_SCOPE},
+			"authtoken"	=> ${APITOKEN},
+			"newFormat"	=> 1,
+			"id"		=> ${uid},
+			"xmlData"	=> ${post_data},
+		}) && $API_REQUEST_COUNT++;
+	} else {
+		&printer(2, "\tExporting: ${uid}\n");
+
+		my $url_get = &URL_FETCH("Events");
+		$url_get =~ s/getRecords/getRecordById/g;
+		$url_get =~ s/json/xml/g;
+
+		$mech->get(${url_get}
+			. "?scope=${URL_SCOPE}"
+			. "&authtoken=${APITOKEN}"
+			. "&id=${uid}"
+		) && $API_REQUEST_COUNT++;
+
+		$output = $mech->content();
+		$output =~ s|^.*<FL val="Description"><!\[CDATA\[||gms;
+		$output =~ s|\]\]>.*$||gms;
+		print FILE ${output} . "\n";
+	};
+
+	if ($mech->content() =~ m/[<]error[>]/) {
+		&printer(2, "\nRESULT[" . $mech->content() . "]\n");
+		&printer(2, "\n");
+		die();
+	};
+
+	if (!${import}) {
+		close(FILE) || die();
 	};
 
 	&printer(2, "\n");
@@ -671,6 +714,7 @@ sub print_events {
 	my $output	= "";
 
 	if (${find} =~ /\|/) {
+		# in "&update_file()" this is made pretty: s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm
 		($stderr, $case, $find, $label) = split(/\|/, ${find});
 	};
 	if (!${label}) {
