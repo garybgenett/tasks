@@ -65,6 +65,10 @@ my $LEGEND_NAME	= "Marker: Legend";
 my $LEGEND_FILE	= ".zoho.reports";
 my $LEGEND_IMP	= "1";
 
+my $TODAY_NAME	= "Marker: Today";
+my $TODAY_EXP	= "zoho.today.txt";
+my $TODAY_IMP	= "zoho.today.out";
+
 my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
 my $ALL_FILE	= "zoho.all.md";
@@ -317,6 +321,19 @@ sub parse_entry {
 
 sub update_legend {
 	&update_file(${LEGEND_NAME}, ${LEGEND_FILE}, ${LEGEND_IMP});
+
+	return(0);
+};
+
+########################################
+
+sub update_today {
+	if (-f ${TODAY_IMP}) {
+		&update_file(${TODAY_NAME}, ${TODAY_IMP}, "1");
+		unlink(${TODAY_IMP}) || die();
+	} else {
+		&update_file(${TODAY_NAME}, ${TODAY_EXP});
+	};
 
 	return(0);
 };
@@ -883,6 +900,7 @@ foreach my $event (keys(%{$events})) {
 
 if (%{$events}) {
 	&update_legend();
+	&update_today();
 };
 
 if (%{$null_events}) {
