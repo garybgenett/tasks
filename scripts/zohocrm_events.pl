@@ -720,7 +720,7 @@ sub print_tasks {
 sub print_events {
 	my $list	= shift() || ${events};
 	my $find	= shift() || ".";
-	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, $DSC, ];
+	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $STS, $REL, $SUB, $DSC, ];
 
 	my $stderr	= "1";
 	my $case	= "";
@@ -814,12 +814,14 @@ sub print_event_fields {
 	my $keep	= shift() || [];
 	my $vals	= shift() || {};
 
+	my $rstatus	= ${STS};
 	my $related	= ($vals->{$REL} || "");
 	my $subject	= ($vals->{$SUB} || "");
 	my $details	= ($vals->{$DSC} || "");
 	my $output	= "";
 
 	if (!${header}) {
+		if ($vals->{$REL} && $vals->{$RID})	{ $rstatus = $leads->{ $vals->{$RID} }{$STS}; } else { $rstatus = ""; };
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
 		if ($vals->{$LOC})			{ $subject = "[${subject}][$vals->{$LOC}]"; };
@@ -838,6 +840,7 @@ sub print_event_fields {
 		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $STS) { $value = ${rstatus}; };
 		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$DSC_EXPORT})) { $value = "**[X][" . ($vals->{$DSC_EXPORT} || "") . "]** " . ${value}; }; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
@@ -923,7 +926,7 @@ if (%{$leads}) {
 &printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
-	&print_events(${events}, "Closed!", [ $BEG, $REL, $SUB, ]);
+	&print_events(${events}, "Closed!", [ $BEG, $STS, $REL, $SUB, ]);
 };
 
 close(CSV) || die();
@@ -959,7 +962,7 @@ if (%{$tasks}) {
 #>>>};
 
 if (%{$events}) {
-	&print_events(${events}, "Active", [ $BEG, $REL, $SUB, ]);
+	&print_events(${events}, "Active", [ $BEG, $STS, $REL, $SUB, ]);
 };
 
 if (%{$events}) {
@@ -969,7 +972,7 @@ if (%{$events}) {
 			&printer("\n");
 			&printer("${LEVEL_1} ${search}\n");
 		} else {
-			&print_events(${events}, ${search}, [ $BEG, $REL, $SUB, ]);
+			&print_events(${events}, ${search}, [ $BEG, $STS, $REL, $SUB, ]);
 		};
 	};
 };
