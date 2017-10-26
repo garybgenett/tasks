@@ -347,12 +347,13 @@ sub update_file {
 
 	my $uid		= "";
 	my $matches	= "0";
-	my $output;
+	my $output	= "";
+	my $input;
 
 	&printer(2, "\n");
 	&printer(2, "\tMatching '${title}'...\n");
 
-	if (${import}) {
+	if (-f ${file}) {
 		open(FILE, "<", ${file}) || die();
 		$output = (stat(${file}))[9];
 		$output = localtime(${output}) . "\n\n";
@@ -360,8 +361,6 @@ sub update_file {
 		# this is to make the input used for "&print_events()" pretty: split(/\|/, ${find})
 		$output =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
 		close(FILE) || die();
-	} else {
-		open(FILE, ">", ${file}) || die();
 	};
 
 	foreach my $event (keys(%{$events})) {
@@ -373,56 +372,70 @@ sub update_file {
 		};
 	};
 
-	if (${import}) {
-		&printer(2, "\tImporting: ${uid}\n");
-
-		my $url_post = &URL_FETCH("Events");
-		$url_post =~ s/getRecords/updateRecords/g;
-		$url_post =~ s/json/xml/g;
-
-		my $post_data = "";
-		$post_data .= '<Events>';
-		$post_data .= '<row no="1">';
-		$post_data .= '<FL val="' . ${UID} . '">' . ${uid} . '</FL>';
-		$post_data .= '<FL val="Subject"><![CDATA[' . ${title} . ']]></FL>';
-		$post_data .= '<FL val="Description"><![CDATA[' . ${output} . ']]></FL>';
-		$post_data .= '</row>';
-		$post_data .= '</Events>';
-
-		$mech->post(${url_post}, {
-			"scope"		=> ${URL_SCOPE},
-			"authtoken"	=> ${APITOKEN},
-			"newFormat"	=> 1,
-			"id"		=> ${uid},
-			"xmlData"	=> ${post_data},
-		}) && $API_REQUEST_COUNT++;
-	} else {
+	if (!${import}) {
 		&printer(2, "\tExporting: ${uid}\n");
-
-		my $url_get = &URL_FETCH("Events");
-		$url_get =~ s/getRecords/getRecordById/g;
-		$url_get =~ s/json/xml/g;
-
-		$mech->get(${url_get}
-			. "?scope=${URL_SCOPE}"
-			. "&authtoken=${APITOKEN}"
-			. "&id=${uid}"
-		) && $API_REQUEST_COUNT++;
-
-		$output = $mech->content();
-		$output =~ s|^.*<FL val="Description"><!\[CDATA\[||gms;
-		$output =~ s|\]\]>.*$||gms;
-		print FILE ${output} . "\n";
+	} else {
+		&printer(2, "\tImporting: ${uid}\n");
 	};
 
+	my $url_get = &URL_FETCH("Events");
+	$url_get =~ s/getRecords/getRecordById/g;
+	$url_get =~ s/json/xml/g;
+
+	$mech->get(${url_get}
+		. "?scope=${URL_SCOPE}"
+		. "&authtoken=${APITOKEN}"
+		. "&id=${uid}"
+	) && $API_REQUEST_COUNT++;
+
 	if ($mech->content() =~ m/[<]error[>]/) {
-		&printer(2, "\nRESULT[" . $mech->content() . "]\n");
+		&printer(2, "\nGET[" . $mech->content() . "]\n");
 		&printer(2, "\n");
 		die();
 	};
 
-	if (!${import}) {
-		close(FILE) || die();
+	$input = $mech->content();
+	$input =~ s|^.*<FL val="Description"><!\[CDATA\[||gms;
+	$input =~ s|\]\]>.*$||gms;
+	$input .= "\n";
+
+	if (${output} ne ${input}) {
+		if (!${import}) {
+			open(FILE, ">", ${file}) || die();
+			print FILE ${input} . "\n";
+			close(FILE) || die();
+		} else {
+			my $url_post = &URL_FETCH("Events");
+			$url_post =~ s/getRecords/updateRecords/g;
+			$url_post =~ s/json/xml/g;
+
+			my $post_data = "";
+			$post_data .= '<Events>';
+			$post_data .= '<row no="1">';
+			$post_data .= '<FL val="' . ${UID} . '">' . ${uid} . '</FL>';
+			$post_data .= '<FL val="Subject"><![CDATA[' . ${title} . ']]></FL>';
+			$post_data .= '<FL val="Description"><![CDATA[' . ${output} . ']]></FL>';
+			$post_data .= '</row>';
+			$post_data .= '</Events>';
+
+			$mech->post(${url_post}, {
+				"scope"		=> ${URL_SCOPE},
+				"authtoken"	=> ${APITOKEN},
+				"newFormat"	=> 1,
+				"id"		=> ${uid},
+				"xmlData"	=> ${post_data},
+			}) && $API_REQUEST_COUNT++;
+
+			if ($mech->content() =~ m/[<]error[>]/) {
+				&printer(2, "\nPOST[" . $mech->content() . "]\n");
+				&printer(2, "\n");
+				die();
+			};
+		};
+
+		&printer(2, "\tCompleted!\n");
+	} else {
+		&printer(2, "\tSkipped!\n");
 	};
 
 	&printer(2, "\n");
