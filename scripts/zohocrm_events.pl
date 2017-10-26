@@ -9,7 +9,7 @@ use Carp qw(confess);
 
 use Data::Dumper;
 sub DUMPER {
-	my $DUMP = shift;
+	my $DUMP = shift();
 	local $Data::Dumper::Purity = 1;
 	&printer(2, "<-- DUMPER " . ("-" x 30) . ">\n");
 	&printer(2, Dumper(${DUMP}));
@@ -58,8 +58,12 @@ my $THOROUGH	= "1";
 
 ########################################
 
+my $AUTH_CRED	= ".zoho-auth";
+my $AUTH_TOKEN	= ".zoho-token";
+
 my $LEGEND_NAME	= "Marker: Legend";
 my $LEGEND_FILE	= ".zoho.reports";
+
 my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
 my $ALL_FILE	= "zoho.all.md";
@@ -120,10 +124,10 @@ my $DSC		= "Description";
 
 our $USERNAME;
 our $PASSWORD;
-do(".zoho-auth") || die();
+do(${AUTH_CRED}) || die();
 
 our $APITOKEN;
-do(".zoho-token") || die();
+do(${AUTH_TOKEN}) || die();
 
 ################################################################################
 
@@ -141,7 +145,7 @@ if (!${APITOKEN}) {
 	$APITOKEN = $mech->content();
 	$APITOKEN =~ s/^.+AUTHTOKEN[=](.+)\n.+$/$1/gms;
 
-	open(OUTPUT, ">", ".zoho-token") || die();
+	open(OUTPUT, ">", ${AUTH_TOKEN}) || die();
 	print OUTPUT "our \$APITOKEN = '${APITOKEN}';\n";
 	close(OUTPUT) || die();
 };
@@ -152,8 +156,9 @@ open(ALL_FILE, ">", ${ALL_FILE}) || die();
 open(OUT_FILE, ">", ${OUT_FILE}) || die();
 
 sub printer {
-	my $output = shift() || "";
-	my $stderr = "0";
+	my $output	= shift() || "";
+
+	my $stderr	= "0";
 
 	if (${output} =~ m/^[012]$/) {
 		$stderr = ${output};
@@ -202,23 +207,25 @@ my $z = {
 	"tasks"		=> {},
 	"events"	=> {},
 };
-my $leads	= $z->{"leads"};
-my $tasks	= $z->{"tasks"};
-my $events	= $z->{"events"};
+my $leads		= $z->{"leads"};
+my $tasks		= $z->{"tasks"};
+my $events		= $z->{"events"};
 
-my $closed_list = {};
-my $related_list = {};
-my $null_events = {};
+my $closed_list		= {};
+my $related_list	= {};
+my $null_events		= {};
 
 ########################################
 
 sub fetch_entries {
 	my $type	= shift() || "Events";
+
 	my $last_mod	= ${START_DATE};
 	my $index_no	= "1";
 	my $records	= "0";
 	my $fetches	= {};
 	my $found;
+	my $output;
 
 	&printer(2, "\n\tFetching ${type}...");
 
@@ -242,7 +249,7 @@ sub fetch_entries {
 			. "&fromIndex=${index_no}"
 			. "&toIndex=" . (${index_no} + (${MAX_RECORDS} -1))
 		) && $API_REQUEST_COUNT++;
-		my $output = decode_json($mech->content());
+		$output = decode_json($mech->content());
 
 		if ( $output->{"response"}{"nodata"} ) {
 			&printer(2, "\n\tNo Data!");
@@ -285,8 +292,9 @@ sub fetch_entries {
 ########################################
 
 sub parse_entry {
-	my $event = shift();
-	my $new = {};
+	my $event	= shift();
+
+	my $new		= {};
 	my $uid;
 	my $mod;
 
@@ -367,7 +375,11 @@ sub update_legend {
 ########################################
 
 sub print_leads {
-	my $report = shift() || "";
+	my $report		= shift() || "";
+
+	my $err_date_list	= {};
+	my $err_dates		= [];
+	my $entries		= "0";
 
 	if (${report} eq "CSV") {
 		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
@@ -389,11 +401,6 @@ sub print_leads {
 		&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
 		&printer(1, "|:---|:---|:---|:---|:---|\n");
 	};
-
-	my $err_date_list = {};
-	my $err_dates = [];
-
-	my $entries = "0";
 
 	foreach my $lead (sort({
 		(
@@ -585,7 +592,9 @@ sub print_leads {
 ########################################
 
 sub print_tasks {
-	my $report = shift() || "";
+	my $report	= shift() || "";
+
+	my $entries	= "0";
 
 	&printer(1, "\n");
 	if (!${report}) {
@@ -597,8 +606,6 @@ sub print_tasks {
 
 	&printer(1, "| ${DUE} | ${TST} | ${PRI} | ${REL} | ${SUB}\n");
 	&printer(1, "|:---|:---|:---|:---|:---|\n");
-
-	my $entries = "0";
 
 	foreach my $task (sort({
 		(($tasks->{$a}{$DUE} || "") cmp ($tasks->{$b}{$DUE} || "")) ||
@@ -651,13 +658,18 @@ sub print_tasks {
 ########################################
 
 sub print_events {
-	my $list = shift() || ${events};
-	my $find = shift() || ".";
-	my $keep = shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, $DSC, ];
+	my $list	= shift() || ${events};
+	my $find	= shift() || ".";
+	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $REL, $SUB, $DSC, ];
 
-	my $stderr = "1";
-	my $case = "";
-	my $label = "";
+	my $stderr	= "1";
+	my $case	= "";
+	my $label	= "";
+	my $report	= "";
+	my $fields	= {};
+	my $entries	= "0";
+	my $output	= "";
+
 	if (${find} =~ /\|/) {
 		($stderr, $case, $find, $label) = split(/\|/, ${find});
 	};
@@ -669,7 +681,6 @@ sub print_events {
 		};
 	};
 
-	my $report = "";
 	if (${find} eq "Closed!") {
 		$report = ${find};
 		$label = ${find};
@@ -686,13 +697,10 @@ sub print_events {
 	&printer(${stderr}, "${LEVEL_2} ${label}\n");
 	&printer(${stderr}, "\n");
 
-	my $fields = {};
 	foreach my $field (@{$keep}) {
 		$fields->{$field} = ${field};
 	};
 	&print_event_fields(${stderr}, "1", ${keep}, ${fields});
-
-	my $entries = "0";
 
 	foreach my $event (sort({
 		(($events->{$a}{$BEG} || "") cmp ($events->{$b}{$BEG} || "")) ||
@@ -728,7 +736,6 @@ sub print_events {
 		};
 	};
 
-	my $output;
 	if (!${entries}) {
 		$output .= "|\n";
 	};
@@ -741,14 +748,16 @@ sub print_events {
 ########################################
 
 sub print_event_fields {
-	my $stderr = shift() || "";
-	my $header = shift() || "";
-	my $keep = shift() || [];
-	my $vals = shift() || {};
+	my $stderr	= shift() || "";
+	my $header	= shift() || "";
+	my $keep	= shift() || [];
+	my $vals	= shift() || {};
 
-	my $related = ($vals->{$REL} || "");
-	my $subject = ($vals->{$SUB} || "");
-	my $details = ($vals->{$DSC} || "");
+	my $related	= ($vals->{$REL} || "");
+	my $subject	= ($vals->{$SUB} || "");
+	my $details	= ($vals->{$DSC} || "");
+	my $output	= "";
+
 	if (!${header}) {
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
@@ -757,8 +766,6 @@ sub print_event_fields {
 		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
 		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
 	};
-
-	my $output = "";
 
 	foreach my $val (@{$keep}) {
 		my $value = "";
@@ -803,7 +810,7 @@ foreach my $type (
 
 	%{ $z->{$var} } = &fetch_entries(${type});
 
-	open(JSON, ">${JSON_BASE}.${var}.json") || die();
+	open(JSON, ">", ${JSON_BASE} . "." . ${var} . ".json") || die();
 	foreach my $key (sort(keys(%{ $z->{$var} }))) {
 		print JSON $json->encode($z->{$var}{$key}) . "\n";
 	};
@@ -844,7 +851,7 @@ if (%{$null_events}) {
 
 ########################################
 
-open(CSV, ">${CSV_FILE}") || die();
+open(CSV, ">", ${CSV_FILE}) || die();
 
 if (%{$leads}) {
 	&print_leads("CSV");
