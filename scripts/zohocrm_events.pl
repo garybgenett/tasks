@@ -575,8 +575,10 @@ sub print_leads {
 				(!$leads->{$lead}{$SRC}) ||
 				(!$leads->{$lead}{$STS})
 			) || (
-				($leads->{$lead}{$STS} eq "Demo") &&
-				($leads->{$lead}{$DSC} !~ m/${DSC_IMPORT}/)
+				($leads->{$lead}{$STS} eq "Demo") && (
+					($leads->{$lead}{$SRC} ne "Referral") ||
+					($leads->{$lead}{$DSC} !~ m/${DSC_IMPORT}/)
+				)
 			) || (
 				(!$related_list->{ $leads->{$lead}{$LID} }) && (
 					($leads->{$lead}{$STS} ne "Demo") &&
