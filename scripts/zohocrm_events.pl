@@ -355,8 +355,10 @@ sub update_file {
 
 	if (-f ${file}) {
 		open(FILE, "<", ${file}) || die();
-		$output = (stat(${file}))[9];
-		$output = localtime(${output}) . "\n\n";
+		if (${import}) {
+			$output = (stat(${file}))[9];
+			$output = localtime(${output}) . "\n\n";
+		};
 		$output .= do { local $/; <FILE> };
 		# this is to make the input used for "&print_events()" pretty: split(/\|/, ${find})
 		$output =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
@@ -402,7 +404,7 @@ sub update_file {
 	if (${output} ne ${input}) {
 		if (!${import}) {
 			open(FILE, ">", ${file}) || die();
-			print FILE ${input} . "\n";
+			print FILE ${input};
 			close(FILE) || die();
 		} else {
 			my $url_post = &URL_FETCH("Events");
