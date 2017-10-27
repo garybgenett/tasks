@@ -738,7 +738,7 @@ sub print_tasks {
 sub print_events {
 	my $list	= shift() || ${events};
 	my $find	= shift() || ".";
-	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $STS, $REL, $SUB, $DSC, ];
+	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $SRC, $STS, $REL, $SUB, $DSC, ];
 
 	my $stderr	= "1";
 	my $case	= "";
@@ -833,6 +833,7 @@ sub print_event_fields {
 	my $keep	= shift() || [];
 	my $vals	= shift() || {};
 
+	my $rsource	= ${SRC};
 	my $rstatus	= ${STS};
 	my $related	= ($vals->{$REL} || "");
 	my $subject	= ($vals->{$SUB} || "");
@@ -840,6 +841,7 @@ sub print_event_fields {
 	my $output	= "";
 
 	if (!${header}) {
+		if ($vals->{$REL} && $vals->{$RID})	{ $rsource = $leads->{ $vals->{$RID} }{$SRC}; } else { $rsource = ""; };
 		if ($vals->{$REL} && $vals->{$RID})	{ $rstatus = $leads->{ $vals->{$RID} }{$STS}; } else { $rstatus = ""; };
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
@@ -859,6 +861,7 @@ sub print_event_fields {
 		if (${val} eq $MOD) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $BEG) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
+		if (${val} eq $SRC) { $value = ${rsource}; };
 		if (${val} eq $STS) { $value = ${rstatus}; };
 		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$DSC_EXPORT})) { $value = "**[X][" . ($vals->{$DSC_EXPORT} || "") . "]** " . ${value}; }; };
 		if (${val} eq $SUB) { $value = ${subject}; };
@@ -945,7 +948,7 @@ if (%{$leads}) {
 &printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
-	&print_events(${events}, "Closed!", [ $BEG, $STS, $REL, $SUB, ]);
+	&print_events(${events}, "Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
 	&printer("\n");
 	&printer("Closed: " . scalar(keys(%{$closed_list})) . "\n");
 };
