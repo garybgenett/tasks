@@ -87,6 +87,7 @@ my $DSC_EXPORT	= "CANCELLED";
 my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
+my $CLOSED_MARK	= "[\$]";
 
 my $SEC_IN_DAY	= 60 * 60 * 24;
 my $AGING_DAYS	= 28 * 5;
@@ -789,7 +790,8 @@ sub print_events {
 			((!${case})					|| ($list->{$event}{$SUB} =~ m/${find}/))
 		) || (
 			(${report} eq "Closed!") &&
-			(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} }))
+			(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} })) &&
+			($list->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
 		) || (
 			(${report} eq "Active") &&
 			($list->{$event}{$RID})
@@ -942,6 +944,8 @@ if (%{$leads}) {
 
 if (%{$events}) {
 	&print_events(${events}, "Closed!", [ $BEG, $STS, $REL, $SUB, ]);
+	&printer("\n");
+	&printer("Closed: " . scalar(keys(%{$closed_list})) . "\n");
 };
 
 close(CSV) || die();
