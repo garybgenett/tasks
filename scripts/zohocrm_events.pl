@@ -471,8 +471,12 @@ sub print_leads {
 		&printer("|:---|:---|:---|:---|:---|\n");
 	}
 	else {
+		if (${report} ne "Broken") {
+			$report = "All";
+		};
+
 		&printer(1, "\n");
-		&printer(1, "${LEVEL_2} Broken Leads\n");
+		&printer(1, "${LEVEL_2} ${report} Leads\n");
 		&printer(1, "\n");
 
 		&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
@@ -571,7 +575,7 @@ sub print_leads {
 				};
 			};
 		}
-		else {
+		elsif (${report} eq "Broken") {
 			if ((
 				(!$leads->{$lead}{$SRC}) ||
 				(!$leads->{$lead}{$STS})
@@ -620,6 +624,11 @@ sub print_leads {
 
 				$entries++;
 			};
+		}
+		else {
+				&printer(1, "| ${source} | ${status} | ${related} | ${subject} | ${details}\n");
+
+				$entries++;
 		};
 	};
 
@@ -956,8 +965,9 @@ close(CSV) || die();
 ########################################
 
 if (%{$leads}) {
+	&print_leads("Broken");
+#>>>	&print_leads();
 	&print_leads("Aging");
-	&print_leads();
 };
 
 ########################################
