@@ -958,9 +958,6 @@ close(CSV) || die();
 
 if (%{$leads}) {
 	&print_leads("Aging");
-};
-
-if (%{$leads}) {
 	&print_leads();
 };
 
@@ -968,23 +965,14 @@ if (%{$leads}) {
 
 if (%{$tasks}) {
 	&print_tasks("Broken");
-};
-
-if (%{$tasks}) {
 	&print_tasks();
-};
-
-if (%{$tasks}) {
 	&print_tasks("Deferred");
 };
 
 ########################################
 
-#>>>if (%{$events}) {
-#>>>	&print_events();
-#>>>};
-
 if (%{$events}) {
+#>>>	&print_events();
 	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
 };
 
