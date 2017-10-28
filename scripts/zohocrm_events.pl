@@ -775,9 +775,12 @@ sub print_events {
 		$find = ".";
 		$stderr = "";
 	}
-	elsif (${find} eq "Active") {
+	elsif (
+		(${find} eq "Broken") ||
+		(${find} eq "Active")
+	) {
 		$report = ${find};
-		$label = ${find};
+		$label = ${find} . " Events";
 		$find = ".";
 	};
 
@@ -803,6 +806,12 @@ sub print_events {
 			(${report} eq "Closed!") &&
 			(($events->{$event}{$RID}) && ($closed_list->{ $events->{$event}{$RID} })) &&
 			($events->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
+		) || (
+			(${report} eq "Broken") &&
+			($events->{$event}{$DSC}) && (
+				($events->{$event}{$SUB} ne ${LEGEND_NAME}) &&
+				($events->{$event}{$SUB} ne ${TODAY_NAME})
+			)
 		) || (
 			(${report} eq "Active") &&
 			($events->{$event}{$RID})
@@ -981,6 +990,7 @@ if (%{$tasks}) {
 ########################################
 
 if (%{$events}) {
+	&print_events("Broken", [ $BEG, $STS, $REL, $SUB, ]);
 #>>>	&print_events();
 	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
 };
