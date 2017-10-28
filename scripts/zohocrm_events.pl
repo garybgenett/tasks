@@ -36,6 +36,7 @@ use JSON::XS;
 my $json = JSON::XS->new();
 $json->ascii(1);
 $json->canonical(1);
+$json->pretty(1);
 
 use POSIX qw(strftime);
 use Time::Local qw(timelocal);
@@ -896,9 +897,7 @@ foreach my $type (
 	%{ $z->{$var} } = &fetch_entries(${type});
 
 	open(JSON, ">", ${JSON_BASE} . "." . ${var} . ".json") || die();
-	foreach my $key (sort(keys(%{ $z->{$var} }))) {
-		print JSON $json->encode($z->{$var}{$key}) . "\n";
-	};
+	print JSON $json->encode($z->{$var});
 	close(JSON) || die();
 };
 
