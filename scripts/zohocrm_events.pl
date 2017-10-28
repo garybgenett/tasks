@@ -70,6 +70,8 @@ my $TODAY_NAME	= "Marker: Today";
 my $TODAY_EXP	= "zoho.today.txt";
 my $TODAY_IMP	= "zoho.today.out";
 
+my $NOTES_FILE	= "zoho/_Note.csv";
+
 my $JSON_BASE	= "zoho-export";
 my $CSV_FILE	= "zoho-data.csv";
 my $ALL_FILE	= "zoho.all.md";
@@ -903,6 +905,44 @@ sub print_event_fields {
 	return(0);
 };
 
+########################################
+
+sub print_notes {
+	my $notes = {};
+	my $count = "0";
+
+	open(CSV, "<", ${NOTES_FILE}) || die();
+	while (<CSV>) {
+		my $num = "1";
+		while (${_} =~ m/zcrm[_]([0-9]+)/gm) {
+			if (${num} == 3) {
+				$notes->{$1}++;
+				${count}++;
+			};
+			${num}++;
+		};
+	};
+	close(CSV) || die();
+
+	&printer(1, "\n");
+	&printer(1, "${LEVEL_2} Exported Notes\n");
+	&printer(1, "\n");
+	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export)\n");
+	&printer(1, "\n");
+	&printer(1, "| Notes Count | ${FNM}${NAME_DIV}${LNM} |\n");
+	&printer(1, "|:---|:---|\n");
+
+	foreach my $note (sort(keys(%{$notes}))) {
+		my $subject = ($leads->{$note}{$FNM} || "") . ${NAME_DIV} . ($leads->{$note}{$LNM} || "");
+		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$note}{$LID}) . ")";
+		&printer(1, "| " . $notes->{$note} . " | " . ${subject} . "\n");
+	};
+
+	&printer(1, "\nEntries: " . ${count} . " (" . scalar(keys(%{$notes})) . " Leads)\n");
+
+	return(0);
+};
+
 ################################################################################
 
 foreach my $type (
@@ -994,6 +1034,14 @@ if (%{$events}) {
 #>>>	&print_events();
 	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
 };
+
+########################################
+
+if (-f ${NOTES_FILE}) {
+	&print_notes();
+};
+
+########################################
 
 if (%{$events}) {
 	foreach my $search (@{ARGV}) {
