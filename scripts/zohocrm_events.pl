@@ -833,16 +833,16 @@ sub print_event_fields {
 	my $keep	= shift() || [];
 	my $vals	= shift() || {};
 
-	my $rsource	= ${SRC};
-	my $rstatus	= ${STS};
+	my $rsource	= ($vals->{$SRC} || "");
+	my $rstatus	= ($vals->{$STS} || "");
 	my $related	= ($vals->{$REL} || "");
 	my $subject	= ($vals->{$SUB} || "");
 	my $details	= ($vals->{$DSC} || "");
 	my $output	= "";
 
 	if (!${header}) {
-		if ($vals->{$REL} && $vals->{$RID})	{ $rsource = $leads->{ $vals->{$RID} }{$SRC}; } else { $rsource = ""; };
-		if ($vals->{$REL} && $vals->{$RID})	{ $rstatus = $leads->{ $vals->{$RID} }{$STS}; } else { $rstatus = ""; };
+		if ($vals->{$REL} && $vals->{$RID}	&& $leads->{ $vals->{$RID} }{$SRC}) { $rsource = $leads->{ $vals->{$RID} }{$SRC}; };
+		if ($vals->{$REL} && $vals->{$RID}	&& $leads->{ $vals->{$RID} }{$STS}) { $rstatus = $leads->{ $vals->{$RID} }{$STS}; };
 		if ($vals->{$REL} && $vals->{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$vals->{$RID}) . ")"; };
 		if ($vals->{$SUB} && $vals->{$UID})	{ $subject = "[${subject}](" . &URL_LINK("Events",	$vals->{$UID}) . ")"; };
 		if ($vals->{$LOC})			{ $subject = "[${subject}][$vals->{$LOC}]"; };
