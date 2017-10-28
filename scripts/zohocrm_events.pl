@@ -736,7 +736,6 @@ sub print_tasks {
 ########################################
 
 sub print_events {
-	my $list	= shift() || ${events};
 	my $find	= shift() || ".";
 	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $SRC, $STS, $REL, $SUB, $DSC, ];
 
@@ -785,32 +784,32 @@ sub print_events {
 		(($events->{$a}{$BEG} || "") cmp ($events->{$b}{$BEG} || "")) ||
 		(($events->{$a}{$END} || "") cmp ($events->{$b}{$END} || "")) ||
 		(($events->{$a}{$SUB} || "") cmp ($events->{$b}{$SUB} || ""))
-	} keys(%{$list}))) {
+	} keys(%{$events}))) {
 		if ((
 			(!${report}) &&
-			(($list->{$event}{$BEG} ge ${START_DATE})	&& ($list->{$event}{$SUB} =~ m/${find}/i)) &&
-			((!${case})					|| ($list->{$event}{$SUB} =~ m/${find}/))
+			(($events->{$event}{$BEG} ge ${START_DATE})	&& ($events->{$event}{$SUB} =~ m/${find}/i)) &&
+			((!${case})					|| ($events->{$event}{$SUB} =~ m/${find}/))
 		) || (
 			(${report} eq "Closed!") &&
-			(($list->{$event}{$RID}) && ($closed_list->{ $list->{$event}{$RID} })) &&
-			($list->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
+			(($events->{$event}{$RID}) && ($closed_list->{ $events->{$event}{$RID} })) &&
+			($events->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
 		) || (
 			(${report} eq "Active") &&
-			($list->{$event}{$RID})
+			($events->{$event}{$RID})
 		)) {
 			if (${report} eq "Closed!") {
-				print CSV "\"$list->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$list->{$event}{$REL}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
 				if (
-					($leads->{ $list->{$event}{$RID} }{$DSC}) &&
-					($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}/)
+					($leads->{ $events->{$event}{$RID} }{$DSC}) &&
+					($leads->{ $events->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}/)
 				) {
-					while ($leads->{ $list->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
-						$list->{$event}{$DSC_EXPORT} = ${1};
+					while ($leads->{ $events->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
+						$events->{$event}{$DSC_EXPORT} = ${1};
 					};
 				};
 			};
 
-			&print_event_fields(${stderr}, "", ${keep}, $list->{$event});
+			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
 
 			$entries++;
 		};
@@ -948,7 +947,7 @@ if (%{$leads}) {
 &printer("${LEVEL_1} Core Reports\n");
 
 if (%{$events}) {
-	&print_events(${events}, "Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
+	&print_events("Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
 	&printer("\n");
 	&printer("Closed: " . scalar(keys(%{$closed_list})) . "\n");
 };
@@ -986,7 +985,7 @@ if (%{$tasks}) {
 #>>>};
 
 if (%{$events}) {
-	&print_events(${events}, "Active", [ $BEG, $STS, $REL, $SUB, ]);
+	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
 };
 
 if (%{$events}) {
@@ -996,7 +995,7 @@ if (%{$events}) {
 			&printer("\n");
 			&printer("${LEVEL_1} ${search}\n");
 		} else {
-			&print_events(${events}, ${search}, [ $BEG, $STS, $REL, $SUB, ]);
+			&print_events(${search}, [ $BEG, $STS, $REL, $SUB, ]);
 		};
 	};
 };
