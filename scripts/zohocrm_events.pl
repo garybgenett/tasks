@@ -915,7 +915,7 @@ sub print_notes {
 
 	open(CSV, "<", ${NOTES_FILE}) || die();
 	$updated = (stat(${NOTES_FILE}))[9];
-	$updated = localtime(${updated}) . "\n\n";
+	$updated = localtime(${updated});
 	while (<CSV>) {
 		my $num = "1";
 		while (${_} =~ m/zcrm[_]([0-9]+)/gm) {
