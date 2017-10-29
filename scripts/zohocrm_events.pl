@@ -802,22 +802,30 @@ sub print_events {
 		(($events->{$a}{$SUB} || "") cmp ($events->{$b}{$SUB} || ""))
 	} keys(%{$events}))) {
 		if ((
-			(!${report}) &&
-			(($events->{$event}{$BEG} ge ${START_DATE})	&& ($events->{$event}{$SUB} =~ m/${find}/i)) &&
-			((!${case})					|| ($events->{$event}{$SUB} =~ m/${find}/))
-		) || (
-			(${report} eq "Closed!") &&
-			(($events->{$event}{$RID}) && ($closed_list->{ $events->{$event}{$RID} })) &&
-			($events->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
-		) || (
-			(${report} eq "Broken") &&
-			($events->{$event}{$DSC}) && (
-				($events->{$event}{$SUB} ne ${LEGEND_NAME}) &&
-				($events->{$event}{$SUB} ne ${TODAY_NAME})
+			(!${report}) && (
+				(($events->{$event}{$BEG} ge ${START_DATE})	&& ($events->{$event}{$SUB} =~ m/${find}/i)) &&
+				((!${case})					|| ($events->{$event}{$SUB} =~ m/${find}/))
 			)
 		) || (
-			(${report} eq "Active") &&
-			($events->{$event}{$RID})
+			(${report} eq "Closed!") && (
+				(($events->{$event}{$RID}) && ($closed_list->{ $events->{$event}{$RID} })) &&
+				($events->{$event}{$SUB} =~ m/${CLOSED_MARK}/)
+			)
+		) || (
+			(${report} eq "Broken") && ((
+				(($events->{$event}{$SUB}) && ($events->{$event}{$SUB} =~ m/${DSC_FLAG}/)) ||
+				(($events->{$event}{$LOC}) && ($events->{$event}{$LOC} =~ m/${DSC_FLAG}/)) ||
+				(($events->{$event}{$DSC}) && ($events->{$event}{$DSC} =~ m/${DSC_FLAG}/))
+			) || (
+				($events->{$event}{$DSC}) && (
+					($events->{$event}{$SUB} ne ${LEGEND_NAME}) &&
+					($events->{$event}{$SUB} ne ${TODAY_NAME})
+				)
+			))
+		) || (
+			(${report} eq "Active") && (
+				($events->{$event}{$RID})
+			)
 		)) {
 			if (${report} eq "Closed!") {
 				print CSV "\"$events->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
