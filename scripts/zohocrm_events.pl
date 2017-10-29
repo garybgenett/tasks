@@ -364,8 +364,9 @@ sub update_file {
 			$output = localtime(${output}) . "\n\n";
 		};
 		$output .= do { local $/; <FILE> };
-		# this is to make the input used for "&print_events()" pretty: split(/\|/, ${find})
-		$output =~ s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm;
+		# make the input for "&print_events()" and "foreach my $search (@{ARGV})" pretty
+		$output =~ s/^["]([${HEAD_MARKER}])[ ]([^"]*)["]$/${1} ${2}/gm;
+		$output =~ s/^["][^|]*[|][^|]*[|]([^|]*)[|]([^|]*)["]$/[${1}] ${2}/gm;
 		close(FILE) || die();
 	};
 
@@ -760,7 +761,7 @@ sub print_events {
 	my $output	= "";
 
 	if (${find} =~ /\|/) {
-		# in "&update_file()" this is made pretty: s/^["].+[|]([^|]+)[|]([^|]+)["]$/[${1}] ${2}/gm
+		# from "foreach my $search (@{ARGV})" and in "&update_file()" it is made pretty
 		($stderr, $case, $find, $label) = split(/\|/, ${find});
 	};
 	if (!${label}) {
@@ -1044,6 +1045,7 @@ if (-f ${NOTES_FILE}) {
 ########################################
 
 if (%{$events}) {
+	# input for "&print_events()" and in "&update_file()" it is made pretty
 	foreach my $search (@{ARGV}) {
 		if (${search} =~ m/^[${HEAD_MARKER}][ ]/) {
 			$search =~ s/^[${HEAD_MARKER}][ ]//g;
