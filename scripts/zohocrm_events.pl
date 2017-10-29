@@ -911,8 +911,11 @@ sub print_event_fields {
 sub print_notes {
 	my $notes = {};
 	my $count = "0";
+	my $updated;
 
 	open(CSV, "<", ${NOTES_FILE}) || die();
+	$updated = (stat(${NOTES_FILE}))[9];
+	$updated = localtime(${updated}) . "\n\n";
 	while (<CSV>) {
 		my $num = "1";
 		while (${_} =~ m/zcrm[_]([0-9]+)/gm) {
@@ -928,7 +931,7 @@ sub print_notes {
 	&printer(1, "\n");
 	&printer(1, "${LEVEL_2} Exported Notes\n");
 	&printer(1, "\n");
-	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export)\n");
+	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export): ${updated}\n");
 	&printer(1, "\n");
 	&printer(1, "| Notes Count | ${FNM}${NAME_DIV}${LNM} |\n");
 	&printer(1, "|:---|:---|\n");
