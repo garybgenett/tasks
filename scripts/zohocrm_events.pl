@@ -909,8 +909,8 @@ sub print_event_fields {
 ########################################
 
 sub print_notes {
-	my $notes = {};
-	my $count = "0";
+	my $notes	= {};
+	my $entries	= "0";
 	my $updated;
 
 	open(CSV, "<", ${NOTES_FILE}) || die();
@@ -921,7 +921,7 @@ sub print_notes {
 		while (${_} =~ m/zcrm[_]([0-9]+)/gm) {
 			if (${num} == 3) {
 				$notes->{$1}++;
-				${count}++;
+				${entries}++;
 			};
 			${num}++;
 		};
@@ -942,7 +942,10 @@ sub print_notes {
 		&printer(1, "| " . $notes->{$note} . " | " . ${subject} . "\n");
 	};
 
-	&printer(1, "\nEntries: " . ${count} . " (" . scalar(keys(%{$notes})) . " Leads)\n");
+	if (!${entries}) {
+		&printer(1, "|\n");
+	};
+	&printer(1, "\nEntries: " . ${entries} . " (" . scalar(keys(%{$notes})) . " Leads)\n");
 
 	return(0);
 };
