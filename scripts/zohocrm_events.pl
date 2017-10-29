@@ -721,6 +721,7 @@ sub print_tasks {
 				)) ||
 				($tasks->{$task}{$PRI} ne "High") ||
 				(!$tasks->{$task}{$REL}) ||
+				($tasks->{$task}{$SUB} =~ m/${DSC_FLAG}/) ||
 				($tasks->{$task}{$DSC})
 			)
 		) || (
