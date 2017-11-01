@@ -710,7 +710,7 @@ sub print_tasks {
 
 		if ((
 			(!${report}) &&
-			($tasks->{$task}{$TST} eq "Not Started")
+				($tasks->{$task}{$TST} eq "Not Started")
 		) || (
 			(${report} eq "Broken") && (
 				(!$tasks->{$task}{$DUE}) ||
@@ -725,8 +725,8 @@ sub print_tasks {
 				($tasks->{$task}{$DSC})
 			)
 		) || (
-			(${report} eq "Deferred") &&
-			($tasks->{$task}{$TST} eq ${report})
+			(${report}) &&
+				($tasks->{$task}{$TST} eq ${report})
 		)) {
 			&printer(1, "| " . ($tasks->{$task}{$DUE} || ""));
 			&printer(1, " | " . ($tasks->{$task}{$TST} || ""));
@@ -1041,6 +1041,7 @@ if (%{$tasks}) {
 	&print_tasks("Broken");
 	&print_tasks();
 	&print_tasks("Deferred");
+	&print_tasks("Completed");
 };
 
 ########################################
