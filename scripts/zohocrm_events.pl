@@ -474,7 +474,10 @@ sub print_leads {
 		&printer("|:---|:---|:---|:---|:---|\n");
 	}
 	else {
-		if (${report} ne "Broken") {
+		if (
+			(${report} ne "Broken") &&
+			(${report} ne "Graveyard")
+		) {
 			$report = "All";
 		};
 
@@ -482,8 +485,13 @@ sub print_leads {
 		&printer(1, "${LEVEL_2} ${report} Leads\n");
 		&printer(1, "\n");
 
-		&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
-		&printer(1, "|:---|:---|:---|:---|:---|\n");
+		if (${report} eq "Broken") {
+			&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
+			&printer(1, "|:---|:---|:---|:---|:---|\n");
+		} else {
+			&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM}\n");
+			&printer(1, "|:---|:---|:---|:---|\n");
+		};
 	};
 
 	foreach my $lead (sort({
@@ -628,8 +636,15 @@ sub print_leads {
 				$entries++;
 			};
 		}
+		elsif (${report} eq "Graveyard") {
+			if ($leads->{$lead}{$STS} eq "Not Interested") {
+				&printer(1, "| ${source} | ${status} | ${related} | ${subject}\n");
+
+				$entries++;
+			};
+		}
 		else {
-				&printer(1, "| ${source} | ${status} | ${related} | ${subject} | ${details}\n");
+				&printer(1, "| ${source} | ${status} | ${related} | ${subject}\n");
 
 				$entries++;
 		};
@@ -1033,6 +1048,7 @@ close(CSV) || die();
 if (%{$leads}) {
 	&print_leads("Broken");
 #>>>	&print_leads();
+	&print_leads("Graveyard");
 	&print_leads("Aging");
 };
 
