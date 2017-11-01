@@ -825,7 +825,8 @@ sub print_events {
 			))
 		) || (
 			(${report} eq "Active") && (
-				($events->{$event}{$RID})
+				($events->{$event}{$RID}) &&
+				($events->{$event}{$SUB} !~ m/${CLOSED_MARK}/)
 			)
 		)) {
 			if (${report} eq "Closed!") {
