@@ -103,6 +103,7 @@ my $HEAD_MARKER	= "#";
 
 my $S_UID	= "%-19.19s";
 my $S_DATE	= "%-19.19s";
+my $S_DATE_ONLY	= "%-10.10s";
 
 ########################################
 
@@ -115,6 +116,7 @@ my $CMP		= "Company";
 
 my $TID		= "ACTIVITYID";
 my $DUE		= "Due Date";
+my $CLT		= "Closed Time";
 my $TST		= "Status";
 my $PRI		= "Priority";
 
@@ -710,11 +712,12 @@ sub print_tasks {
 	};
 	&printer(1, "\n");
 
-	&printer(1, "| ${DUE} | ${TST} | ${PRI} | ${REL} | ${SUB}\n");
-	&printer(1, "|:---|:---|:---|:---|:---|\n");
+	&printer(1, "| ${DUE} | ${CLT} | ${TST} | ${PRI} | ${REL} | ${SUB}\n");
+	&printer(1, "|:---|:---|:---|:---|:---|:---|\n");
 
 	foreach my $task (sort({
 		(($tasks->{$a}{$DUE} || "") cmp ($tasks->{$b}{$DUE} || "")) ||
+		(($tasks->{$a}{$CLT} || "") cmp ($tasks->{$b}{$CLT} || "")) ||
 		(($tasks->{$a}{$REL} || "") cmp ($tasks->{$b}{$REL} || "")) ||
 		(($tasks->{$a}{$SUB} || "") cmp ($tasks->{$b}{$SUB} || ""))
 	} keys(%{$tasks}))) {
@@ -744,6 +747,7 @@ sub print_tasks {
 				($tasks->{$task}{$TST} eq ${report})
 		)) {
 			&printer(1, "| " . ($tasks->{$task}{$DUE} || ""));
+			&printer(1, " | " . ($tasks->{$task}{$CLT} ? sprintf("${S_DATE_ONLY}", $tasks->{$task}{$CLT}) : ""));
 			&printer(1, " | " . ($tasks->{$task}{$TST} || ""));
 			&printer(1, " | " . ($tasks->{$task}{$PRI} || ""));
 			&printer(1, " | ${related}");
