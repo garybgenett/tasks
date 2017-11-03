@@ -92,6 +92,8 @@ my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
 my $CLOSED_MARK	= "[\$]";
 
+my $SPLIT_CHAR	= "[\|]";
+
 my $SEC_IN_DAY	= 60 * 60 * 24;
 my $AGING_DAYS	= 28 * 5;
 
@@ -780,9 +782,9 @@ sub print_events {
 	my $entries	= "0";
 	my $output	= "";
 
-	if (${find} =~ /\|/) {
+	if (${find} =~ /${SPLIT_CHAR}/) {
 		# from "foreach my $search (@{ARGV})" and in "&update_file()" it is made pretty
-		($stderr, $case, $find, $label) = split(/\|/, ${find});
+		($stderr, $case, $find, $label) = split(/${SPLIT_CHAR}/, ${find});
 	};
 	if (!${label}) {
 		if ($find eq ".") {
