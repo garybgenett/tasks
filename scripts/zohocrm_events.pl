@@ -93,6 +93,8 @@ my $NON_ASCII_M	= "[^[:ascii:]]";
 my $CLOSED_MARK	= "[\$]";
 
 my $SPLIT_CHAR	= "[\|]";
+my $A_BEG_CHAR	= "[\[]";
+my $A_END_CHAR	= "[\]]";
 
 my $SEC_IN_DAY	= 60 * 60 * 24;
 my $AGING_DAYS	= 28 * 5;
@@ -773,6 +775,7 @@ sub print_tasks {
 sub print_events {
 	my $find	= shift() || ".";
 	my $keep	= shift() || [ $UID, $MOD, $BEG, $END, $SRC, $STS, $REL, $SUB, $DSC, ];
+	my $list	= shift() || [];
 
 	my $stderr	= "1";
 	my $case	= "";
@@ -874,6 +877,8 @@ sub print_events {
 	$output .= "\nEntries: ${entries}\n";
 	&printer(${stderr}, ${output});
 
+	&count_events(${stderr}, ${list});
+
 	return(0);
 };
 
@@ -933,6 +938,41 @@ sub print_event_fields {
 	};
 
 	&printer(${stderr}, ${output});
+
+	return(0);
+};
+
+########################################
+
+sub count_events {
+	my $stderr	= shift() || "";
+	my $list	= shift() || [];
+
+	my $count	= {};
+	my $entries	= "0";
+
+	if (@{$list}) {
+		&printer(${stderr}, "\n");
+		&printer(${stderr}, "| Match | Count |\n");
+		&printer(${stderr}, "|:---|:---|\n");
+
+		foreach my $item (@{$list}) {
+			if (!defined($count->{$item})) {
+				$count->{$item} = "0";
+			};
+
+			foreach my $event (keys(%{$events})) {
+				if ($events->{$event}{$SUB} =~ m/${item}/) {
+					$count->{$item}++;
+					${entries}++;
+				};
+			};
+
+			&printer(${stderr}, "| ${item} | $count->{$item}\n");
+		};
+
+		&printer(${stderr}, "\nEntries: ${entries}\n");
+	};
 
 	return(0);
 };
@@ -1073,6 +1113,17 @@ if (%{$events}) {
 	&print_events("Broken", [ $BEG, $STS, $REL, $SUB, ]);
 #>>>	&print_events();
 	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
+
+	my $counts = [];
+	my $opt_num = "0";
+	foreach my $opt (@{ARGV}) {
+		if (${opt} =~ m/[#][ ]Active[ ]${A_BEG_CHAR}(.*)${A_END_CHAR}$/) {
+			@{$counts} = split(/${SPLIT_CHAR}/, ${1});
+			&count_events("1", ${counts});
+			splice(@{ARGV}, ${opt_num}, 1);
+		};
+		${opt_num}++;
+	};
 };
 
 ########################################
@@ -1091,7 +1142,12 @@ if (%{$events}) {
 			&printer("\n");
 			&printer("${LEVEL_1} ${search}\n");
 		} else {
-			&print_events(${search}, [ $BEG, $STS, $REL, $SUB, ]);
+			my $counts = [];
+			if (${search} =~ m/[ ]${A_BEG_CHAR}(.*)${A_END_CHAR}$/) {
+				$search =~ s/[ ]${A_BEG_CHAR}(.*)${A_END_CHAR}$//;
+				@{$counts} = split(/${SPLIT_CHAR}/, ${1});
+			};
+			&print_events(${search}, [ $BEG, $STS, $REL, $SUB, ], ${counts});
 		};
 	};
 };
