@@ -21,9 +21,9 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
-#]    * GTD (`read status:pending project:.gtd`)
-#]    * Research (`read status:pending tags:.research`)
-#]    * Waiting (`read status:pending tags:.waiting`)
+#]        * GTD (`read status:pending project:.gtd`)
+#]        * Research (`read status:pending tags:.research`)
+#]        * Waiting (`read status:pending tags:.waiting`)
 #]    * Projects (`projects`)
 #]        * Active (`projects status:pending`)
 #]        * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done`)
@@ -35,7 +35,9 @@
 #]            * Active (`tags status:pending`)
 #]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE}; done`)
 #]    * Someday (`read project:.someday`)
-#]    * Verify (`fail`, `data`, `meta status:pending`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
+#]    * Verify
+#]        * Overview (`fail`, `data`, `meta status:pending`)
+#]        * Recurring (`read status:recurring`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
 #]    * Report (`.repo`)
 
 #[ _task_parse_cmd :: impersonate_command ]
@@ -62,6 +64,7 @@
 #|fail
 #|data
 #|meta status:pending
+#|read status:recurring
 #|+ACTIVE; task-recur status:recurring
 #|+ACTIVE; task-recur status.not:recurring
 #|.repo
@@ -88,6 +91,7 @@ task read project:.someday;
 task fail;
 task data;
 task meta status:pending;
+task read status:recurring;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status:recurring;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status.not:recurring;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
