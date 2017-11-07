@@ -463,6 +463,7 @@ sub update_file {
 sub print_leads {
 	my $report		= shift() || "";
 
+	my $stderr		= "1";
 	my $err_date_list	= {};
 	my $err_dates		= [];
 	my $entries		= "0";
@@ -472,6 +473,8 @@ sub print_leads {
 		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
 	}
 	elsif (${report} eq "Aging") {
+		$stderr = "0";
+
 		&printer("\n");
 		&printer("${LEVEL_2} QC Aging\n");
 		&printer("\n");
@@ -487,22 +490,21 @@ sub print_leads {
 			$report = "All";
 		};
 
-		&printer(1, "\n");
-		&printer(1, "${LEVEL_2} ${report} Leads\n");
-		&printer(1, "\n");
+		&printer(${stderr}, "\n");
+		&printer(${stderr}, "${LEVEL_2} ${report} Leads\n");
+		&printer(${stderr}, "\n");
 
 		if (${report} eq "Broken") {
-			&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
-			&printer(1, "|:---|:---|:---|:---|:---|\n");
+			&printer(${stderr}, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
+			&printer(${stderr}, "|:---|:---|:---|:---|:---|\n");
 		} else {
-			&printer(1, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM}\n");
-			&printer(1, "|:---|:---|:---|:---|\n");
+			&printer(${stderr}, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM}\n");
+			&printer(${stderr}, "|:---|:---|:---|:---|\n");
 		};
 	};
 
 	foreach my $lead (sort({
-		(
-			(${report} eq "Aging") &&
+		((${report} eq "Aging") &&
 			(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
 		) ||
 		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
@@ -586,7 +588,7 @@ sub print_leads {
 					${mod_days}	.= " days";
 					${overdue}	.= " days";
 
-					&printer("| ${modified} | ${mod_days} | " . (${last_log} || "-") . " | ${overdue} | ${subject}\n");
+					&printer(${stderr}, "| ${modified} | ${mod_days} | " . (${last_log} || "-") . " | ${overdue} | ${subject}\n");
 
 					$entries++;
 				};
@@ -637,20 +639,20 @@ sub print_leads {
 				if (!${details}) {
 					$details = ".";
 				};
-				&printer(1, "| ${source} | ${status} | ${related} | ${subject} | ${details}\n");
+				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject} | ${details}\n");
 
 				$entries++;
 			};
 		}
 		elsif (${report} eq "Graveyard") {
 			if ($leads->{$lead}{$STS} eq "Not Interested") {
-				&printer(1, "| ${source} | ${status} | ${related} | ${subject}\n");
+				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
 
 				$entries++;
 			};
 		}
 		else {
-				&printer(1, "| ${source} | ${status} | ${related} | ${subject}\n");
+				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
 
 				$entries++;
 		};
@@ -693,9 +695,9 @@ sub print_leads {
 		};
 	} else {
 		if (!${entries}) {
-			&printer(1, "|\n");
+			&printer(${stderr}, "|\n");
 		};
-		&printer(1, "\nEntries: ${entries}\n");
+		&printer(${stderr}, "\nEntries: ${entries}\n");
 	};
 
 	return(0);
