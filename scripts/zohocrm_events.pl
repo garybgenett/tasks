@@ -484,15 +484,24 @@ sub print_leads {
 	}
 	else {
 		if (
+			(${report} ne "Cancelled?") &&
 			(${report} ne "Broken") &&
 			(${report} ne "Graveyard")
 		) {
 			$report = "All";
 		};
 
-		&printer(${stderr}, "\n");
-		&printer(${stderr}, "${LEVEL_2} ${report} Leads\n");
-		&printer(${stderr}, "\n");
+		if (${report} eq "Cancelled?") {
+			$stderr = "0";
+
+			&printer(${stderr}, "\n");
+			&printer(${stderr}, "${LEVEL_2} ${report}\n");
+			&printer(${stderr}, "\n");
+		} else {
+			&printer(${stderr}, "\n");
+			&printer(${stderr}, "${LEVEL_2} ${report} Leads\n");
+			&printer(${stderr}, "\n");
+		};
 
 		if (${report} eq "Broken") {
 			&printer(${stderr}, "| ${SRC} | ${STS} | ${REL} | ${FNM}${NAME_DIV}${LNM} | ${DSC}\n");
@@ -506,6 +515,9 @@ sub print_leads {
 	foreach my $lead (sort({
 		((${report} eq "Aging") &&
 			(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
+		) ||
+		((${report} eq "Cancelled?") &&
+			(($leads->{$a}{$DSC_EXPORT} || "") cmp ($leads->{$b}{$DSC_EXPORT} || ""))
 		) ||
 		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
 		(($leads->{$a}{$LNM} || "") cmp ($leads->{$b}{$LNM} || "")) ||
@@ -592,6 +604,15 @@ sub print_leads {
 
 					$entries++;
 				};
+			};
+		}
+		elsif (${report} eq "Cancelled?") {
+			if (($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}/)) {
+				$subject = "**[X][" . $leads->{$lead}{$DSC_EXPORT} . "]** " . ${subject};
+
+				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
+
+				$entries++;
 			};
 		}
 		elsif (${report} eq "Broken") {
@@ -1094,6 +1115,13 @@ close(CSV) || die();
 ########################################
 
 if (%{$leads}) {
+	foreach my $lead (keys(%{$leads})) {
+		while ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
+			$leads->{$lead}{$DSC_EXPORT} = ${1};
+		};
+	};
+	&print_leads("Cancelled?");
+
 	&print_leads("Broken");
 #>>>	&print_leads();
 	&print_leads("Graveyard");
