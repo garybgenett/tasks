@@ -227,6 +227,7 @@ my $tasks		= $z->{"tasks"};
 my $events		= $z->{"events"};
 
 my $closed_list		= {};
+my $cancelled_list	= {};
 my $related_list	= {};
 my $null_events		= {};
 
@@ -517,7 +518,7 @@ sub print_leads {
 			(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
 		) ||
 		((${report} eq "Cancelled?") &&
-			(($leads->{$a}{$DSC_EXPORT} || "") cmp ($leads->{$b}{$DSC_EXPORT} || ""))
+			(($cancelled_list->{$a} || "") cmp ($cancelled_list->{$b} || ""))
 		) ||
 		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
 		(($leads->{$a}{$LNM} || "") cmp ($leads->{$b}{$LNM} || "")) ||
@@ -559,14 +560,13 @@ sub print_leads {
 			};
 		}
 		elsif (${report} eq "Aging") {
-			if ((
+			if (
 				($leads->{$lead}{$STS}) && (
 					($leads->{$lead}{$STS} eq "Closed Won") ||
 					($leads->{$lead}{$STS} eq "Demo")
-				)
-			) && (
-				(($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} !~ m/${DSC_EXPORT}/))
-			)) {
+				) &&
+				(!$cancelled_list->{$lead})
+			) {
 				my $modified = $leads->{$lead}{$MOD} || "";
 				my $mod_days = $modified;
 				my $last_log = "";
@@ -607,8 +607,8 @@ sub print_leads {
 			};
 		}
 		elsif (${report} eq "Cancelled?") {
-			if (($leads->{$lead}{$DSC}) && ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}/)) {
-				$subject = "**[X][" . $leads->{$lead}{$DSC_EXPORT} . "]** " . ${subject};
+			if ($cancelled_list->{$lead}) {
+				$subject = $cancelled_list->{$lead} . " " . ${subject};
 
 				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
 
@@ -878,14 +878,6 @@ sub print_events {
 		)) {
 			if (${report} eq "Closed!") {
 				print CSV "\"$events->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
-				if (
-					($leads->{ $events->{$event}{$RID} }{$DSC}) &&
-					($leads->{ $events->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}/)
-				) {
-					while ($leads->{ $events->{$event}{$RID} }{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
-						$events->{$event}{$DSC_EXPORT} = ${1};
-					};
-				};
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
@@ -943,7 +935,7 @@ sub print_event_fields {
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $SRC) { $value = ${rsource}; };
 		if (${val} eq $STS) { $value = ${rstatus}; };
-		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$DSC_EXPORT})) { $value = "**[X][" . ($vals->{$DSC_EXPORT} || "") . "]** " . ${value}; }; };
+		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$RID}) && defined($cancelled_list->{ $vals->{$RID} })) { $value = $cancelled_list->{ $vals->{$RID} } . " " . ${value}; }; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
 
@@ -1066,6 +1058,11 @@ foreach my $lead (keys(%{$leads})) {
 	if ($leads->{$lead}{$STS} && $leads->{$lead}{$STS} eq "Closed Won") {
 		$closed_list->{$lead}++;
 	};
+	foreach my $lead (keys(%{$leads})) {
+		while ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
+			$cancelled_list->{$lead} = "**[X][" . ${1} . "]**";
+		};
+	};
 };
 
 foreach my $event (keys(%{$events})) {
@@ -1115,13 +1112,7 @@ close(CSV) || die();
 ########################################
 
 if (%{$leads}) {
-	foreach my $lead (keys(%{$leads})) {
-		while ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
-			$leads->{$lead}{$DSC_EXPORT} = ${1};
-		};
-	};
 	&print_leads("Cancelled?");
-
 	&print_leads("Broken");
 #>>>	&print_leads();
 	&print_leads("Graveyard");
