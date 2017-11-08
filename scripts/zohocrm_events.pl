@@ -805,6 +805,7 @@ sub print_events {
 	my $label	= "";
 	my $report	= "";
 	my $fields	= {};
+	my $count_list	= [];
 	my $entries	= "0";
 	my $output	= "";
 
@@ -882,6 +883,7 @@ sub print_events {
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
 
+			push(@{$count_list}, ${event});
 			$entries++;
 		};
 	};
@@ -892,7 +894,7 @@ sub print_events {
 	$output .= "\nEntries: ${entries}\n";
 	&printer(${stderr}, ${output});
 
-	&count_events(${stderr}, ${list});
+	&count_events(${stderr}, ${count_list}, ${list});
 
 	return(0);
 };
@@ -961,32 +963,66 @@ sub print_event_fields {
 
 sub count_events {
 	my $stderr	= shift() || "";
+	my $count_list	= shift() || [];
 	my $list	= shift() || [];
 
 	my $count	= {};
 	my $entries	= "0";
 
-	if (@{$list}) {
+	if (@{$count_list} && @{$list}) {
 		&printer(${stderr}, "\n");
 		&printer(${stderr}, "| Match | Count |\n");
 		&printer(${stderr}, "|:---|:---|\n");
 
 		foreach my $item (@{$list}) {
-			if (!defined($count->{$item})) {
-				$count->{$item} = "0";
-			};
+			$count->{$item} = "0";
+		};
+		$count->{"DUPL"} = [];
+		$count->{"NULL"} = [];
 
-			foreach my $event (keys(%{$events})) {
+		foreach my $event (@{$count_list}) {
+			my $matched	= "0";
+
+			foreach my $item (@{$list}) {
 				if ($events->{$event}{$SUB} =~ m/${item}/) {
 					$count->{$item}++;
+					${matched}++;
 					${entries}++;
 				};
 			};
 
+			if (!${matched}) {
+				push(@{ $count->{"NULL"} }, ${event});
+			}
+			elsif (${matched} > 1) {
+				push(@{ $count->{"DUPL"} }, ${event});
+			};
+		};
+
+		foreach my $item (@{$list}) {
 			&printer(${stderr}, "| ${item} | $count->{$item}\n");
 		};
 
-		&printer(${stderr}, "\nEntries: ${entries}\n");
+		foreach my $error ("DUPL", "NULL") {
+			if (@{ $count->{$error} }) {
+				&printer(${stderr}, "| *("
+					. (($error eq "DUPL") ? "Duplicate"	: "")
+					. (($error eq "NULL") ? "Unmatched"	: "")
+					. ")* | *(" . scalar(@{ $count->{$error} }) . ")*"
+				);
+
+				foreach my $event (@{ $count->{$error} }) {
+					&printer(${stderr}, " [[" . $events->{$event}{$SUB} . "](" . &URL_LINK("Events", $events->{$event}{$UID}) . ")]");
+				};
+				&printer(${stderr}, "\n");
+			};
+		};
+
+		&printer(${stderr}, "\nEntries: ${entries}");
+		if (@{ $count->{"DUPL"} } || @{ $count->{"NULL"} }) {
+			&printer(${stderr}, " (" . ((${entries} - scalar(@{ $count->{"DUPL"} })) + scalar(@{ $count->{"NULL"} })) . ")");
+		};
+		&printer(${stderr}, "\n");
 	};
 
 	return(0);
@@ -1133,18 +1169,17 @@ if (%{$tasks}) {
 if (%{$events}) {
 	&print_events("Broken", [ $BEG, $STS, $REL, $SUB, ]);
 #>>>	&print_events();
-	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ]);
 
 	my $counts = [];
 	my $opt_num = "0";
 	foreach my $opt (@{ARGV}) {
 		if (${opt} =~ m/[#][ ]Active[ ]${A_BEG_CHAR}(.*)${A_END_CHAR}$/) {
 			@{$counts} = split(/${SPLIT_CHAR}/, ${1});
-			&count_events("1", ${counts});
 			splice(@{ARGV}, ${opt_num}, 1);
 		};
 		${opt_num}++;
 	};
+	&print_events("Active", [ $BEG, $STS, $REL, $SUB, ], ${counts});
 };
 
 ########################################
