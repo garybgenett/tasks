@@ -78,6 +78,7 @@ my $ALL_FILE	= "zoho.all.md";
 my $OUT_FILE	= "zoho.md";
 
 my $START_DATE	= "2016-10-24"; if ($ARGV[0] && $ARGV[0] =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) { $START_DATE = shift(); };
+my $CSV_DATE	= "2017-01-02";
 my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
@@ -471,7 +472,7 @@ sub print_leads {
 
 	if (${report} eq "CSV") {
 		print CSV "\"Date\",\"Day\",\"New\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
-		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\n";
+		print CSV "\"${CSV_DATE}\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\n";
 	}
 	elsif (${report} eq "Aging") {
 		$stderr = "0";
