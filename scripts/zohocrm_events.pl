@@ -470,8 +470,8 @@ sub print_leads {
 	my $entries		= "0";
 
 	if (${report} eq "CSV") {
-		print CSV "\"Date\",\"Day\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
-		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\n";
+		print CSV "\"Date\",\"Day\",\"New\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
+		print CSV "\"2017-01-02\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\n";
 	}
 	elsif (${report} eq "Aging") {
 		$stderr = "0";
@@ -536,6 +536,7 @@ sub print_leads {
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
+				my $new = "1";
 				while ($leads->{$lead}{$DSC} =~ m/^([0-9][0-9-]+[,]?[ ]?[A-Za-z]*)$/gm) {
 					if (${1}) {
 						my $match = ${1};
@@ -546,7 +547,8 @@ sub print_leads {
 
 							$subject =~ s/\"/\'/g;
 
-							print CSV "\"${date}\",\"${day}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+							$new = "";
 
 							if (!${day}) {
 								$day = "NULL";
@@ -878,7 +880,7 @@ sub print_events {
 			)
 		)) {
 			if (${report} eq "Closed!") {
-				print CSV "\"$events->{$event}{$BEG}\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
