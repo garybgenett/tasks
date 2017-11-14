@@ -87,8 +87,8 @@ my $NULL_CNAME	= "0 NULL";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_IMPORT	= "IMPORTED";
-my $DSC_EXP_NO	= "CANCELLED";	my $DSC_EXP_NO_I	= "X";
-my $DSC_EXP_YES	= "CANCEL";	my $DSC_EXP_YES_I	= "!";
+my $DSC_EXP_BD	= "CANCELLED";	my $DSC_EXP_BD_I	= "X";
+my $DSC_EXP_GD	= "CANCEL";	my $DSC_EXP_GD_I	= "!";
 my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
@@ -229,7 +229,8 @@ my $tasks		= $z->{"tasks"};
 my $events		= $z->{"events"};
 
 my $closed_list		= {};
-my $cancelled_list	= {};
+my $cancel_bd_list	= {};
+my $cancel_gd_list	= {};
 my $related_list	= {};
 my $null_events		= {};
 
@@ -520,7 +521,7 @@ sub print_leads {
 			(($leads->{$a}{$MOD} || "") cmp ($leads->{$b}{$MOD} || ""))
 		) ||
 		((${report} eq "Cancelled?") &&
-			(($cancelled_list->{$a} || "") cmp ($cancelled_list->{$b} || ""))
+			(($cancel_bd_list->{$a} || $cancel_gd_list->{$a} || "") cmp ($cancel_bd_list->{$b} || $cancel_gd_list->{$b} || ""))
 		) ||
 		(($leads->{$a}{$FNM} || "") cmp ($leads->{$b}{$FNM} || "")) ||
 		(($leads->{$a}{$LNM} || "") cmp ($leads->{$b}{$LNM} || "")) ||
@@ -569,7 +570,7 @@ sub print_leads {
 					($leads->{$lead}{$STS} eq "Closed Won") ||
 					($leads->{$lead}{$STS} eq "Demo")
 				) &&
-				(!$cancelled_list->{$lead})
+				(!$cancel_bd_list->{$lead})
 			) {
 				my $modified = $leads->{$lead}{$MOD} || "";
 				my $mod_days = $modified;
@@ -611,8 +612,8 @@ sub print_leads {
 			};
 		}
 		elsif (${report} eq "Cancelled?") {
-			if ($cancelled_list->{$lead}) {
-				$subject = $cancelled_list->{$lead} . " " . ${subject};
+			if ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) {
+				$subject = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) . " " . ${subject};
 
 				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
 
@@ -941,9 +942,15 @@ sub print_event_fields {
 		if (${val} eq $END) { $value = sprintf("${S_DATE}",	${value}); };
 		if (${val} eq $SRC) { $value = ${rsource}; };
 		if (${val} eq $STS) { $value = ${rstatus}; };
-		if (${val} eq $REL) { $value = ${related}; if (defined($vals->{$RID}) && defined($cancelled_list->{ $vals->{$RID} })) { $value = $cancelled_list->{ $vals->{$RID} } . " " . ${value}; }; };
+		if (${val} eq $REL) { $value = ${related}; };
 		if (${val} eq $SUB) { $value = ${subject}; };
 		if (${val} eq $DSC) { $value = ${details}; };
+
+		if ((${val} eq $REL) && (defined($vals->{$RID}))) {
+			if ($cancel_bd_list->{ $vals->{$RID} } || $cancel_gd_list->{ $vals->{$RID} }) {
+				$value = ($cancel_bd_list->{ $vals->{$RID} } || $cancel_gd_list->{ $vals->{$RID} }) . " " . ${value};
+			};
+		};
 
 		$output .= "| ${value} ";
 	};
@@ -1099,12 +1106,9 @@ foreach my $lead (keys(%{$leads})) {
 		$closed_list->{$lead}++;
 	};
 	foreach my $lead (keys(%{$leads})) {
-		while ($leads->{$lead}{$DSC} =~ m/(${DSC_EXP_NO}|${DSC_EXP_YES})[:]?(.*)$/gm) {
-			$cancelled_list->{$lead} = ""
-				. "**["
-				. ((${1} eq ${DSC_EXP_NO})	? ${DSC_EXP_NO_I}	: "")
-				. ((${1} eq ${DSC_EXP_YES})	? ${DSC_EXP_YES_I}	: "")
-				. "][" . ${2} . "]**";
+		while ($leads->{$lead}{$DSC} =~ m/(${DSC_EXP_BD}|${DSC_EXP_GD})[:]?(.*)$/gm) {
+			if (${1} eq ${DSC_EXP_BD}) { $cancel_bd_list->{$lead} = "**[${2}][${DSC_EXP_BD_I}]**"; };
+			if (${1} eq ${DSC_EXP_GD}) { $cancel_gd_list->{$lead} = "**[${2}][${DSC_EXP_GD_I}]**"; };
 		};
 	};
 };
