@@ -87,7 +87,8 @@ my $NULL_CNAME	= "0 NULL";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_IMPORT	= "IMPORTED";
-my $DSC_EXPORT	= "CANCELLED";
+my $DSC_EXP_NO	= "CANCELLED";	my $DSC_EXP_NO_I	= "X";
+my $DSC_EXP_YES	= "CANCEL";	my $DSC_EXP_YES_I	= "!";
 my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
@@ -1098,8 +1099,12 @@ foreach my $lead (keys(%{$leads})) {
 		$closed_list->{$lead}++;
 	};
 	foreach my $lead (keys(%{$leads})) {
-		while ($leads->{$lead}{$DSC} =~ m/${DSC_EXPORT}[:]?(.*)$/gm) {
-			$cancelled_list->{$lead} = "**[X][" . ${1} . "]**";
+		while ($leads->{$lead}{$DSC} =~ m/(${DSC_EXP_NO}|${DSC_EXP_YES})[:]?(.*)$/gm) {
+			$cancelled_list->{$lead} = ""
+				. "**["
+				. ((${1} eq ${DSC_EXP_NO})	? ${DSC_EXP_NO_I}	: "")
+				. ((${1} eq ${DSC_EXP_YES})	? ${DSC_EXP_YES_I}	: "")
+				. "][" . ${2} . "]**";
 		};
 	};
 };
