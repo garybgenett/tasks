@@ -670,7 +670,7 @@ sub print_leads {
 			};
 		}
 		elsif (${report} eq "Graveyard") {
-			if ($leads->{$lead}{$STS} eq "Not Interested") {
+			if (($leads->{$lead}{$STS}) && ($leads->{$lead}{$STS} eq "Not Interested")) {
 				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
 
 				$entries++;
