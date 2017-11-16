@@ -69,6 +69,7 @@ my $LEGEND_IMP	= "1";
 my $TODAY_NAME	= "Marker: Today";
 my $TODAY_EXP	= "zoho.today.txt";
 my $TODAY_IMP	= "zoho.today.out";
+my $TODAY_TMP	= "zoho.today.tmp";
 
 my $NOTES_FILE	= "zoho/_Note.csv";
 
@@ -171,19 +172,23 @@ if (!${APITOKEN}) {
 
 open(ALL_FILE, ">", ${ALL_FILE}) || die();
 open(OUT_FILE, ">", ${OUT_FILE}) || die();
+open(TODAY_TMP, ">", ${TODAY_TMP}) || die();
 
 sub printer {
 	my $output	= shift() || "";
 
 	my $stderr	= "0";
 
-	if (${output} =~ m/^[012]$/) {
+	if (${output} =~ m/^[0123]$/) {
 		$stderr = ${output};
 		$output = "";
 	};
 	$output .= join("", @{_});
 
-	if (${stderr} == 2) {
+	if (${stderr} == 3) {
+		print TODAY_TMP ${output};
+	}
+	elsif (${stderr} == 2) {
 		print ALL_FILE ${output};
 		print STDERR ${output};
 	}
@@ -901,6 +906,10 @@ sub print_events {
 
 	&count_events(${stderr}, ${count_list}, ${list});
 
+	if (!${report}) {
+		&today_tmp(${find}, ${count_list}, ${list});
+	};
+
 	return(0);
 };
 
@@ -1034,6 +1043,38 @@ sub count_events {
 			&printer(${stderr}, " (" . ((${entries} - scalar(@{ $count->{"DUPL"} })) + scalar(@{ $count->{"NULL"} })) . ")");
 		};
 		&printer(${stderr}, "\n");
+	};
+
+	return(0);
+};
+
+########################################
+
+sub today_tmp {
+	my $title	= shift() || "";
+	my $count_list	= shift() || [];
+	my $list	= shift() || [];
+
+	my $stderr	= "3";
+
+	if (@{$count_list} && @{$list}) {
+		foreach my $item (@{$list}) {
+			&printer(${stderr}, "${LEVEL_1} [${title}][${item}]\n");
+
+			foreach my $event (@{$count_list}) {
+				if ($events->{$event}{$SUB} =~ m/${item}/) {
+					my $comp = $events->{$event}{$SUB};
+					my $name = "";
+
+					if ($events->{$event}{$RID}) {
+						if ($leads->{ $events->{$event}{$RID} }{$CMP}) { $comp = $leads->{ $events->{$event}{$RID} }{$CMP}; };
+						if ($leads->{ $events->{$event}{$RID} }{$FNM}) { $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
+					};
+
+					&printer(${stderr}, "[${title}][${item}] ${comp} <${name}>\n");
+				};
+			};
+		};
 	};
 
 	return(0);
@@ -1224,6 +1265,7 @@ if (%{$events}) {
 
 close(ALL_FILE) || die();
 close(OUT_FILE) || die();
+close(TODAY_TMP) || die();
 
 exit(0);
 
