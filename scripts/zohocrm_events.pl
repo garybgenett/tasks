@@ -610,7 +610,7 @@ sub print_leads {
 					${mod_days}	.= " days";
 					${overdue}	.= " days";
 
-					&printer(${stderr}, "| ${modified} | ${mod_days} | " . (${last_log} || "-") . " | ${overdue} | ${related} | ${subject}\n");
+					&printer(${stderr}, "| ${modified} | ${mod_days} | ${last_log} | ${overdue} | ${related} | ${subject}\n");
 
 					$entries++;
 				};
