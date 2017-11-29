@@ -1056,6 +1056,18 @@ sub today_tmp {
 	my $list	= shift() || [];
 
 	my $stderr	= "3";
+	my $current	= [];
+
+	if (-f ${TODAY_IMP}) {
+		open(FILE, "<", ${TODAY_IMP}) || die();
+		@{$current} = split("\n", do { local $/; <FILE> });
+		close(FILE) || die();
+	}
+	elsif (-f ${TODAY_EXP}) {
+		open(FILE, "<", ${TODAY_EXP}) || die();
+		@{$current} = split("\n", do { local $/; <FILE> });
+		close(FILE) || die();
+	};
 
 	if (@{$count_list} && @{$list}) {
 		foreach my $item (@{$list}) {
@@ -1071,7 +1083,16 @@ sub today_tmp {
 						if ($leads->{ $events->{$event}{$RID} }{$FNM}) { $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
 					};
 
-					&printer(${stderr}, "[${title}][${item}] ${comp} <${name}>\n");
+					my $output = "[${title}][${item}] ${comp} <${name}>";
+					my $match = "0";
+					foreach my $line (@{$current}) {
+						if (${line} eq ${output}) {
+							$match = "1";
+						};
+					};
+					if (!${match}) {
+						&printer(${stderr}, "${output}\n");
+					};
 				};
 			};
 		};
