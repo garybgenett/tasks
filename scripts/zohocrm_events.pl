@@ -67,7 +67,7 @@ my $LEGEND_FILE	= ".zoho.reports";
 my $LEGEND_IMP	= "1";
 
 my $TODAY_NAME	= "Marker: Today";
-my $TODAY_EXP	= "zoho.today.txt";
+my $TODAY_EXP	= "zoho.today.md";
 my $TODAY_IMP	= "zoho.today.out";
 my $TODAY_TMP	= "zoho.today.tmp";
 
@@ -1084,7 +1084,7 @@ sub today_tmp {
 						if ($leads->{ $events->{$event}{$RID} }{$FNM}) { $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
 					};
 
-					my $output = "[${title}][${item}] ${comp} <${name}>";
+					my $output = "  * [${title}][${item}] ${comp} <${name}>";
 					my $match = "0";
 					foreach my $line (@{$current}) {
 						if (${line} eq ${output}) {
