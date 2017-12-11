@@ -381,7 +381,8 @@ sub update_file {
 		$output .= do { local $/; <FILE> };
 		# make the input for "&print_events()" and "foreach my $search (@{ARGV})" pretty
 		$output =~ s/^["]([${HEAD_MARKER}])[ ]([^"]*)["]$/${1} ${2}/gm;
-		$output =~ s/^["][^|]*[|][^|]*[|]([^|]*)[|]([^|]*)["]$/[${1}] ${2}/gm;
+		$output =~ s/^["][^|]*[|][^|]*[|]([^|]+)[|](.+)["]$/[${1}] ${2}/gm;
+		$output =~ s/[ ]${A_BEG_CHAR}(.*)${A_END_CHAR}$/ {${1}}/gm;
 		close(FILE) || die();
 	};
 
