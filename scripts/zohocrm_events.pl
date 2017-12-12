@@ -68,8 +68,8 @@ my $LEGEND_IMP	= "1";
 
 my $TODAY_NAME	= "Marker: Today";
 my $TODAY_EXP	= "zoho.today.md";
-my $TODAY_IMP	= "zoho.today.out";
-my $TODAY_TMP	= "zoho.today.tmp";
+my $TODAY_IMP	= "zoho.today.out.md";
+my $TODAY_TMP	= "zoho.today.tmp.md";
 
 my $NOTES_FILE	= "zoho/_Note.csv";
 
@@ -1058,6 +1058,8 @@ sub today_tmp {
 
 	my $stderr	= "3";
 	my $current	= [];
+	my $output	= "";
+	my $line;
 
 	if (-f ${TODAY_IMP}) {
 		open(FILE, "<", ${TODAY_IMP}) || die();
@@ -1072,7 +1074,7 @@ sub today_tmp {
 
 	if (@{$count_list} && @{$list}) {
 		foreach my $item (@{$list}) {
-			&printer(${stderr}, "${LEVEL_1} [${title}][${item}]\n");
+			$output .= "${LEVEL_2} [${title}][${item}]\n\n";
 
 			foreach my $event (@{$count_list}) {
 				if ($events->{$event}{$SUB} =~ m/${item}/) {
@@ -1084,20 +1086,24 @@ sub today_tmp {
 						if ($leads->{ $events->{$event}{$RID} }{$FNM}) { $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
 					};
 
-					my $output = "  * [${title}][${item}] ${comp} <${name}>";
+					$line = "  * [${title}][${item}] ${comp} <${name}>";
 					my $match = "0";
-					foreach my $line (@{$current}) {
-						if (${line} eq ${output}) {
+					foreach my $test (@{$current}) {
+						if (${test} eq ${line}) {
 							$match = "1";
 						};
 					};
 					if (!${match}) {
-						&printer(${stderr}, "${output}\n");
+						$output .= "${line}\n";
 					};
 				};
 			};
+
+			$output .= "\n";
 		};
 	};
+
+	&printer(${stderr}, ${output});
 
 	return(0);
 };
