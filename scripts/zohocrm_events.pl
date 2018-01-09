@@ -1089,7 +1089,7 @@ sub today_tmp {
 					$line = "  * [${title}][${item}] ${comp} <${name}>";
 					my $match = "0";
 					foreach my $test (@{$current}) {
-						if (${test} eq ${line}) {
+						if (${test} =~ m/\Q${line}\E/) {
 							$match = "1";
 						};
 					};
