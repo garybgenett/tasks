@@ -95,6 +95,7 @@ my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
 my $CLOSED_MARK	= "[\$]";
 
+my $MARK_REGEX	= "^([A-Z:-]+)[:][ ]";
 my $SPLIT_CHAR	= "[\|]";
 my $A_BEG_CHAR	= "[\[]";
 my $A_END_CHAR	= "[\]]";
@@ -1074,19 +1075,34 @@ sub today_tmp {
 
 	if (@{$count_list} && @{$list}) {
 		foreach my $item (@{$list}) {
-			$output .= "${LEVEL_2} [${title}][${item}]\n\n";
+			$output .= "${LEVEL_2} [${title}|${item}]\n\n";
 
 			foreach my $event (@{$count_list}) {
 				if ($events->{$event}{$SUB} =~ m/${item}/) {
+					my $mark = "[${title}|${item}]";
 					my $comp = $events->{$event}{$SUB};
 					my $name = "";
 
 					if ($events->{$event}{$RID}) {
-						if ($leads->{ $events->{$event}{$RID} }{$CMP}) { $comp = $leads->{ $events->{$event}{$RID} }{$CMP}; };
-						if ($leads->{ $events->{$event}{$RID} }{$FNM}) { $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
+						$comp =~ s/^${MARK_REGEX}//;
+						if (${1})					{ $mark = "[${1}]"; };
+						if ($leads->{ $events->{$event}{$RID} }{$CMP})	{ $comp = $leads->{ $events->{$event}{$RID} }{$CMP}; };
+						if ($leads->{ $events->{$event}{$RID} }{$FNM})	{ $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
 					};
 
-					$line = "  * [${title}][${item}] ${comp} <${name}>";
+					$line = "  * ${mark} ${comp} <${name}> {";
+					$line .= (($events->{$event}{$BEG}) ? $events->{$event}{$BEG} : "");
+					foreach my $task (sort(keys(%{$tasks}))) {
+						if (
+							($tasks->{$task}{$RID}) &&
+							($tasks->{$task}{$RID} eq $events->{$event}{$RID}) &&
+							($tasks->{$task}{$TST} eq "Not Started")
+						) {
+							$line .= "|" . $tasks->{$task}{$SUB};
+						};
+					};
+					$line .= "}";
+
 					my $match = "0";
 					foreach my $test (@{$current}) {
 						if (${test} =~ m/\Q${line}\E/) {
