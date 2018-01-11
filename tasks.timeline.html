@@ -5,11 +5,12 @@
 <!-- http://simile-widgets.org/wiki/Timeline_EventSources -->
 <!-- http://simile-widgets.org/wiki/Timeline_CreatingNewThemes -->
 <!-- http://simile-widgets.org/wiki/Timeline_ThemeClass -->
+<!-- https://groups.google.com/forum/#!topic/simile-widgets/xn4zA6PwpVg -->
 <script type="text/javascript" src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js"></script>
 <script type="text/javascript">
 function onLoad() {
-	var eventSource		= new Timeline.DefaultEventSource();
 	var projectSource	= new Timeline.DefaultEventSource();
+	var eventSource		= new Timeline.DefaultEventSource();
 	var theme = Timeline.ClassicTheme.create();
 		theme.timeline_start			= new Date(Date.UTC(2014,3,0,0,0,0,0));
 		theme.timeline_stop			= new Date(Date.UTC(2038,1,19,0,0,0,0));
@@ -22,19 +23,11 @@ function onLoad() {
 		theme.event.track.height		= 20;
 	var bandInfos = [
 		Timeline.createBandInfo({
-			eventSource:	eventSource,
-			intervalUnit:	Timeline.DateTime.HOUR,
-			overview:	false,
-			width:		"40%",
-			intervalPixels:	40,	// about a day
-			theme:		theme,
-		}),
-		Timeline.createBandInfo({
-			eventSource:	eventSource,
-			intervalUnit:	Timeline.DateTime.DAY,
+			eventSource:	projectSource,
+			intervalUnit:	Timeline.DateTime.MONTH,
 			overview:	true,
 			width:		"10%",
-			intervalPixels:	140,	// about a week
+			intervalPixels:	80,	// about a year
 			theme:		theme,
 		}),
 		Timeline.createBandInfo({
@@ -46,22 +39,36 @@ function onLoad() {
 			theme:		theme,
 		}),
 		Timeline.createBandInfo({
-			eventSource:	projectSource,
-			intervalUnit:	Timeline.DateTime.MONTH,
+			eventSource:	eventSource,
+			intervalUnit:	Timeline.DateTime.DAY,
 			overview:	true,
 			width:		"10%",
-			intervalPixels:	80,	// about a year
+			intervalPixels:	140,	// about a week
+			theme:		theme,
+		}),
+		Timeline.createBandInfo({
+			eventSource:	eventSource,
+			intervalUnit:	Timeline.DateTime.HOUR,
+			overview:	false,
+			width:		"40%",
+			intervalPixels:	40,	// about a day
 			theme:		theme,
 		}),
 	];
-	bandInfos[1].syncWith = 0; bandInfos[1].highlight = true;
-	bandInfos[2].syncWith = 1; bandInfos[2].highlight = true;
-	bandInfos[3].syncWith = 2; bandInfos[3].highlight = true;
+	bandInfos[0].syncWith = 1; bandInfos[0].highlight = true;
+	bandInfos[1].syncWith = 2; bandInfos[1].highlight = true;
+	bandInfos[2].syncWith = 3; bandInfos[2].highlight = true;
 	timeline = Timeline.create(document.getElementById("timeline"), bandInfos);
-	Timeline.loadJSON("tasks.timeline.json",		function(json,url){eventSource.loadJSON(json,url);});
 	Timeline.loadJSON("tasks.timeline.projects.json",	function(json,url){projectSource.loadJSON(json,url);});
+	Timeline.loadJSON("tasks.timeline.json",		function(json,url){eventSource.loadJSON(json,url);});
 }
 </script>
+<style>
+	.timeline-band-0 .timeline-ether-bg{background-color:#d0d0d0}
+	.timeline-band-1 .timeline-ether-bg{background-color:#e0e0e0}
+	.timeline-band-2 .timeline-ether-bg{background-color:#d0d0d0}
+	.timeline-band-3 .timeline-ether-bg{background-color:#e0e0e0}
+</style>
 </head>
 <body onload="onLoad();" onresize="onLoad();">
 <noscript>This page requires Javascript.</noscript>
