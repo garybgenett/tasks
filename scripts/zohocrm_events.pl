@@ -1149,10 +1149,10 @@ sub print_notes {
 	&printer(1, "\n");
 	&printer(1, "${LEVEL_2} Exported Notes\n");
 	&printer(1, "\n");
-	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export): ${updated}\n");
-	&printer(1, "\n");
-	&printer(1, "[[Recycle Bin]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=recyclebin)\n");
-	&printer(1, "\n");
+	&printer(1, "[[Recycle Bin]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=recyclebin)");
+	&printer(1, "${NAME_DIV}");
+	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export): ${updated}");
+	&printer(1, "\n\n");
 	&printer(1, "| Notes Count | ${FNM}${NAME_DIV}${LNM} |\n");
 	&printer(1, "|:---|:---|\n");
 
