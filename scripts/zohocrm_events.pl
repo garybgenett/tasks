@@ -1151,6 +1151,8 @@ sub print_notes {
 	&printer(1, "\n");
 	&printer(1, "[[Export Link]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=export): ${updated}\n");
 	&printer(1, "\n");
+	&printer(1, "[[Recycle Bin]](https://crm.zoho.com/crm/ShowSetup.do?tab=data&subTab=recyclebin)\n");
+	&printer(1, "\n");
 	&printer(1, "| Notes Count | ${FNM}${NAME_DIV}${LNM} |\n");
 	&printer(1, "|:---|:---|\n");
 
