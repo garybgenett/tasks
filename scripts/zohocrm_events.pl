@@ -1119,7 +1119,8 @@ sub today_tmp_format {
 		if ($leads->{ $events->{$event}{$RID} }{$FNM})	{ $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
 	};
 
-	$line = "  * ${mark} ${comp} {${name}} {";
+	$line = "  * ${mark} ${comp} {${name}}";
+	$line .= " {";
 	$line .= (($events->{$event}{$BEG}) ? $events->{$event}{$BEG} : "");
 	foreach my $task (sort(keys(%{$tasks}))) {
 		if (
@@ -1131,6 +1132,7 @@ sub today_tmp_format {
 		};
 	};
 	$line .= "}";
+	$line .= (($events->{$event}{$LOC}) ? (" -- " . $events->{$event}{$LOC}) : "");
 
 	return(${line});
 };
