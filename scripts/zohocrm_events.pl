@@ -1079,29 +1079,7 @@ sub today_tmp {
 
 			foreach my $event (@{$count_list}) {
 				if ($events->{$event}{$SUB} =~ m/${item}/) {
-					my $mark = "[${title}|${item}]";
-					my $comp = $events->{$event}{$SUB};
-					my $name = "";
-
-					if ($events->{$event}{$RID}) {
-						$comp =~ s/^${MARK_REGEX}//;
-						if (${1})					{ $mark = "[${1}]"; };
-						if ($leads->{ $events->{$event}{$RID} }{$CMP})	{ $comp = $leads->{ $events->{$event}{$RID} }{$CMP}; };
-						if ($leads->{ $events->{$event}{$RID} }{$FNM})	{ $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
-					};
-
-					$line = "  * ${mark} ${comp} {${name}} {";
-					$line .= (($events->{$event}{$BEG}) ? $events->{$event}{$BEG} : "");
-					foreach my $task (sort(keys(%{$tasks}))) {
-						if (
-							($tasks->{$task}{$RID}) &&
-							($tasks->{$task}{$RID} eq $events->{$event}{$RID}) &&
-							($tasks->{$task}{$TST} eq "Not Started")
-						) {
-							$line .= "|" . $tasks->{$task}{$SUB};
-						};
-					};
-					$line .= "}";
+					$line = &today_tmp_format(${event}, "[${title}|${item}]");
 
 					my $match = "0";
 					foreach my $test (@{$current}) {
@@ -1120,6 +1098,78 @@ sub today_tmp {
 	};
 
 	&printer(${stderr}, ${output});
+
+	return(0);
+};
+
+########################################
+
+sub today_tmp_format {
+	my $event	= shift() || "";
+	my $mark	= shift() || "[${DSC_FLAG}]";
+	my $line;
+
+	my $comp = $events->{$event}{$SUB};
+	my $name = "";
+
+	if ($events->{$event}{$RID}) {
+		$comp =~ s/^${MARK_REGEX}//;
+		if (${1})					{ $mark = "[${1}]"; };
+		if ($leads->{ $events->{$event}{$RID} }{$CMP})	{ $comp = $leads->{ $events->{$event}{$RID} }{$CMP}; };
+		if ($leads->{ $events->{$event}{$RID} }{$FNM})	{ $name = $leads->{ $events->{$event}{$RID} }{$FNM}; };
+	};
+
+	$line = "  * ${mark} ${comp} {${name}} {";
+	$line .= (($events->{$event}{$BEG}) ? $events->{$event}{$BEG} : "");
+	foreach my $task (sort(keys(%{$tasks}))) {
+		if (
+			(($tasks->{$task}{$RID}) && ($events->{$event}{$RID})) &&
+			($tasks->{$task}{$RID} eq $events->{$event}{$RID}) &&
+			($tasks->{$task}{$TST} eq "Not Started")
+		) {
+			$line .= "|" . $tasks->{$task}{$SUB};
+		};
+	};
+	$line .= "}";
+
+	return(${line});
+};
+
+########################################
+
+sub today_tmp_reverse {
+	my $stderr	= "3";
+	my $current	= [];
+
+	if (-f ${TODAY_IMP}) {
+		open(FILE, "<", ${TODAY_IMP}) || die();
+		@{$current} = split("\n", do { local $/; <FILE> });
+		close(FILE) || die();
+	}
+	elsif (-f ${TODAY_EXP}) {
+		open(FILE, "<", ${TODAY_EXP}) || die();
+		@{$current} = split("\n", do { local $/; <FILE> });
+		close(FILE) || die();
+	};
+
+	my $lines = [];
+	foreach my $event (sort(keys(%{$events}))) {
+		push(@{$lines}, &today_tmp_format($events->{$event}{$UID}));
+	};
+
+	&printer(${stderr}, "${LEVEL_2} [${DSC_FLAG}]\n\n");
+
+	foreach my $test (@{$current}) {
+		my $match = "0";
+		foreach my $line (@{$lines}) {
+			if (${test} =~ m/\Q${line}\E/) {
+				$match = "1";
+			};
+		};
+		if (!${match}) {
+			&printer(${stderr}, "\t${test}\n");
+		};
+	};
 
 	return(0);
 };
@@ -1305,6 +1355,8 @@ if (%{$events}) {
 			&print_events(${search}, [ $BEG, $STS, $REL, $SUB, ], ${counts});
 		};
 	};
+
+	&today_tmp_reverse();
 };
 
 ########################################
