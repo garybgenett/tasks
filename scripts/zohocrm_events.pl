@@ -342,6 +342,7 @@ sub parse_entry {
 
 sub find_notes_entries {
 	my $notes	= {};
+	my $matches	= "0";
 
 	&printer(2, "\n");
 	&printer(2, "\tNotes Search");
@@ -379,6 +380,7 @@ sub find_notes_entries {
 				$content =~ s|\]\]>.*$||gms;
 
 				$notes->{$lead}{$created} = ${content};
+				${matches}++;
 			};
 		};
 	};
@@ -404,11 +406,9 @@ sub find_notes_entries {
 				&printer(2, "\t\t\t${content}\n");
 			};
 		};
-
-		return(1);
 	};
 
-	return(0);
+	return(${matches});
 };
 
 ########################################
@@ -464,8 +464,8 @@ sub update_file {
 	foreach my $event (keys(%{$events})) {
 		if ($events->{$event}{$SUB} eq ${title}) {
 			$uid = $events->{$event}{$UID};
-			&printer(2, "\t${uid}: $events->{$event}{$MOD}\n");
 
+			&printer(2, "\t${uid}: $events->{$event}{$MOD}\n");
 			${matches}++;
 		};
 	};
@@ -1315,7 +1315,7 @@ foreach my $type (
 		(${type} eq "Leads") &&
 		(${FIND_NOTES})
 	) {
-		if(!&find_notes_entries()) {
+		if(&find_notes_entries()) {
 			exit(1);
 		};
 	};
