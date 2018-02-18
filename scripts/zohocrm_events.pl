@@ -238,7 +238,7 @@ my $closed_list		= {};
 my $cancel_bd_list	= {};
 my $cancel_gd_list	= {};
 my $related_list	= {};
-my $null_events		= {};
+my $empty_events	= [];
 
 ########################################
 
@@ -1258,7 +1258,7 @@ foreach my $event (keys(%{$events})) {
 	};
 
 	if ($events->{$event}{$SUB} eq ${NULL_ENAME}) {
-		$null_events->{ $events->{$event}{$BEG} }++;
+		push(@{$empty_events}, "[" . $events->{$event}{$BEG} . "](" . &URL_LINK("Events", $events->{$event}{$UID}) . ")");
 	};
 };
 
@@ -1269,11 +1269,11 @@ if (%{$events}) {
 	&update_today();
 };
 
-if (%{$null_events}) {
+if (@{$empty_events}) {
 	&printer(2, "\n");
 	&printer(2, "\tEmpty Events:\n");
-	foreach my $entry (sort(keys(%{$null_events}))) {
-		&printer(2, "\t\t${entry} = $null_events->{$entry}\n");
+	foreach my $entry (sort(@{$empty_events})) {
+		&printer(2, "\t\t${entry}\n");
 	};
 };
 
