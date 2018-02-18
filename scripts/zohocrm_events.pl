@@ -476,7 +476,7 @@ sub print_leads {
 
 	my $stderr		= "1";
 	my $err_date_list	= {};
-	my $err_dates		= [];
+	my $err_dates		= {};
 	my $entries		= "0";
 
 	if (${report} eq "CSV") {
@@ -565,7 +565,7 @@ sub print_leads {
 							};
 							push(@{ $err_date_list->{$date}{$day} }, ${subject});
 						} else {
-							push(@{$err_dates}, "${match} = ${subject}");
+							push(@{ $err_dates->{"NULL"}{$match} }, ${subject});
 						};
 					};
 				};
@@ -692,7 +692,7 @@ sub print_leads {
 	};
 
 	if (${report} eq "CSV") {
-		if ((${err_date_list}) || (${err_dates})) {
+		if ((%{$err_date_list}) || (%{$err_dates})) {
 			foreach my $date (sort(keys(%{$err_date_list}))) {
 				my $date_list = [];
 				@{$date_list} = sort(keys(%{ $err_date_list->{$date} }));
@@ -707,22 +707,26 @@ sub print_leads {
 					(!defined($err_date_list->{$date}{$is_day})) ||
 					($#{$date_list} >= 1)
 				) {
-					my $entry = "${date}, ${is_day}\n";
+					my $entry = "${date}, ${is_day}";
 					foreach my $day (sort(@{$date_list})) {
-						$entry .= "\t\t\t[${day}]\n";
 						foreach my $item (sort(@{ $err_date_list->{$date}{$day} })) {
-							$entry .= "\t\t\t\t${item}\n";
+							push(@{ $err_dates->{$entry}{$day} }, ${item});
 						};
 					};
-					push(@{$err_dates}, ${entry});
 				};
 			};
 
-			if (@{$err_dates}) {
+			if (%{$err_dates}) {
 				&printer(2, "\n");
 				&printer(2, "\tBroken Dates:\n");
-				foreach my $entry (@{$err_dates}) {
-					&printer(2, "\t\t${entry}\n");
+				foreach my $date (sort(keys(%{$err_dates}))) {
+					&printer(2, "\t\t[${date}]\n");
+					foreach my $day (sort(keys(%{$err_dates->{$date}}))) {
+						&printer(2, "\t\t\t[${day}]\n");
+						foreach my $item (sort(@{$err_dates->{$date}{$day}})) {
+							&printer(2, "\t\t\t\t${item}\n");
+						};
+					};
 				};
 			};
 		};
