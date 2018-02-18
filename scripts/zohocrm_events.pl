@@ -71,6 +71,7 @@ my $TODAY_EXP	= "zoho.today.md";
 my $TODAY_IMP	= "zoho.today.out.md";
 my $TODAY_TMP	= "zoho.today.tmp.md";
 
+my $FIND_NOTES	= "0";
 my $NOTES_FILE	= "zoho/_Note.csv";
 
 my $JSON_BASE	= "zoho-export";
@@ -336,6 +337,79 @@ sub parse_entry {
 
 	return(${mod}, ${uid}, ${new});
 }
+
+########################################
+
+sub find_notes_entries {
+	my $notes	= {};
+
+	&printer(2, "\n");
+	&printer(2, "\tNotes Search");
+
+	my $url_get = &URL_FETCH("Notes");
+	$url_get =~ s/getRecords/getRelatedRecords/g;
+	$url_get =~ s/json/xml/g;
+
+	foreach my $lead (sort(keys(%{$leads}))) {
+		&printer(2, ".");
+
+		$mech->get(${url_get}
+			. "?scope=${URL_SCOPE}"
+			. "&authtoken=${APITOKEN}"
+			. "&id=${lead}"
+			. "&parentModule=Leads"
+		) && $API_REQUEST_COUNT++;
+
+		if ($mech->content() =~ m/[<]error[>]/) {
+			&printer(2, "\nGET[" . $mech->content() . "]\n");
+			&printer(2, "\n");
+			die();
+		};
+
+		my $result = $mech->content();
+
+		if (${result} !~ m|<nodata>|) {
+			while (${result} =~ m|<row no="[0-9]+">(.+?)</row>|gms) {
+				my $note = ${1};
+				my $created = ${note};
+				my $content = ${note};
+				$created =~ s|^.*<FL val="Created Time"><!\[CDATA\[||gms;
+				$created =~ s|\]\]>.*$||gms;
+				$content =~ s|^.*<FL val="Note Content"><!\[CDATA\[||gms;
+				$content =~ s|\]\]>.*$||gms;
+
+				$notes->{$lead}{$created} = ${content};
+			};
+		};
+	};
+
+	&printer(2, "\n");
+
+	if (%{$notes}) {
+		&printer(2, "\n");
+		&printer(2, "\tNotes Entries:\n");
+
+		foreach my $lead (sort(keys(%{$notes}))) {
+			my $subject = ($leads->{$lead}{$FNM} || "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} || "");
+			$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
+			&printer(2, "\t\t${subject}\n");
+
+			foreach my $note (sort(keys(%{$notes->{$lead}}))) {
+				my $content = $notes->{$lead}{$note};
+
+				$content =~ s|\n|\n\t\t\t|gms;
+				$content =~ s|\t\t\t$||gms;
+
+				&printer(2, "\t\t\tNOTES ENTRY (${note}):\n");
+				&printer(2, "\t\t\t${content}\n");
+			};
+		};
+
+		return(1);
+	};
+
+	return(0);
+};
 
 ########################################
 
@@ -1236,6 +1310,15 @@ foreach my $type (
 	my $var = lc(${type});
 
 	%{ $z->{$var} } = &fetch_entries(${type});
+
+	if (
+		(${type} eq "Leads") &&
+		(${FIND_NOTES})
+	) {
+		if(!&find_notes_entries()) {
+			exit(1);
+		};
+	};
 
 	open(JSON, ">", ${JSON_BASE} . "." . ${var} . ".json") || die();
 	print JSON $json->encode($z->{$var});
