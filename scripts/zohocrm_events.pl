@@ -437,8 +437,8 @@ sub update_file {
 			$post_data .= '<Events>';
 			$post_data .= '<row no="1">';
 			$post_data .= '<FL val="' . ${UID} . '">' . ${uid} . '</FL>';
-			$post_data .= '<FL val="Subject"><![CDATA[' . ${title} . ']]></FL>';
-			$post_data .= '<FL val="Description"><![CDATA[' . ${output} . ']]></FL>';
+			$post_data .= '<FL val="' . ${SUB} . '"><![CDATA[' . ${title} . ']]></FL>';
+			$post_data .= '<FL val="' . ${DSC} . '"><![CDATA[' . ${output} . ']]></FL>';
 			$post_data .= '</row>';
 			$post_data .= '</Events>';
 
