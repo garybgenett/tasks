@@ -54,7 +54,7 @@ sub URL_LINK	{ "https://crm.zoho.com/crm/EntityInfo.do?module=" . shift() . "&id
 my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
-my $APP_NAME	= "Event_Download";
+my $APP_NAME	= "ZohoCRM Export";
 my $THOROUGH	= "1";
 
 ########################################
