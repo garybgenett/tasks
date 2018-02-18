@@ -1273,6 +1273,12 @@ if (%{$events}) {
 	&update_today();
 };
 
+open(CSV, ">", ${CSV_FILE}) || die();
+if (%{$leads}) {
+	&print_leads("CSV");
+};
+close(CSV) || die();
+
 if (@{$empty_events}) {
 	&printer(2, "\n");
 	&printer(2, "\tEmpty Events:\n");
@@ -1283,21 +1289,20 @@ if (@{$empty_events}) {
 
 ########################################
 
-open(CSV, ">", ${CSV_FILE}) || die();
+&printer(2, "\n");
+&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
 
-if (%{$leads}) {
-	&print_leads("CSV");
-};
+################################################################################
 
 &printer(1, "\n");
 &printer("${LEVEL_1} Core Reports\n");
 
+open(CSV, ">", ${CSV_FILE}) || die();
 if (%{$events}) {
 	&print_events("Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
 	&printer("\n");
 	&printer("Closed: " . scalar(keys(%{$closed_list})) . "\n");
 };
-
 close(CSV) || die();
 
 ########################################
@@ -1365,7 +1370,7 @@ if (%{$events}) {
 	&today_tmp_reverse();
 };
 
-########################################
+################################################################################
 
 close(ALL_FILE) || die();
 close(OUT_FILE) || die();
