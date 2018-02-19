@@ -1500,7 +1500,7 @@ if (${fail_exit}) {
 &printer(1, "\n");
 &printer("${LEVEL_1} Core Reports\n");
 
-open(CSV, ">", ${CSV_FILE}) || die();
+open(CSV, ">>", ${CSV_FILE}) || die();
 if (%{$events}) {
 	&print_events("Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
 	&printer("\n");
