@@ -241,6 +241,8 @@ my $cancel_gd_list	= {};
 my $related_list	= {};
 my $empty_events	= [];
 
+my $fail_exit		= "0";
+
 ########################################
 
 sub fetch_entries {
@@ -308,9 +310,7 @@ sub fetch_entries {
 
 	&printer(2, "\n");
 
-	&printer(2, "\n");
 	&printer(2, "\tTotal ${type}: " . scalar(keys(%{$fetches})) . "\n");
-	&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
 
 	return(%{$fetches});
 };
@@ -367,7 +367,6 @@ sub update_file {
 	my $import	= shift();
 
 	my $uid		= "";
-	my $matches	= "0";
 	my $output	= "";
 	my $input;
 
@@ -393,7 +392,6 @@ sub update_file {
 			$uid = $events->{$event}{$UID};
 
 			&printer(2, "\t${uid}: $events->{$event}{$MOD}\n");
-			${matches}++;
 		};
 	};
 
@@ -463,10 +461,6 @@ sub update_file {
 		&printer(2, "\tSkipped!\n");
 	};
 
-	&printer(2, "\n");
-	&printer(2, "\tMatches: ${matches}\n");
-	&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
-
 	return(0);
 };
 
@@ -474,7 +468,6 @@ sub update_file {
 
 sub find_notes_entries {
 	my $notes	= {};
-	my $matches	= "0";
 
 	&printer(2, "\n");
 	&printer(2, "\tNotes Search");
@@ -512,7 +505,6 @@ sub find_notes_entries {
 				$content =~ s|\]\]>.*$||gms;
 
 				$notes->{$lead}{$created} = ${content};
-				${matches}++;
 			};
 		};
 	};
@@ -522,6 +514,7 @@ sub find_notes_entries {
 	if (%{$notes}) {
 		&printer(2, "\n");
 		&printer(2, "\tNotes Entries:\n");
+		$fail_exit = "1";
 
 		foreach my $lead (sort(keys(%{$notes}))) {
 			my $subject = ($leads->{$lead}{$FNM} || "") . ${NAME_DIV} . ($leads->{$lead}{$LNM} || "");
@@ -540,7 +533,7 @@ sub find_notes_entries {
 		};
 	};
 
-	return(${matches});
+	return(0);
 };
 
 ########################################
@@ -793,6 +786,8 @@ sub print_leads {
 			if (%{$err_dates}) {
 				&printer(2, "\n");
 				&printer(2, "\tBroken Dates:\n");
+				$fail_exit = "1";
+
 				foreach my $date (sort(keys(%{$err_dates}))) {
 					&printer(2, "\t\t[${date}]\n");
 					foreach my $day (sort(keys(%{$err_dates->{$date}}))) {
@@ -1351,9 +1346,7 @@ if (
 	(%{$leads}) &&
 	(${FIND_NOTES})
 ) {
-	if(&find_notes_entries()) {
-		exit(1);
-	};
+	&find_notes_entries();
 };
 
 open(CSV, ">", ${CSV_FILE}) || die();
@@ -1365,6 +1358,8 @@ close(CSV) || die();
 if (@{$empty_events}) {
 	&printer(2, "\n");
 	&printer(2, "\tEmpty Events:\n");
+	$fail_exit = "1";
+
 	foreach my $entry (sort(@{$empty_events})) {
 		&printer(2, "\t\t${entry}\n");
 	};
@@ -1373,7 +1368,11 @@ if (@{$empty_events}) {
 ########################################
 
 &printer(2, "\n");
-&printer(2, "\tRequests: ${API_REQUEST_COUNT}\n");
+&printer(2, "\tTotal Requests: ${API_REQUEST_COUNT}\n");
+
+if (${fail_exit}) {
+	exit(${fail_exit});
+};
 
 ################################################################################
 
