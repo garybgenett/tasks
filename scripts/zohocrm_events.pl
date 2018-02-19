@@ -544,6 +544,60 @@ sub find_notes_entries {
 
 ########################################
 
+sub check_recycle_bin {
+	my $recycled	= {};
+
+	foreach my $type (
+		"Leads",
+		"Tasks",
+		"Events",
+	) {
+		my $url_get = &URL_FETCH(${type});
+		$url_get =~ s/getRecords/getDeletedRecordIds/g;
+		$url_get =~ s/json/xml/g;
+
+		$mech->get(${url_get}
+			. "?scope=${URL_SCOPE}"
+			. "&authtoken=${APITOKEN}"
+			. "&sortColumnString=${SORT_COLUMN}"
+			. "&sortOrderString=${SORT_ORDER}"
+			. "&toIndex=${MAX_RECORDS}"
+		) && $API_REQUEST_COUNT++;
+
+		if ($mech->content() =~ m/[<]error[>]/) {
+			&printer(2, "\nGET[" . $mech->content() . "]\n");
+			&printer(2, "\n");
+			die();
+		};
+
+		my $result = $mech->content();
+		$result =~ s|^.*<DeletedIDs>||gms;
+		$result =~ s|</DeletedIDs>.*$||gms;
+
+		foreach my $item (split(",", ${result})) {
+			$recycled->{$type}{$item}++;
+		};
+	};
+
+	if (%{$recycled}) {
+		&printer(2, "\n");
+		&printer(2, "\tRecycle Bin:\n");
+		$fail_exit = "1";
+
+		foreach my $type (
+			"Leads",
+			"Tasks",
+			"Events",
+		) {
+			&printer(2, "\t\t${type}: " . scalar(keys(%{ $recycled->{$type} })) . "\n");
+		};
+	};
+
+	return(0);
+};
+
+########################################
+
 sub unlink_null_events {
 	my $null_linked	= [];
 
@@ -1425,6 +1479,8 @@ if (@{$empty_events}) {
 		&printer(2, "\t\t${entry}\n");
 	};
 };
+
+&check_recycle_bin();
 
 if (%{$events}) {
 	&unlink_null_events();
