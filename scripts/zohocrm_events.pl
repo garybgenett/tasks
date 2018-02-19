@@ -387,12 +387,18 @@ sub update_file {
 		close(FILE) || die();
 	};
 
-	foreach my $event (keys(%{$events})) {
+	foreach my $event (sort(keys(%{$events}))) {
 		if ($events->{$event}{$SUB} eq ${title}) {
 			$uid = $events->{$event}{$UID};
 
-			&printer(2, "\t${uid}: $events->{$event}{$MOD}\n");
+			&printer(2, "\t\t[" . $events->{$event}{$MOD} . "]\n");
+			&printer(2, "\t\t\t[${uid}](" . &URL_LINK("Events", ${uid}) . ")\n");
 		};
+	};
+
+	if (!${uid}) {
+		&printer(2, "\tDID NOT FIND ANY MATCHES!\n");
+		return(0);
 	};
 
 	if (!${import}) {
@@ -785,7 +791,7 @@ sub print_leads {
 
 			if (%{$err_dates}) {
 				&printer(2, "\n");
-				&printer(2, "\tBroken Dates:\n");
+				&printer(2, "\tIncorrect Dates:\n");
 				$fail_exit = "1";
 
 				foreach my $date (sort(keys(%{$err_dates}))) {
