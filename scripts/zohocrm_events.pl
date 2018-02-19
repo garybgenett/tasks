@@ -544,6 +544,61 @@ sub find_notes_entries {
 
 ########################################
 
+sub unlink_null_events {
+	my $null_linked	= [];
+
+	foreach my $event (sort(keys(%{$events}))) {
+		if (
+			($events->{$event}{$RID}) &&
+			($leads->{ $events->{$event}{$RID} }{$CMP} eq ${NULL_CNAME})
+		) {
+			push(@{$null_linked}, ${event});
+		};
+	};
+
+	if (@{$null_linked}) {
+		&printer(2, "\n");
+		&printer(2, "\tNull Linked:\n");
+		$fail_exit = "1";
+
+		foreach my $event (@{$null_linked}) {
+			&printer(2, "\t\t[" . $events->{$event}{$SUB} . "](" . &URL_LINK("Events", $events->{$event}{$UID}) . ")\n");
+
+			my $url_post = &URL_FETCH("Events");
+			$url_post =~ s/getRecords/updateRecords/g;
+			$url_post =~ s/json/xml/g;
+
+			my $post_data = "";
+			$post_data .= '<Events>';
+			$post_data .= '<row no="1">';
+			$post_data .= '<FL val="' . ${UID} . '">' . ${event} . '</FL>';
+			$post_data .= '<FL val="' . ${SUB} . '"><![CDATA[' . $events->{$event}{$SUB} . ']]></FL>';
+			$post_data .= '<FL val="SEMODULE"></FL>';
+			$post_data .= '<FL val="SEID"></FL>';
+			$post_data .= '</row>';
+			$post_data .= '</Events>';
+
+			$mech->post(${url_post}, {
+				"scope"		=> ${URL_SCOPE},
+				"authtoken"	=> ${APITOKEN},
+				"newFormat"	=> 1,
+				"id"		=> ${event},
+				"xmlData"	=> ${post_data},
+			}) && $API_REQUEST_COUNT++;
+
+			if ($mech->content() =~ m/[<]error[>]/) {
+				&printer(2, "\nPOST[" . $mech->content() . "]\n");
+				&printer(2, "\n");
+				die();
+			};
+		};
+	};
+
+	return(0);
+};
+
+########################################
+
 sub print_leads {
 	my $report		= shift() || "";
 
@@ -1369,6 +1424,10 @@ if (@{$empty_events}) {
 	foreach my $entry (sort(@{$empty_events})) {
 		&printer(2, "\t\t${entry}\n");
 	};
+};
+
+if (%{$events}) {
+	&unlink_null_events();
 };
 
 ########################################
