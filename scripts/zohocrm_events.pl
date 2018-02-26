@@ -55,7 +55,7 @@ my $URL_SCOPE	= "crmapi";
 my $API_SCOPE	= "ZohoCRM/${URL_SCOPE}";
 
 my $APP_NAME	= "ZohoCRM Export";
-my $THOROUGH	= "1";
+my $THOROUGH	= "0"; # MANUAL TOGGLE: DOES NOT SEEM TO WORK (SKIPS MULTIPLE ENTRIES)
 
 ########################################
 
@@ -116,6 +116,8 @@ my $S_DATE_ONLY	= "%-10.10s";
 
 ########################################
 
+my $TYPES	= [ "Leads", "Tasks", "Events" ];
+
 my $LID		= "LEADID";
 my $SRC		= "Lead Source";
 my $STS		= "Lead Status";
@@ -123,13 +125,13 @@ my $FNM		= "First Name";
 my $LNM		= "Last Name";
 my $CMP		= "Company";
 
+my $RID		= "RELATEDTOID";
+
 my $TID		= "ACTIVITYID";
 my $DUE		= "Due Date";
 my $CLT		= "Closed Time";
 my $TST		= "Status";
 my $PRI		= "Priority";
-
-my $RID		= "RELATEDTOID";
 
 my $UID		= "UID";
 my $MOD		= "Modified Time";
@@ -250,10 +252,11 @@ sub fetch_entries {
 
 	my $last_mod	= ${START_DATE};
 	my $index_no	= "1";
+	my $index_to	= "1";
 	my $records	= "0";
 	my $fetches	= {};
-	my $found;
 	my $output;
+	my $found;
 
 	&printer(2, "\n\tFetching ${type}...");
 
@@ -261,21 +264,22 @@ sub fetch_entries {
 		if ($last_mod =~ m/^[0-9]{4}[-][0-9]{2}[-][0-9]{2}$/) {
 			$last_mod .= " 00:00:00";
 		};
-		if (!${THOROUGH}) {
+		if (${THOROUGH}) {
 			$last_mod =~ s/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}).*$/${1} 00:00:00/g;
 			$index_no = "1";
 		};
+		$index_to = (${index_no} + (${MAX_RECORDS} -1));
 
-		&printer(2, "\n\tProcessing: ${last_mod} (${index_no} to " . (${index_no} + (${MAX_RECORDS} -1)) . ")... ");
+		&printer(2, "\n\tProcessing: ${last_mod} (${index_no} to ${index_to})... ");
 
 		$mech->get(&URL_FETCH(${type})
 			. "?scope=${URL_SCOPE}"
 			. "&authtoken=${APITOKEN}"
-			. (!${THOROUGH} ? "&lastModifiedTime=${last_mod}" : "")
+			. (${THOROUGH} ? "&lastModifiedTime=${last_mod}" : "")
 			. "&sortColumnString=${SORT_COLUMN}"
 			. "&sortOrderString=${SORT_ORDER}"
 			. "&fromIndex=${index_no}"
-			. "&toIndex=" . (${index_no} + (${MAX_RECORDS} -1))
+			. "&toIndex=${index_to}"
 		) && $API_REQUEST_COUNT++;
 		$output = decode_json($mech->content());
 
@@ -546,36 +550,47 @@ sub find_notes_entries {
 
 sub check_recycle_bin {
 	my $recycled	= {};
+	my $index_no	= "1";
+	my $index_to	= "1";
+	my $output;
+	my $found;
 
-	foreach my $type (
-		"Leads",
-		"Tasks",
-		"Events",
-	) {
-		my $url_get = &URL_FETCH(${type});
-		$url_get =~ s/getRecords/getDeletedRecordIds/g;
-		$url_get =~ s/json/xml/g;
+	foreach my $type (@{$TYPES}) {
+		while (1) {
 
-		$mech->get(${url_get}
-			. "?scope=${URL_SCOPE}"
-			. "&authtoken=${APITOKEN}"
-			. "&sortColumnString=${SORT_COLUMN}"
-			. "&sortOrderString=${SORT_ORDER}"
-			. "&toIndex=${MAX_RECORDS}"
-		) && $API_REQUEST_COUNT++;
+			$index_to = (${index_no} + (${MAX_RECORDS} -1));
 
-		if ($mech->content() =~ m/[<]error[>]/) {
-			&printer(2, "\nGET[" . $mech->content() . "]\n");
-			&printer(2, "\n");
-			die();
-		};
+			my $url_get = &URL_FETCH(${type});
+			$url_get =~ s/getRecords/getDeletedRecordIds/g;
+			$url_get =~ s/json/xml/g;
 
-		my $result = $mech->content();
-		$result =~ s|^.*<DeletedIDs>||gms;
-		$result =~ s|</DeletedIDs>.*$||gms;
+			$mech->get(${url_get}
+				. "?scope=${URL_SCOPE}"
+				. "&authtoken=${APITOKEN}"
+				. "&fromIndex=${index_no}"
+				. "&toIndex=${index_to}"
+			) && $API_REQUEST_COUNT++;
 
-		foreach my $item (split(",", ${result})) {
-			$recycled->{$type}{$item}++;
+			if ($mech->content() =~ m/[<]error[>]/) {
+				&printer(2, "\nGET[" . $mech->content() . "]\n");
+				&printer(2, "\n");
+				die();
+			};
+
+			$output = $mech->content();
+			$output =~ s|^.*<DeletedIDs>||gms;
+			$output =~ s|</DeletedIDs>.*$||gms;
+
+			$found = "0";
+			foreach my $item (split(",", ${output})) {
+				$recycled->{$type}{$item}++;
+				$found++;
+			};
+			if (${found} < ${MAX_RECORDS}) {
+				last();
+			};
+
+			$index_no += ${MAX_RECORDS};
 		};
 	};
 
@@ -584,11 +599,7 @@ sub check_recycle_bin {
 		&printer(2, "\tRecycle Bin:\n");
 		$fail_exit = "1";
 
-		foreach my $type (
-			"Leads",
-			"Tasks",
-			"Events",
-		) {
+		foreach my $type (@{$TYPES}) {
 			&printer(2, "\t\t${type}: " . scalar(keys(%{ $recycled->{$type} })) . "\n");
 		};
 	};
@@ -1412,11 +1423,7 @@ sub print_notes {
 
 ################################################################################
 
-foreach my $type (
-	"Leads",
-	"Tasks",
-	"Events",
-) {
+foreach my $type (@{$TYPES}) {
 	my $var = lc(${type});
 
 	%{ $z->{$var} } = &fetch_entries(${type});
@@ -1424,6 +1431,15 @@ foreach my $type (
 	open(JSON, ">", ${JSON_BASE} . "." . ${var} . ".json") || die();
 	print JSON $json->encode($z->{$var});
 	close(JSON) || die();
+};
+
+if (
+	(%{$leads}) ||
+	(%{$events})
+) {
+	open(CSV, ">", ${CSV_FILE}) || die();
+	&print_leads("CSV");
+	close(CSV) || die();
 };
 
 ########################################
@@ -1464,11 +1480,11 @@ if (
 	&find_notes_entries();
 };
 
-open(CSV, ">", ${CSV_FILE}) || die();
 if (%{$leads}) {
+	open(CSV, ">>", ${CSV_FILE}) || die();
 	&print_leads("CSV");
+	close(CSV) || die();
 };
-close(CSV) || die();
 
 if (@{$empty_events}) {
 	&printer(2, "\n");
@@ -1500,13 +1516,13 @@ if (${fail_exit}) {
 &printer(1, "\n");
 &printer("${LEVEL_1} Core Reports\n");
 
-open(CSV, ">>", ${CSV_FILE}) || die();
 if (%{$events}) {
+	open(CSV, ">>", ${CSV_FILE}) || die();
 	&print_events("Closed!", [ $BEG, $SRC, $STS, $REL, $SUB, ]);
 	&printer("\n");
 	&printer("Closed: " . scalar(keys(%{$closed_list})) . "\n");
+	close(CSV) || die();
 };
-close(CSV) || die();
 
 ########################################
 
