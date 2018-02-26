@@ -1438,7 +1438,6 @@ if (
 	(%{$events})
 ) {
 	open(CSV, ">", ${CSV_FILE}) || die();
-	&print_leads("CSV");
 	close(CSV) || die();
 };
 
