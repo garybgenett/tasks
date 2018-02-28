@@ -213,19 +213,19 @@ report.sort.sort=			end+,due+,modified+,entry+
 report.todo.description=		Custom [Todo]: Due and priority tasks
 report.todo.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority
 report.todo.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.todo.filter=			((status:pending ((((project:.gtd kind.none: ) or (kind.none: +ANNOTATED) or priority.any: ) -BLOCKED) or (+DUE or +TODAY or +OVERDUE))) or +ACTIVE)
+report.todo.filter=			((status:pending (((project:.gtd kind.none: ) or (kind.none: +ANNOTATED) or priority.any: ) -BLOCKED) or (+DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.todo.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 report.view.description=		Custom [View]: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.view.filter=			((project.not:_data project.not:_journal project.not:.someday kind.none: (status:pending (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))) or +ACTIVE)
+report.view.filter=			((status:pending project.not:_data project.not:_journal project.not:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.view.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 report.zoom.description=		Custom [Zoom]: Default list view (View), condensed for reporting
 report.zoom.columns=			uuid.short,project,tags,priority,due,end,kind,description.count
 report.zoom.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.zoom.filter=			((project.not:_data project.not:_journal project.not:.someday kind.none: (status:pending (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))) or +ACTIVE)
+report.zoom.filter=			((status:pending project.not:_data project.not:_journal project.not:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.zoom.sort=			start-,due+,priority-,urgency-,project+,depends+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
