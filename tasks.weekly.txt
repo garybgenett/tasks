@@ -1,22 +1,54 @@
 ###[ Weekly Review Steps & Commands ]###
 
 #[ Markdown Source ]
-#]### Weekly Review
+#]#### System
 #]
-#]  * Thoughts
-#]  * Queues
-#]    * Inbox (`.in`)
-#]    * Notepad
-#]    * Paperwork
-#]    * Browser
-#]    * Email
-#]    * Phone
-#]        * Voicemails
-#]        * Texts
+#]  * Strategic
+#]    * [Goals (.review)](#goals)
+#]    * [Roadmap (.status)](#roadmap)
+#]    * [Timeline (tasks.timeline.html)](tasks.timeline.html)
+#]    * [Plan (.today)](#plan)
+#]    * [Sales (zoho.today.md)](zoho.today.md)
+#]  * Tactical
+#]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
+#]    * [Family & Friends](#uuid-7327628e-c2e8-4b08-b691-e64e4731b17b)
+#]    * [Sales Data (zoho.all.md)](zoho.all.md)
+#]  * Input
+#]    * Thoughts
+#]    * Digital
+#]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.txt](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]}))
+#]        * [Tasks](https://mail.google.com/tasks/canvas) (+Inbox, '.in')
+#]        * [Drive](https://drive.google.com/drive/my-drive)
+#]        * [Share](https://drive.google.com/drive/shared-with-me)
+#]    * Analog
+#]        * Wallet
+#]        * Binder
+#]        * Folders
+#]  * Output
 #]    * Calendar
 #]        * Past, for missed
 #]        * Future, for upcoming
-#]  * System (`.view`)
+#]    * Taskwarrior
+#]    * Phone
+#]        * Review ('android.txt')
+#]        * Backup
+#]            * Rsync ('android.txt -b')
+#]            * SMS Backup
+#]        * Voicemails
+#]        * Texts
+#]    * Computer
+#]        * Browser
+#]        * Email
+
+#[ _task_parse_cmd :: impersonate_command ]
+
+#[ _task_parse_cmd_bash :: bash]
+
+#[ Markdown Source ]
+#]#### Weekly Review
+#]
+#]  * [System](#system)
+#]  * Taskwarrior ('.view')
 #]    * Reminders (`calendar`, `mind`)
 #]        * Past, for missed
 #]        * Future, for upcoming
@@ -41,8 +73,6 @@
 #]    * Report (`.repo`)
 
 #[ _task_parse_cmd :: impersonate_command ]
-#|.in
-#|.view
 #|calendar
 #|mind
 #|todo
@@ -97,20 +127,21 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status.not:recurring;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 
 #[ Markdown Source ]
-#]### Weekly Report
+#]#### Weekly Report
 #]
-#]  * Integrity (`diagnostics`)
-#]  * Projects (`summary`)
-#]  * History
-#]    * Numerical (`rc.defaultwidth=120 history.monthly`)
-#]    * Graphical (`rc.defaultwidth=120 ghistory.monthly`)
-#]  * Trending
-#]    * Weekly (`rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly`)
-#]    * Daily (`rc.defaultwidth=120 rc.defaultheight=40 burndown.daily`)
-#]  * Activity
-#]    * Custom (`+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)`)
-#]    * Default (`timesheet 2`)
-#]  * Statistics (`stats`)
+#]  * Taskwarrior ('.repo')
+#]    * Integrity (`diagnostics`)
+#]    * Projects (`summary`)
+#]    * History
+#]        * Numerical (`rc.defaultwidth=120 history.monthly`)
+#]        * Graphical (`rc.defaultwidth=120 ghistory.monthly`)
+#]    * Trending
+#]        * Weekly (`rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly`)
+#]        * Daily (`rc.defaultwidth=120 rc.defaultheight=40 burndown.daily`)
+#]    * Activity
+#]        * Custom (`+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)`)
+#]        * Default (`timesheet 2`)
+#]    * Statistics (`stats`)
 
 #[ _task_parse_cmd :: impersonate_command ]
 #|diagnostics
