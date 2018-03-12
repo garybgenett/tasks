@@ -13,7 +13,7 @@
 #]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
 #]    * [Family & Friends](#uuid-7327628e-c2e8-4b08-b691-e64e4731b17b)
 #]    * [Sales Data (zoho.all.md)](zoho.all.md)
-#]  * Input
+#]  * Sources
 #]    * Thoughts
 #]    * Digital
 #]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.txt](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]}))
@@ -24,7 +24,7 @@
 #]        * Wallet
 #]        * Binder
 #]        * Folders
-#]  * Output
+#]  * Tools
 #]    * Calendar
 #]        * Past, for missed
 #]        * Future, for upcoming
