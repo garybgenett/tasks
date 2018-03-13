@@ -139,11 +139,11 @@ alias.ll=				zoom
 
 uda.kind.label=				Kind
 uda.kind.type=				string
-uda.kind.values=			notes,track
+uda.kind.values=			notes,track,
 
 uda.area.label=				Area
 uda.area.type=				string
-uda.area.values=			_gtd,computer,family,gear,health,money,people,self,travel,work,work-em,work.em,work.f5,writing
+uda.area.values=			_gtd,computer,family,gear,health,money,people,self,travel,work,work-em,work.em,work.f5,writing,
 
 ########################################
 
@@ -165,13 +165,13 @@ report.data.description=		Custom [Data]: Reference and non-task data
 report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.data.filter=			(project:_data or project:_journal)
-report.data.sort=			project+,kind+,area-,description+,entry+
+report.data.sort=			project+,kind-,area-,description+,entry+
 
 report.meta.description=		Custom [Meta]: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.meta.filter=			((project.not:_data project.not:_journal (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
-report.meta.sort=			project+,kind+,area-,description+,entry+
+report.meta.sort=			project+,kind-,area-,description+,entry+
 
 ########################################
 
@@ -194,13 +194,13 @@ report.read.description=		Custom [Read]: List view, unfiltered and sorted for re
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
-report.read.sort=			project+,kind+,priority-,depends+,description+,entry+
+report.read.sort=			project+,kind-,priority-,depends+,description+,entry+
 
 report.skim.description=		Custom [Skim]: List view (Read), condensed for reporting
 report.skim.columns=			uuid.short,project,tags,priority,due,end,kind,description.count
 report.skim.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
 report.skim.filter=			#>>>
-report.skim.sort=			project+,kind+,priority-,depends+,description+,entry+
+report.skim.sort=			project+,kind-,priority-,depends+,description+,entry+
 
 report.sort.description=		Custom [Sort]: List view, unfiltered and sorted by dates
 report.sort.columns=			entry,modified,due,end,id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority,status,imask
