@@ -62,11 +62,11 @@
 #]        * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done`)
 #]    * Tasks (`read status:pending project:`, `+ACTIVE; task-depends status:pending project:`)
 #]        * UDAs (`udas`)
-#]            * Kinds (`+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}.; done`)
-#]            * Areas (`+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}.; done`)
+#]            * Kinds (`+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done`)
+#]            * Areas (`+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done`)
 #]        * Tags (`tags`)
 #]            * Active (`tags status:pending`)
-#]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}.; done`)
+#]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done`)
 #]    * Someday (`read project:.someday`)
 #]    * Verify
 #]        * Overview (`fail`, `data`, `meta status:pending`)
@@ -86,11 +86,11 @@
 #|read status:pending project:
 #|+ACTIVE; task-depends status:pending project:
 #|udas
-#|+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}.; done
-#|+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}.; done
+#|+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done
+#|+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done
 #|tags
 #|tags status:pending
-#|+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}.; done
+#|+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done
 #|read project:.someday
 #|fail
 #|data
@@ -113,11 +113,11 @@ for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | 
 task read status:pending project:;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends status:pending project:;
 task udas;
-for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}.; done;
-for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | cut -d. -f1 | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}.; done;
+for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done;
+for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done;
 task tags;
 task tags status:pending;
-for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}.; done;
+for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done;
 task read project:.someday;
 task fail;
 task data;
