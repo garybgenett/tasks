@@ -145,6 +145,10 @@ uda.area.label=				Area
 uda.area.type=				string
 uda.area.values=			_gtd,computer,family,gear,health,money,people,self,travel,work,work-em,work.em,work.f5,writing,
 
+uda.priority.label=			Priority
+uda.priority.type=			string
+uda.priority.values=			H,M,L,
+
 ########################################
 
 report.dump.description=		Custom [Dump]: Shows all information
