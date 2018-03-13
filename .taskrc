@@ -233,13 +233,13 @@ report.zoom.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 report.agenda.description=		Custom [Agenda]: Default list view (View), tag sorted alphabetically
 report.agenda.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority
 report.agenda.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.agenda.filter=			(status:pending tags:agenda)
+report.agenda.filter=			(status:pending tags:agenda (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
 report.agenda.sort=			description+,start-,due+,priority-,urgency-,project+,entry+
 
 report.errand.description=		Custom [Errand]: Default list view (View), tag sorted alphabetically
 report.errand.columns=			id,depends,urgency.integer,start.age,due.age,description.count,project,kind,area,tags,entry.age,recur,priority
 report.errand.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.errand.filter=			(status:pending tags:errand)
+report.errand.filter=			(status:pending tags:errand (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
 report.errand.sort=			description+,start-,due+,priority-,urgency-,project+,entry+
 
 ################################################################################
