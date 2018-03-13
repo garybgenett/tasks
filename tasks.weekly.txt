@@ -6,13 +6,14 @@
 #]  * Strategic
 #]    * [Goals (.review)](#goals)
 #]    * [Roadmap (.status)](#roadmap)
+#]    * [Sales (zoho.today.md)](zoho.today.md)
 #]    * [Timeline (tasks.timeline.html)](tasks.timeline.html)
 #]    * [Plan (.today)](#plan)
-#]    * [Sales (zoho.today.md)](zoho.today.md)
 #]  * Tactical
+#]    * [Sales Data (zoho.all.md)](zoho.all.md)
 #]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
 #]    * [Family & Friends](#uuid-7327628e-c2e8-4b08-b691-e64e4731b17b)
-#]    * [Sales Data (zoho.all.md)](zoho.all.md)
+#]    * [Travel & Gear](#uuid-3fc2209e-6600-4724-86a4-ea8bedff8479)
 #]  * Sources
 #]    * Thoughts
 #]    * Digital
