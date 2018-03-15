@@ -234,6 +234,8 @@ report.zoom.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
 
+################################################################################
+
 report.agenda.description=		Custom [Agenda]: Default list view (View), tag sorted alphabetically
 report.agenda.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.agenda.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
@@ -245,6 +247,12 @@ report.errand.columns=			id,depends,urgency.integer,start.age,due.age,descriptio
 report.errand.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
 report.errand.filter=			(status:pending tags:errand (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
 report.errand.sort=			description+,start-,due+,priority-,urgency-,project+,entry+
+
+report.status.description=		Custom [Status]: Default list view (View), status of work actions
+report.status.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
+report.status.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
+report.status.filter=			(status:pending (project:em.opsmgr or project:em.tasks.opsmgr or (area:work.em (tag:.waiting or tag:agenda))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or ((area:work-em or area:work.em) project.none: )
+report.status.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 ################################################################################
 # end of file
