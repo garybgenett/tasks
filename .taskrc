@@ -251,7 +251,7 @@ report.errand.sort=			description+,start-,due+,priority-,urgency-,project+,entry
 report.status.description=		Custom [Status]: Default list view (View), status of work actions
 report.status.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.status.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.status.filter=			(status:pending (project:em.opsmgr or project:em.tasks.opsmgr or (area:work.em (tag:.waiting or tag:agenda))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or ((area:work-em or area:work.em) project.none: )
+report.status.filter=			(status:pending (project:em.opsmgr or project:em.tasks.opsmgr or project:em.tasks.track or (area:work.em (tag:.waiting or tag:agenda))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or ((area:work-em or area:work.em) project.none: )
 report.status.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 ################################################################################
