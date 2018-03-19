@@ -1341,6 +1341,7 @@ sub today_tmp_format {
 sub today_tmp_reverse {
 	my $stderr	= "3";
 	my $current	= [];
+	my $duplicates	= {};
 
 	if (-f ${TODAY_IMP}) {
 		open(FILE, "<", ${TODAY_IMP}) || die();
@@ -1369,6 +1370,18 @@ sub today_tmp_reverse {
 		};
 		if (!${match}) {
 			&printer(${stderr}, "\t${test}\n");
+		};
+		$duplicates->{$test}++;
+	};
+
+	&printer(${stderr}, "\n${LEVEL_2} [${DSC_FLAG}]\n\n");
+
+	foreach my $item (sort(keys(%{$duplicates}))) {
+		if (
+			(${item}) &&
+			($duplicates->{$item} > 1)
+		) {
+			&printer(${stderr}, "\t${item}\n");
 		};
 	};
 
