@@ -190,7 +190,7 @@ report.mind.description=		Custom [Mind]: Reminders for all tasks with due date
 report.mind.columns=			id,depends,urgency.integer,start.age,due.remaining,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,entry,due,end,imask
 report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+BORN,+DEAD,+DIED,+I
 report.mind.filter=			((status:pending due.any: ) or +ACTIVE)
-report.mind.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
+report.mind.sort=			due+,priority-,urgency-,project+,description+,entry+
 
 ########################################
 
@@ -240,19 +240,19 @@ report.agenda.description=		Custom [Agenda]: Default list view (View), tag sorte
 report.agenda.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.agenda.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
 report.agenda.filter=			(status:pending tags:agenda (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
-report.agenda.sort=			kind-,description+,start-,due+,priority-,urgency-,project+,entry+
+report.agenda.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 report.errand.description=		Custom [Errand]: Default list view (View), tag sorted alphabetically
 report.errand.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.errand.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
 report.errand.filter=			(status:pending tags:errand (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
-report.errand.sort=			kind-,description+,start-,due+,priority-,urgency-,project+,entry+
+report.errand.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 report.status.description=		Custom [Status]: Default list view (View), status of work actions
 report.status.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.status.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
 report.status.filter=			(status:pending ((((project:em.opsmgr or project:em.tasks.opsmgr or project:em.tasks.track) or (area:work.em (tag:.waiting or tag:agenda))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or ((project:em.opsmgr or project:em.tasks.opsmgr or project:em.tasks.track) kind:notes depends.any: ))) or ((area:work-em or area:work.em) project.none: )
-report.status.sort=			kind-,description+,start-,due+,priority-,urgency-,project+,entry+
+report.status.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 ################################################################################
 # end of file
