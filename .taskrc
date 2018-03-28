@@ -251,7 +251,7 @@ report.errand.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 report.status.description=		Custom [Status]: Default list view (View), status of work actions
 report.status.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.status.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.status.filter=			((((status:pending (project:em.opsmgr or project:em.tasks.opsmgr or project:em.tasks.track) kind:notes depends.any: ) or ((((project:em.opsmgr project.not:em.opsmgr.) or (project:em.tasks.opsmgr project.not:em.tasks.opsmgr.) or (project:em.tasks.track project.not:em.tasks.track.)) or (status:pending area:work.em (tag:.waiting or tag:agenda or tag:office))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)))) or ((area:work-em or area:work.em) project.none: ))
+report.status.filter=			((((status:pending (project:em.opsmgr or project:em.tasks.opsmgr or project:em.tasks.track) kind:notes depends.any: ) or ((((project:em.opsmgr project.not:em.opsmgr.) or (project:em.tasks.opsmgr project.not:em.tasks.opsmgr.) or (project:em.tasks.track project.not:em.tasks.track.)) or (status:pending area:work.em (tag:.waiting or tag:agenda or tag:errand or tag:office))) (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)))) or ((area:work-em or area:work.em) project.none: ))
 report.status.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 ################################################################################
