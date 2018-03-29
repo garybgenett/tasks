@@ -1089,7 +1089,10 @@ sub print_events {
 			)
 		)) {
 			if (${report} eq "Closed!") {
-				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"$events->{$event}{$REL}\",\n";
+				my $subject = ($leads->{ $events->{$event}{$RID} }{$FNM} || "") . ${NAME_DIV} . ($leads->{ $events->{$event}{$RID} }{$LNM} || "");
+				$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{ $events->{$event}{$RID} }{$LID}) . ")";
+
+				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
