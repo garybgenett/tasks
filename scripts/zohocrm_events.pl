@@ -673,8 +673,8 @@ sub print_leads {
 	my $entries		= "0";
 
 	if (${report} eq "CSV") {
-		print CSV "\"Date\",\"Day\",\"New\",\"Closed\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
-		print CSV "\"${CSV_DATE}\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\n";
+		print CSV "\"Date\",\"Day\",\"New\",\"Closed\",\"Cancelled\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
+		print CSV "\"${CSV_DATE}\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\"\",\n";
 	}
 	elsif (${report} eq "Aging") {
 		$stderr = "0";
@@ -750,7 +750,7 @@ sub print_leads {
 
 							$subject =~ s/\"/\'/g;
 
-							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 							$new = "";
 
 							if (!${day}) {
@@ -813,6 +813,11 @@ sub print_leads {
 		}
 		elsif (${report} eq "Cancelled?") {
 			if ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) {
+				my $cancel = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead});
+				$cancel =~ s/^[^[]*[[]([^]:]*)[]:].*$/$1/g;
+
+				print CSV "\"${cancel}\",\"\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
+
 				$subject = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) . " " . ${subject};
 
 				&printer(${stderr}, "| ${source} | ${status} | ${related} | ${subject}\n");
@@ -1092,7 +1097,7 @@ sub print_events {
 				my $subject = ($leads->{ $events->{$event}{$RID} }{$FNM} || "") . ${NAME_DIV} . ($leads->{ $events->{$event}{$RID} }{$LNM} || "");
 				$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{ $events->{$event}{$RID} }{$LID}) . ")";
 
-				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"\",\"${subject}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
@@ -1542,7 +1547,9 @@ if (%{$events}) {
 ########################################
 
 if (%{$leads}) {
+	open(CSV, ">>", ${CSV_FILE}) || die();
 	&print_leads("Cancelled?");
+	close(CSV) || die();
 	&print_leads("Broken");
 #>>>	&print_leads();
 	&print_leads("Graveyard");
