@@ -47,7 +47,8 @@ $| = "1";
 
 ################################################################################
 
-my $FILE		= "calendar";
+my $C_FILE		= "calendar";
+my $D_FILE		= "drive";
 my $EXTENSION		= ".ics";
 
 my $REQ_PER_SEC		= "1";
@@ -72,19 +73,19 @@ sub EXIT {
 ########################################
 
 sub authenticate {
-	$mech->get("https://www.google.com/calendar") && $REQUEST_COUNT++;
+	$mech->get("https://www.google.com/calendar");
 
-#>>>	$mech->get("https://accounts.google.com/ServiceLogin") && $REQUEST_COUNT++;
+#>>>	$mech->get("https://accounts.google.com/ServiceLogin");
 	$mech->form_id("gaia_loginform");
 	$mech->field("Email",	${USERNAME});
 	$mech->field("Passwd",	${PASSWORD});
-	$mech->submit() && $REQUEST_COUNT++;
+	$mech->submit();
 
-#>>>	$mech->get("https://accounts.google.com/AccountLoginInfo") && $REQUEST_COUNT++;
+#>>>	$mech->get("https://accounts.google.com/AccountLoginInfo");
 	$mech->form_id("gaia_loginform");
 	$mech->field("Email",	${USERNAME});
 	$mech->field("Passwd",	${PASSWORD});
-	$mech->submit() && $REQUEST_COUNT++;
+	$mech->submit();
 
 	return(0);
 };
@@ -95,29 +96,55 @@ sub get_calendar {
 	my $name	= shift;
 	my $id		= shift;
 
-	$name = "${FILE}-${name}${EXTENSION}";
+	$name = "${C_FILE}-${name}${EXTENSION}";
 	print "${name} :: ${id}\n";
 
-	my($TEMPFILE, $tempfile) = tempfile(".${FILE}.XXXX", "UNLINK" => "1");
+	my($TEMPFILE, $tempfile) = tempfile(".${C_FILE}.XXXX", "UNLINK" => "1");
 	my $zip = Archive::Zip->new();
 
 	if ((${REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
 		sleep(${REQ_PER_SEC_SLEEP});
 	};
 	$mech->get("https://www.google.com/calendar/exporticalzip?cexp=${id}") && $REQUEST_COUNT++;
-	$mech->save_content(${tempfile});
+	$mech->save_content($tempfile);
 #>>>	&DUMPER(${mech});
 
-	if ($zip->read(${tempfile}) != AZ_OK) { die(); };
+	if ($zip->read($tempfile) != AZ_OK) { die(); };
 #>>>	&DUMPER($zip);
 	my @files = $zip->memberNames();
 	my $files = \@files;
 #>>>	&DUMPER($files);
 	foreach my $file (@{$files}) {
-		print "\t${file} -> ${name}\n";
+		print "\t${tempfile} -> ${file} -> ${name}\n";
 		if ($zip->extractMember(${file}) != AZ_OK) { die(); };
 		move(${file}, ${name});
 	};
+
+	close(${TEMPFILE}) || die();
+
+	return(0);
+};
+
+########################################
+
+sub get_drive {
+	my $name	= shift;
+	my $id		= shift;
+
+	$name = "${D_FILE}-${name}";
+	print "${name} :: ${id}\n";
+
+	my($TEMPFILE, $tempfile) = tempfile(".${D_FILE}.XXXX", "UNLINK" => "1");
+
+	if ((${REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
+		sleep(${REQ_PER_SEC_SLEEP});
+	};
+	$mech->get("https://docs.google.com/uc?export=download&id=${id}") && $REQUEST_COUNT++;
+	$mech->save_content($tempfile);
+#>>>	&DUMPER(${mech});
+
+	print "\t${tempfile} -> ${name}\n";
+	move($tempfile, ${name});
 
 	close(${TEMPFILE}) || die();
 
@@ -130,8 +157,17 @@ if (@{ARGV}) {
 	&authenticate();
 
 	foreach my $calendar (@{ARGV}) {
-		my($name, $id) = split(/:/, ${calendar});
-		&get_calendar(${name}, ${id});
+		my($type, $data) = split(/[|]/, ${calendar});
+		my($name, $id) = split(/[:]/, ${data});
+		if (${type} eq "c") {
+			&get_calendar(${name}, ${id});
+		}
+		elsif (${type} eq "d") {
+			&get_drive(${name}, ${id});
+		}
+		else {
+			die("INVALID TYPE [${calendar}]!");
+		};
 	};
 };
 
