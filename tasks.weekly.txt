@@ -59,18 +59,18 @@
 #]        * Waiting (`read status:pending tags:.waiting`)
 #]    * Projects (`projects`)
 #]        * Active (`projects status:pending`)
-#]        * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done`)
+#]        * Iterate (`+for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done`)
 #]    * Tasks (`read status:pending project.none:; task-depends status:pending project.none:`)
 #]        * UDAs (`udas`)
-#]            * Kinds (`+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done`)
-#]            * Areas (`+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done`)
+#]            * Kinds (`+for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done`)
+#]            * Areas (`+for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done`)
 #]        * Tags (`tags`)
 #]            * Active (`tags status:pending`)
-#]            * Iterate (`+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done`)
+#]            * Iterate (`+for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done`)
 #]    * Someday (`read project:.someday`)
 #]    * Verify
 #]        * Overview (`fail`, `data`, `meta status:pending`)
-#]        * Recurring (`read status:recurring`, `+ACTIVE; task-recur status:recurring`, `+ACTIVE; task-recur status.not:recurring`)
+#]        * Recurring (`read status:recurring`, `+task-recur status:recurring`, `+task-recur status.not:recurring`)
 #]    * Report (`.repo`)
 
 #[ _task_parse_cmd :: impersonate_command ]
@@ -82,21 +82,21 @@
 #|read status:pending tags:.waiting
 #|projects
 #|projects status:pending
-#|+ACTIVE; for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done
+#|+for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project:${FILE} project.not:${FILE}.; task-depends project:${FILE} project.not:${FILE}.; done
 #|read status:pending project.none:; task-depends status:pending project.none:
 #|udas
-#|+ACTIVE; for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done
-#|+ACTIVE; for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done
+#|+for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind:${FILE} kind.not:${FILE}. kind.not:${FILE}-; done
+#|+for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; task read status:pending area:${FILE} area.not:${FILE}. area.not:${FILE}-; done
 #|tags
 #|tags status:pending
-#|+ACTIVE; for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done
+#|+for FILE in $(task status:pending _unique tags | grep -E -v "^[._]" | sort | uniq); do task read status:pending tags:${FILE} tags.not:${FILE}. tags.not:${FILE}-; done
 #|read project:.someday
 #|fail
 #|data
 #|meta status:pending
 #|read status:recurring
-#|+ACTIVE; task-recur status:recurring
-#|+ACTIVE; task-recur status.not:recurring
+#|+task-recur status:recurring
+#|+task-recur status.not:recurring
 #|.repo
 
 #[ _task_parse_cmd_bash :: bash]
@@ -138,7 +138,7 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 #]        * Weekly (`rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly`)
 #]        * Daily (`rc.defaultwidth=120 rc.defaultheight=40 burndown.daily`)
 #]    * Activity
-#]        * Custom (`+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)`)
+#]        * Custom (`+SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)`)
 #]        * Default (`timesheet 2`)
 #]    * Statistics (`stats`)
 
@@ -149,7 +149,7 @@ eval ${MARKER}; IMPERSONATE_NAME=task .bashrc impersonate_command repo;
 #|rc.defaultwidth=120 ghistory.monthly
 #|rc.defaultwidth=120 rc.defaultheight=40 burndown.weekly
 #|rc.defaultwidth=120 rc.defaultheight=40 burndown.daily
-#|+ACTIVE; SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
+#|+SINCE="$(date --date="@$(calc $(date +%s)-$(calc 60*60*24*7))" --iso=s)"; task sort rc.color.completed=green rc.color.deleted=red \( \( end.after:${SINCE} \) or \( modified.after:${SINCE} kind.any: \) \)
 #|timesheet 2
 #|stats
 
