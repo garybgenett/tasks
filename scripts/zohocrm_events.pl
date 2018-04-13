@@ -765,7 +765,7 @@ sub print_leads {
 				};
 				my $mod = ${modified};
 				$mod =~ s/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/${1}/gm;
-				print CSV "\"${mod}\",\"\",\"\",\"1\",\"\",\"\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"${mod}\",\"[MOD]\",\"\",\"1\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 			};
 		}
 		elsif (${report} eq "Aging") {
@@ -819,7 +819,7 @@ sub print_leads {
 				my $cancel = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead});
 				$cancel =~ s/^[^[]*[[]([^]:]*)[]:].*$/$1/g;
 
-				print CSV "\"${cancel}\",\"\",\"\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"${cancel}\",\"[CNL]\",\"\",\"\",\"\",\"1\",\"${source}\",\"${status}\",\"${subject}\",\n";
 
 				$subject = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) . " " . ${subject};
 
@@ -1097,10 +1097,12 @@ sub print_events {
 			)
 		)) {
 			if (${report} eq "Closed!") {
+				my $source = ($leads->{ $events->{$event}{$RID} }{$SRC} || "");
+				my $status = ($leads->{ $events->{$event}{$RID} }{$STS} || "");
 				my $subject = ($leads->{ $events->{$event}{$RID} }{$FNM} || "") . ${NAME_DIV} . ($leads->{ $events->{$event}{$RID} }{$LNM} || "");
 				$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{ $events->{$event}{$RID} }{$LID}) . ")";
 
-				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"\",\"1\",\"\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"[CLS]\",\"\",\"\",\"1\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
