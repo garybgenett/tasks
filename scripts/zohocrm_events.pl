@@ -39,7 +39,7 @@ $json->canonical(1);
 $json->pretty(1);
 
 use POSIX qw(strftime);
-use Time::Local qw(timelocal);
+use Time::Local qw(timegm timelocal);
 
 ########################################
 
@@ -740,32 +740,51 @@ sub print_leads {
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
+				my $matches = [];
 				my $new = "1";
+				my $mod = "";
+				my $mod_date = ${modified};
+				$mod_date =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2})[ ]([0-9]{2})[:]([0-9]{2})[:]([0-9]{2})$/;
+				$mod_date = &timegm(${6},${5},${4},${3},(${2}-1),${1});
+				$mod_date = &strftime("%Y-%m-%d", localtime(${mod_date}));
 				while ($leads->{$lead}{$DSC} =~ m/^([0-9][0-9-]+[,]?[ ]?[A-Za-z]*)$/gm) {
 					if (${1}) {
 						my $match = ${1};
 						if (${match} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm) {
-							my $date = ${1};
-							my $day = ${2};
-							$day =~ s/^[,][ ]//g;
-
-							$subject =~ s/\"/\'/g;
-
-							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
-							$new = "";
-
-							if (!${day}) {
-								$day = "NULL";
-							};
-							push(@{ $err_date_list->{$date}{$day} }, ${subject});
+							push(@{$matches}, ${match});
 						} else {
 							push(@{ $err_dates->{"NULL"}{$match} }, ${subject});
 						};
 					};
 				};
-				my $mod = ${modified};
-				$mod =~ s/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/${1}/gm;
-				print CSV "\"${mod}\",\"[MOD]\",\"\",\"1\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+				my $num = "0";
+				foreach my $match (@{$matches}) {
+					${match} =~ m/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/gm;
+					my $date = ${1};
+					my $day = ${2};
+					$day =~ s/^[,][ ]//g;
+
+					$subject =~ s/\"/\'/g;
+
+					if (
+						(${date} eq ${mod_date}) ||
+						(${num} eq $#{$matches})
+					) {
+						$mod = "1";
+					};
+					print CSV "\"${date}\",\"${day}\",\"${new}\",\"${mod}\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+					$new = "";
+
+					if (!${day}) {
+						$day = "NULL";
+					};
+					push(@{ $err_date_list->{$date}{$day} }, ${subject});
+
+					${num}++;
+				};
+				if (!${mod}) {
+					print CSV "\"${mod_date}\",\"[MOD]\",\"\",\"1\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+				};
 			};
 		}
 		elsif (${report} eq "Aging") {
