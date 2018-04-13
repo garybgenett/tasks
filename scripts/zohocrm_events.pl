@@ -673,8 +673,8 @@ sub print_leads {
 	my $entries		= "0";
 
 	if (${report} eq "CSV") {
-		print CSV "\"Date\",\"Day\",\"New\",\"Closed\",\"Cancelled\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
-		print CSV "\"${CSV_DATE}\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\"\",\n";
+		print CSV "\"Date\",\"Day\",\"New\",\"Changed\",\"Closed\",\"Cancelled\",\"${SRC}\",\"${STS}\",\"${FNM}${NAME_DIV}${LNM}\",\n";
+		print CSV "\"${CSV_DATE}\",\"Mon\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\n";
 	}
 	elsif (${report} eq "Aging") {
 		$stderr = "0";
@@ -736,6 +736,7 @@ sub print_leads {
 		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 		$details = "[${details}]"; $details =~ s/\n+/\]\[/g;
 		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+		my $modified = $leads->{$lead}{$MOD} || "";
 
 		if (${report} eq "CSV") {
 			if ($leads->{$lead}{$DSC}) {
@@ -750,7 +751,7 @@ sub print_leads {
 
 							$subject =~ s/\"/\'/g;
 
-							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+							print CSV "\"${date}\",\"${day}\",\"${new}\",\"\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
 							$new = "";
 
 							if (!${day}) {
@@ -762,6 +763,9 @@ sub print_leads {
 						};
 					};
 				};
+				my $mod = ${modified};
+				$mod =~ s/^([0-9]{4}[-][0-9]{2}[-][0-9]{2})(.*)$/${1}/gm;
+				print CSV "\"${mod}\",\"\",\"\",\"1\",\"\",\"\",\"\",\"\",\"${subject}\",\n";
 			};
 		}
 		elsif (${report} eq "Aging") {
@@ -772,7 +776,6 @@ sub print_leads {
 				) &&
 				(!$cancel_bd_list->{$lead})
 			) {
-				my $modified = $leads->{$lead}{$MOD} || "";
 				my $mod_days = $modified;
 				my $last_log = "";
 				my $overdue = "-1";
@@ -816,7 +819,7 @@ sub print_leads {
 				my $cancel = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead});
 				$cancel =~ s/^[^[]*[[]([^]:]*)[]:].*$/$1/g;
 
-				print CSV "\"${cancel}\",\"\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"${cancel}\",\"\",\"\",\"\",\"\",\"1\",\"\",\"\",\"${subject}\",\n";
 
 				$subject = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) . " " . ${subject};
 
@@ -1097,7 +1100,7 @@ sub print_events {
 				my $subject = ($leads->{ $events->{$event}{$RID} }{$FNM} || "") . ${NAME_DIV} . ($leads->{ $events->{$event}{$RID} }{$LNM} || "");
 				$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{ $events->{$event}{$RID} }{$LID}) . ")";
 
-				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"1\",\"\",\"\",\"\",\"${subject}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"\",\"\",\"\",\"1\",\"\",\"\",\"\",\"${subject}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
