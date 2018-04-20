@@ -1101,8 +1101,7 @@ sub print_events {
 		) || (
 			(${report} eq "Broken") && ((
 				(($events->{$event}{$SUB}) && ($events->{$event}{$SUB} =~ m/${DSC_FLAG}/)) ||
-				(($events->{$event}{$LOC}) && ($events->{$event}{$LOC} =~ m/${DSC_FLAG}/)) ||
-				(($events->{$event}{$DSC}) && ($events->{$event}{$DSC} =~ m/${DSC_FLAG}/))
+				(($events->{$event}{$LOC}) && ($events->{$event}{$LOC} =~ m/${DSC_FLAG}/))
 			) || (
 				($events->{$event}{$DSC}) && (
 					($events->{$event}{$SUB} ne ${LEGEND_NAME}) &&
