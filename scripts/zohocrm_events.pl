@@ -747,6 +747,8 @@ sub print_leads {
 				$mod_date =~ m/^([0-9]{4})[-]([0-9]{2})[-]([0-9]{2})[ ]([0-9]{2})[:]([0-9]{2})[:]([0-9]{2})$/;
 				$mod_date = &timegm(${6},${5},${4},${3},(${2}-1),${1});
 				$mod_date = &strftime("%Y-%m-%d", localtime(${mod_date}));
+				my $subject_csv = ${subject};
+				$subject_csv =~ s/\"/\'/g;
 				while ($leads->{$lead}{$DSC} =~ m/^([0-9][0-9-]+[,]?[ ]?[A-Za-z]*)$/gm) {
 					if (${1}) {
 						my $match = ${1};
@@ -764,15 +766,13 @@ sub print_leads {
 					my $day = ${2};
 					$day =~ s/^[,][ ]//g;
 
-					$subject =~ s/\"/\'/g;
-
 					if (
 						(${date} eq ${mod_date}) ||
 						(${num} eq $#{$matches})
 					) {
 						$mod = "1";
 					};
-					print CSV "\"${date}\",\"${day}\",\"${new}\",\"${mod}\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+					print CSV "\"${date}\",\"${day}\",\"${new}\",\"${mod}\",\"\",\"\",\"${source}\",\"${status}\",\"${subject_csv}\",\n";
 					$new = "";
 
 					if (!${day}) {
@@ -783,7 +783,7 @@ sub print_leads {
 					${num}++;
 				};
 				if (!${mod}) {
-					print CSV "\"${mod_date}\",\"[MOD]\",\"\",\"1\",\"\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+					print CSV "\"${mod_date}\",\"[MOD]\",\"\",\"1\",\"\",\"\",\"${source}\",\"${status}\",\"${subject_csv}\",\n";
 				};
 			};
 		}
@@ -837,8 +837,10 @@ sub print_leads {
 			if ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) {
 				my $cancel = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead});
 				$cancel =~ s/^[^[]*[[]([^]:]*)[]:].*$/$1/g;
+				my $subject_csv = ${subject};
+				$subject_csv =~ s/\"/\'/g;
 
-				print CSV "\"${cancel}\",\"[CNL]\",\"\",\"\",\"\",\"1\",\"${source}\",\"${status}\",\"${subject}\",\n";
+				print CSV "\"${cancel}\",\"[CNL]\",\"\",\"\",\"\",\"1\",\"${source}\",\"${status}\",\"${subject_csv}\",\n";
 
 				$subject = ($cancel_bd_list->{$lead} || $cancel_gd_list->{$lead}) . " " . ${subject};
 
@@ -1120,8 +1122,10 @@ sub print_events {
 				my $status = ($leads->{ $events->{$event}{$RID} }{$STS} || "");
 				my $subject = ($leads->{ $events->{$event}{$RID} }{$FNM} || "") . ${NAME_DIV} . ($leads->{ $events->{$event}{$RID} }{$LNM} || "");
 				$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{ $events->{$event}{$RID} }{$LID}) . ")";
+				my $subject_csv = ${subject};
+				$subject_csv =~ s/\"/\'/g;
 
-				print CSV "\"$events->{$event}{$BEG}\",\"[CLS]\",\"\",\"\",\"1\",\"\",\"${source}\",\"${status}\",\"${subject}\",\n";
+				print CSV "\"$events->{$event}{$BEG}\",\"[CLS]\",\"\",\"\",\"1\",\"\",\"${source}\",\"${status}\",\"${subject_csv}\",\n";
 			};
 
 			&print_event_fields(${stderr}, "", ${keep}, $events->{$event});
