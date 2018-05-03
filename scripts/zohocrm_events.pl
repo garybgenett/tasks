@@ -146,10 +146,10 @@ my $DSC		= "Description";
 
 our $USERNAME;
 our $PASSWORD;
-do(${AUTH_CRED}) || die();
+do("./${AUTH_CRED}") || die();
 
 our $APITOKEN;
-do(${AUTH_TOKEN}) || die();
+do("./${AUTH_TOKEN}") || die();
 
 ################################################################################
 

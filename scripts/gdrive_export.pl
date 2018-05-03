@@ -70,12 +70,12 @@ our $PASSWORD;
 our $CLIENTID;
 our $CLSECRET;
 our $REDIRECT;
-do(".auth-${FILE}") || die();
+do("./.auth-${FILE}") || die();
 
 our $CODE;
 our $REFRESH;
 our $ACCESS;
-do(".token-${FILE}") || die($!);
+do("./.token-${FILE}") || die($!);
 
 ################################################################################
 
