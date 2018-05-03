@@ -208,12 +208,12 @@ our $PASSWORD;
 our $CLIENTID;
 our $CLSECRET;
 our $REDIRECT;
-do(".auth") || die();
+do("./.auth") || die();
 
 our $CODE;
 our $REFRESH;
 our $ACCESS;
-do(".token") || die();
+do("./.token") || die();
 
 ################################################################################
 
