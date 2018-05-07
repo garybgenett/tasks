@@ -160,7 +160,7 @@ report.dump.sort=			entry+
 report.fail.description=		Custom [Fail]: Finds non-conforming tasks
 report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,wait,scheduled,until,modified,due,end,uuid,parent,imask,mask
 report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+WAIT,+HOLD,+REAP,+MOVE,+DEAD,+DIED,+UUID,+PUID,+I,+M
-report.fail.filter=			((project:_gtd (kind.not:track recur.none: )) or (project:.gtd area.not:_gtd) or ((project:_data or project:_journal or project:.someday) kind.not:notes) or ((project.not:_gtd project.not:.gtd project.not:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area:work area.not:work- area.not:work.) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
+report.fail.filter=			((project:_gtd (kind.isnt:track recur.none: )) or (project:.gtd area.isnt:_gtd) or ((project:_data or project:_journal or project:.someday) kind.isnt:notes) or ((project.isnt:_gtd project.isnt:.gtd project.isnt:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area.is:work) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
 report.fail.sort=			entry+
 
 ########################################
@@ -174,7 +174,7 @@ report.data.sort=			project+,kind-,area-,description+,entry+
 report.meta.description=		Custom [Meta]: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
-report.meta.filter=			((project.not:_data project.not:_journal (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
+report.meta.filter=			((project.isnt:_data project.isnt:_journal (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
 report.meta.sort=			project+,kind-,area-,description+,entry+
 
 ########################################
@@ -223,13 +223,13 @@ report.todo.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 report.view.description=		Custom [View]: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.view.filter=			((status:pending project.not:_data project.not:_journal project.not:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.view.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.view.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 report.zoom.description=		Custom [Zoom]: Default list view (View), condensed for reporting
 report.zoom.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.zoom.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.zoom.filter=			((status:pending project.not:_data project.not:_journal project.not:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.zoom.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.zoom.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
