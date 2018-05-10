@@ -96,7 +96,7 @@ my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
 my $CLOSED_MARK	= "[\$]";
 
-my $MARK_REGEX	= "^([A-Z:-]+)[:][ ]";
+my $MARK_REGEX	= "^([\$A-Z:-]+)[:][ ]";
 my $SPLIT_CHAR	= "[\|]";
 my $A_BEG_CHAR	= "[\[]";
 my $A_END_CHAR	= "[\]]";
