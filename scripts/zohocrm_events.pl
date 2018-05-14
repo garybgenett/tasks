@@ -242,6 +242,7 @@ my $cancel_bd_list	= {};
 my $cancel_gd_list	= {};
 my $related_list	= {};
 my $empty_events	= [];
+my $orphaned_tasks	= {};
 
 my $fail_exit		= "0";
 
@@ -1364,6 +1365,7 @@ sub today_tmp_format {
 			($tasks->{$task}{$TST} eq "Not Started")
 		) {
 			$line .= "|" . $tasks->{$task}{$SUB};
+			$orphaned_tasks->{$task}++;
 		};
 	};
 	$line .= "}";
@@ -1396,6 +1398,23 @@ sub today_tmp_reverse {
 	};
 
 	&printer(${stderr}, "${LEVEL_2} [${DSC_FLAG}]\n\n");
+
+	foreach my $task (sort(keys(%{$tasks}))) {
+		if ((
+			(!$tasks->{$task}{$RID}) ||
+			(!$orphaned_tasks->{$task})
+		) && (
+			($tasks->{$task}{$TST} eq "Not Started")
+		)) {
+			my $related = ($tasks->{$task}{$REL} || "");
+			my $subject = ($tasks->{$task}{$SUB} || "");
+			if ($tasks->{$task}{$REL} && $tasks->{$task}{$RID})	{ $related = "[${related}](" . &URL_LINK("Leads",	$tasks->{$task}{$RID}) . ")"; };
+			if ($tasks->{$task}{$SUB} && $tasks->{$task}{$TID})	{ $subject = "[${subject}](" . &URL_LINK("Tasks",	$tasks->{$task}{$TID}) . ")"; };
+			&printer(${stderr}, "\t${subject} -> ${related}\n");
+		};
+	};
+
+	&printer(${stderr}, "\n${LEVEL_2} [${DSC_FLAG}]\n\n");
 
 	foreach my $test (@{$current}) {
 		my $match = "0";
