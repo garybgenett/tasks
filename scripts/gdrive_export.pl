@@ -183,13 +183,13 @@ sub api_upload {
 	my $input = do { local $/; <INPUT> };
 	close(INPUT) || die();
 
-	print "${file} (";
-	{ use bytes; print length(${input}); };
-	print ") -> ${id}\n";
-
 	$mech->request(HTTP::Request->new(
 		"PATCH", "${URL_API_UP}/files/${id}?uploadType=media", [], ${input},
 	)) && api_req_per_sec();
+
+	print "${file} (";
+	{ use bytes; print length(${input}); };
+	print ") -> ${id}\n";
 
 	return(0);
 };
@@ -203,13 +203,13 @@ sub api_download {
 	$mech->get("${URL_API}/files/${id}?alt=media") && api_req_per_sec();
 	my $output = $mech->content();
 
-	print "${id} -> ${file} (";
-	{ use bytes; print length(${output}); };
-	print ")\n";
-
 	open(OUTPUT, ">", ${file}) || die();
 	print OUTPUT ${output};
 	close(OUTPUT) || die();
+
+	print "${id} -> ${file} (";
+	{ use bytes; print length(${output}); };
+	print ")\n";
 
 	return(0);
 };
