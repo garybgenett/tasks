@@ -8,7 +8,7 @@
 #]    * [Roadmap (.status)](#roadmap)
 #]    * [Plan (.today)](#plan) ('.@', '.todo')
 #]    * [Timeline (tasks.timeline.html)](tasks.timeline.html)
-#]    * [Sales (zoho.today.md)](zoho.today.md) ('.% 2', 'tw % 2')
+#]    * [Sales (zoho.today.md)](#sales) ('.% 2', 'tw % 2')
 #]  * Tactical
 #]    * [Sales Data (zoho.all.md)](zoho.all.md)
 #]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
