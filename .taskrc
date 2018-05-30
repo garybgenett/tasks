@@ -174,7 +174,7 @@ report.data.sort=			project+,kind-,area-,description+,entry+
 report.meta.description=		Custom [Meta]: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
-report.meta.filter=			((project.isnt:_data project.isnt:_journal (kind.any: or recur.any: or tags:.research or tags:.waiting)) or +ACTIVE)
+report.meta.filter=			((project.isnt:_data project.isnt:_journal (kind.any: or (recur.any: mask.any: ) or tags:.research or tags:.waiting)) or +ACTIVE)
 report.meta.sort=			project+,kind-,area-,description+,entry+
 
 ########################################
