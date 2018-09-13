@@ -163,7 +163,7 @@ if (!${APITOKEN}) {
 		. "&DISPLAY_NAME=${APP_NAME}"
 		. "&EMAIL_ID=${USERNAME}"
 		. "&PASSWORD=${PASSWORD}"
-	) && $API_REQUEST_COUNT++;
+	);
 	$APITOKEN = $mech->content();
 	$APITOKEN =~ s/^.+AUTHTOKEN[=](.+)\n.+$/$1/gms;
 
