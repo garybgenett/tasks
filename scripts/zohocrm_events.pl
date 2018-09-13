@@ -85,7 +85,7 @@ my $SORT_COLUMN	= "Modified DateTime";
 my $SORT_ORDER	= "asc";
 my $MAX_RECORDS	= "200";
 
-my $NULL_CNAME	= "0 NULL";
+my $NULL_CNAME	= "\[0 NULL\]";
 my $NULL_ENAME	= "New Event";
 my $NAME_DIV	= " ";
 my $DSC_IMPORT	= "IMPORTED";
