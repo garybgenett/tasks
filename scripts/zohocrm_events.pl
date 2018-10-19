@@ -1006,7 +1006,10 @@ sub print_tasks {
 					($tasks->{$task}{$TST} ne "Completed")
 				)) ||
 				($tasks->{$task}{$PRI} ne "High") ||
-				(!$tasks->{$task}{$REL}) ||
+				((!$tasks->{$task}{$REL}) || (
+					($tasks->{$task}{$TST} eq "Not Started") &&
+					(!$related_list->{ $tasks->{$task}{$RID} })
+				)) ||
 				($tasks->{$task}{$SUB} =~ m/${DSC_FLAG}/) ||
 				($tasks->{$task}{$DSC})
 			)
