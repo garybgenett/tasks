@@ -94,6 +94,7 @@ my $DSC_EXP_GD	= "CANCEL";	my $DSC_EXP_GD_I	= "!";
 my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
+my $NON_ASCII_S	= "(\r|\n\n\n)";
 my $CLOSED_MARK	= "[\$]";
 
 my $MARK_REGEX	= "^([\$A-Z:-]+)[:][ ]";
@@ -736,7 +737,8 @@ sub print_leads {
 		my $details = ($leads->{$lead}{$DSC} || "");
 		$subject = "[${subject}](" . &URL_LINK("Leads", $leads->{$lead}{$LID}) . ")";
 		$details = "[${details}]"; $details =~ s/\n+/\]\[/g;
-		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/gms;
+		$details =~ s/${NON_ASCII_S}/${NON_ASCII}/gms;
 		my $modified = $leads->{$lead}{$MOD} || "";
 
 		if (${report} eq "CSV") {
@@ -882,14 +884,16 @@ sub print_leads {
 				($leads->{$lead}{$LNM} ne $leads->{$lead}{$CMP})
 			) || (
 				($leads->{$lead}{$DSC}) &&
-				($leads->{$lead}{$DSC} =~ m/(${DSC_FLAG}|${NON_ASCII_M})/)
+				($leads->{$lead}{$DSC} =~ m/(${DSC_FLAG}|${NON_ASCII_M}|${NON_ASCII_S})/gms)
 			)) {
 				$details = ($leads->{$lead}{$DSC} || "");
 				my $matching = "";
-				while ($details =~ m/^(.*(${DSC_FLAG}|${NON_ASCII_M}).*)$/gm) {
+#>>>				while ($details =~ m/^(.*(${DSC_FLAG}|${NON_ASCII_M}|${NON_ASCII_S}).*)$/gms) {
+				while ($details =~ m/^(.*(${DSC_FLAG}|${NON_ASCII_M}|${NON_ASCII_S}).*)$/gm) {
 					$matching .= "[${1}]";
 				};
-				$matching =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+				$matching =~ s/${NON_ASCII_M}/${NON_ASCII}/gms;
+				$matching =~ s/${NON_ASCII_S}/${NON_ASCII}/gms;
 				$details = ${matching};
 
 				if (!${details}) {
@@ -1177,7 +1181,8 @@ sub print_event_fields {
 		if ($vals->{$LOC})			{ $subject = "[${subject}][$vals->{$LOC}]"; };
 		if ($vals->{$DSC})			{ $subject = "**${subject}**"; };
 		if ($vals->{$DSC})			{ $details = "[${details}]"; $details =~ s/\n+/\]\[/g; };
-		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/g;
+		$details =~ s/${NON_ASCII_M}/${NON_ASCII}/gms;
+		$details =~ s/${NON_ASCII_S}/${NON_ASCII}/gms;
 	};
 
 	foreach my $val (@{$keep}) {
