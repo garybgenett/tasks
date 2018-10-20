@@ -94,6 +94,7 @@ my $DSC_EXP_GD	= "CANCEL";	my $DSC_EXP_GD_I	= "!";
 my $DSC_FLAG	= "WORK";
 my $NON_ASCII	= "###";
 my $NON_ASCII_M	= "[^[:ascii:]]";
+#>>>my $NON_ASCII_S	= "(\r|[[:space:]]\n|\n\n\n)";
 my $NON_ASCII_S	= "(\r|\n\n\n)";
 my $CLOSED_MARK	= "[\$]";
 
