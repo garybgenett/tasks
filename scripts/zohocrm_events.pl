@@ -118,6 +118,20 @@ my $S_DATE_ONLY	= "%-10.10s";
 
 ########################################
 
+#WORK: generic search/replace
+#	* create global matching hash: module => [ field list ]
+#	* module name is arg/switch matched against matching hash
+#	* second arg/switch is field matched againtst matching hash
+#	* title is default?  can't be
+#	* exit if either not matched?  nope, arg will just fail or not
+#	* only pull module?  nope, be lazy but thorough
+#	* don't reset files?  nope, same as above
+#	* exit immediately?  nope, like above
+#	* final arg/switch is exact "s//" regex, fail if none
+#	* create "new" variable hash, based on matching hash, loop over field array and regex hash item using field token, post all "new" fields also using loop
+#	* test with TEST -> TSET, event location, lead desc, task title
+#WORK
+
 my $TYPES	= [ "Leads", "Tasks", "Events" ];
 
 my $LID		= "LEADID";
@@ -284,6 +298,9 @@ sub fetch_entries {
 			. "&fromIndex=${index_no}"
 			. "&toIndex=${index_to}"
 		) && $API_REQUEST_COUNT++;
+#WORK
+#sleep(2);
+#WORK
 		$output = decode_json($mech->content());
 
 		if ( $output->{"response"}{"nodata"} ) {
@@ -558,6 +575,11 @@ sub check_recycle_bin {
 	my $output;
 	my $found;
 
+#WORK
+#my $date = &strftime("%Y-%m-%d", localtime(time()));
+#open(API_FAIL, ">/tmp/zoho_api-broken_recycle_bin_calls-${date}.txt") || die();
+#local $Data::Dumper::Purity = 1;
+#WORK
 	foreach my $type (@{$TYPES}) {
 		while (1) {
 
@@ -573,6 +595,16 @@ sub check_recycle_bin {
 				. "&fromIndex=${index_no}"
 				. "&toIndex=${index_to}"
 			) && $API_REQUEST_COUNT++;
+#WORK
+#print API_FAIL ${url_get}
+#	. "?scope=${URL_SCOPE}"
+#	. "&authtoken=${APITOKEN}"
+#	. "&fromIndex=${index_no}"
+#	. "&toIndex=${index_to}"
+#	. "\n"
+#	. $mech->content()
+#. "\n";
+#WORK
 
 			if ($mech->content() =~ m/[<]error[>]/) {
 				&printer(2, "\nGET[" . $mech->content() . "]\n");
@@ -600,13 +632,36 @@ sub check_recycle_bin {
 	if (%{$recycled}) {
 		&printer(2, "\n");
 		&printer(2, "\tRecycle Bin:\n");
-		$fail_exit = "1";
+#WORK		$fail_exit = "1";
 
 		foreach my $type (@{$TYPES}) {
 			&printer(2, "\t\t${type}: " . scalar(keys(%{ $recycled->{$type} })) . "\n");
 		};
 	};
 
+#WORK
+#WORK print API_FAIL Dumper($recycled);
+#foreach my $type (@{$TYPES}) {
+#	my $url_get = &URL_FETCH(${type});
+#	$url_get =~ s/getRecords/getRecordById/g;
+#	$url_get =~ s/json/xml/g;
+#	foreach my $record (sort(keys(%{ $recycled->{$type} }))) {
+#		$mech->get(${url_get}
+#			. "?scope=${URL_SCOPE}"
+#			. "&authtoken=${APITOKEN}"
+#			. "&id=${record}"
+#		) && $API_REQUEST_COUNT++;
+#		print API_FAIL ${url_get}
+#			. "?scope=${URL_SCOPE}"
+#			. "&authtoken=${APITOKEN}"
+#			. "&id=${record}"
+#			. "\n"
+#			. $mech->content()
+#		. "\n";
+#	};
+#};
+#close(API_FAIL) || die();
+#WORK
 	return(0);
 };
 
