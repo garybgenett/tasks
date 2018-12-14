@@ -192,6 +192,12 @@ report.mind.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+BORN,
 report.mind.filter=			((status:pending due.any: ) or +ACTIVE)
 report.mind.sort=			due+,priority-,urgency-,project+,description+,entry+
 
+report.note.description=		Custom [Note]: Active notes
+report.note.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,entry,due,end,imask
+report.note.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+BORN,+DEAD,+DIED,+I
+report.note.filter=			(status:pending kind:notes +ANNOTATED)
+report.note.sort=			description+,entry+
+
 ########################################
 
 report.read.description=		Custom [Read]: List view, unfiltered and sorted for review
