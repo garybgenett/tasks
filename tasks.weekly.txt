@@ -8,9 +8,8 @@
 #]    * [Roadmap (.status)](#roadmap)
 #]    * [Plan (.today)](#plan) ('.@', '.todo')
 #]    * [Timeline (tasks.timeline.html)](tasks.timeline.html)
-#]    * [Sales (zoho.today.md)](#sales) ('.% 2', 'tw % 2')
 #]  * Tactical
-#]    * [Sales Data (zoho.all.md)](zoho.all.md)
+#]    * [Writing (\_imagination.md)](#writing) ('.@')
 #]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
 #]    * [Family & Friends](#uuid-7327628e-c2e8-4b08-b691-e64e4731b17b)
 #]    * [Travel & Gear](#uuid-3fc2209e-6600-4724-86a4-ea8bedff8479)
@@ -18,17 +17,17 @@
 #]    * Thoughts
 #]    * Digital
 #]        * [Tasks](https://mail.google.com/tasks/canvas) (+Inbox, '.in')
-#]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]}))
-#]        * [Sales](https://drive.google.com/file/d/1wQrnTw0I5pDfzlqeuKdBNCNvFH9Ifulz) ([_sales.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1wQrnTw0I5pDfzlqeuKdBNCNvFH9Ifulz"]}))
+#]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]})) ([_notes.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e))
+#]        * [Write](https://drive.google.com/file/d/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k) ([_write.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k"]})) ([_write.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k))
 #]        * [Drive](https://drive.google.com/drive/my-drive)
 #]        * [Share](https://drive.google.com/drive/shared-with-me)
 #]        * [Mail](https://secure.earthclassmail.com)
 #]    * Analog
 #]        * Wallet
-#]        * Binder
-#]        * Folders
+#]        * Paperwork / Folders
 #]  * Tools
 #]    * Calendar
+#]        * Working entries
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Taskwarrior
