@@ -160,7 +160,8 @@ report.dump.sort=			entry+
 report.fail.description=		Custom [Fail]: Finds non-conforming tasks
 report.fail.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,wait,scheduled,until,modified,due,end,uuid,parent,imask,mask
 report.fail.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+WAIT,+HOLD,+REAP,+MOVE,+DEAD,+DIED,+UUID,+PUID,+I,+M
-report.fail.filter=			((project:_gtd (kind.isnt:track recur.none: )) or (project:.gtd area.isnt:_gtd) or ((project:_data or project:_journal or project:.someday) kind.isnt:notes) or ((project.isnt:_gtd project.isnt:.gtd project.isnt:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area.is:work) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
+#>>>report.fail.filter=			((project:_gtd (kind.isnt:track recur.none: )) or (project:.gtd area.isnt:_gtd) or ((project:_data or project:_journal or project:.someday) kind.isnt:notes) or ((project.isnt:_gtd project.isnt:.gtd project.isnt:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area.is:work) or (priority.any: or wait.any: or scheduled.any: or (until.any: recur.none: )))
+report.fail.filter=			((project:_gtd (kind.isnt:track recur.none: )) or (project:.gtd area.isnt:_gtd) or ((project:_data or project:_journal or project:.someday) kind.isnt:notes) or ((project.isnt:_gtd project.isnt:.gtd project.isnt:_data) area:_gtd) or (project.none: kind:notes) or (kind.any: tags.any: ) or (kind.none: tags.none: ) or (area.none: ) or (area.is:work) or (wait.any: or scheduled.any: or (until.any: recur.none: )))
 report.fail.sort=			entry+
 
 ########################################
