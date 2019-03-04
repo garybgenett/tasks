@@ -7,7 +7,7 @@ data.location=				/.g/_data/zactive/_pim/tasks
 ########################################
 
 taskd.server=				server.garybgenett.net:53589
-taskd.credentials=			local/user/17835bc0-774f-415e-956a-d5ca07c3069f
+taskd.credentials=			local/user/e52c1208-5c20-4935-aef2-84666d0167ff
 
 taskd.ca=				/.g/_data/zactive/.home/.openssl/server-ca.garybgenett.net.crt
 taskd.certificate=			/.g/_data/zactive/.home/.openssl/client.garybgenett.net.crt
