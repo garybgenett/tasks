@@ -16,7 +16,7 @@ debug.tls=				1
 
 ########################################
 
-defaultwidth=				0
+defaultwidth=				160
 defaultheight=				0
 detection=				1
 xterm.title=				0
