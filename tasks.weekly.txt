@@ -20,7 +20,7 @@
 #]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]})) ([_notes.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e))
 #]        * [Write](https://drive.google.com/file/d/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k) ([_write.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k"]})) ([_write.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k))
 #]        * [Drive](https://drive.google.com/drive/my-drive) ([Share](https://drive.google.com/drive/shared-with-me))
-#]        * [Mail](https://secure.earthclassmail.com)
+#]        * [Mail](https://app.earthclassmail.com)
 #]    * Analog
 #]        * Wallet
 #]        * Paperwork / Folders
