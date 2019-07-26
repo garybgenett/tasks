@@ -54,13 +54,13 @@
 #]        * Past, for missed
 #]        * Future, for upcoming
 #]    * Todos (`todo`)
-#]        * GTD (`read status:pending project:.gtd`)
+#]        * GTD & HPI (`read status:pending \( project:.gtd or project:.hpi \)`)
 #]        * Research (`read status:pending tags:.research`)
 #]        * Waiting (`read status:pending tags:.waiting`)
 #]    * Projects (`projects`)
 #]        * Active (`projects status:pending`)
 #]        * Iterate (`+for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project.is:${FILE}; task view project.is:${FILE}; task-depends project.is:${FILE}; done`)
-#]    * Tasks (`read status:pending project.none:; task view status:pending project.none:; task-depends status:pending project.none:`)
+#]    * Tasks (`view project.none:; task-depends status:pending project.none:`)
 #]        * UDAs (`udas`)
 #]            * Kinds (`+for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind.is:${FILE}; done`)
 #]            * Areas (`+for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done`)
@@ -77,13 +77,13 @@
 #|calendar
 #|mind
 #|todo
-#|read status:pending project:.gtd
+#|read status:pending \( project:.gtd or project:.hpi \)
 #|read status:pending tags:.research
 #|read status:pending tags:.waiting
 #|projects
 #|projects status:pending
 #|+for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project.is:${FILE}; task view project.is:${FILE}; task-depends project.is:${FILE}; done
-#|read status:pending project.none:; task view status:pending project.none:; task-depends status:pending project.none:
+#|view project.none:; task-depends status:pending project.none:
 #|udas
 #|+for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind.is:${FILE}; done
 #|+for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done
@@ -103,13 +103,13 @@
 task calendar;
 task mind;
 task todo;
-task read status:pending project:.gtd;
+task read status:pending \( project:.gtd or project:.hpi \);
 task read status:pending tags:.research;
 task read status:pending tags:.waiting;
 task projects;
 task projects status:pending;
 for FILE in $(task status:pending _unique project | grep -E -v "^[._]" | sort | uniq); do task read project.is:${FILE}; task view project.is:${FILE}; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends project.is:${FILE}; done;
-task read status:pending project.none:; task view status:pending project.none:; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends status:pending project.none:;
+task view project.none:; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends status:pending project.none:;
 task udas;
 for FILE in $(task status:pending _unique kind | grep -E -v "^[._]" | sort | uniq); do task read status:pending kind.is:${FILE}; done;
 for FILE in $(task status:pending _unique area | grep -E -v "^[._]" | sort | uniq); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done;
