@@ -224,19 +224,19 @@ report.sort.sort=			end+,due+,modified+,entry+
 report.todo.description=		Custom [Todo]: Due and priority tasks
 report.todo.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.todo.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.todo.filter=			((status:pending (((project:.gtd kind.none: ) or (project:.hpi kind.none: ) or (kind.none: +ANNOTATED) or priority.any: ) -BLOCKED) or (+DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.todo.filter=			((status:pending (((project:.gtd kind.none: ) or (project:.hpi kind.none: ) or (kind.none: +ANNOTATED) or priority.any: ) +UNBLOCKED) or (+DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.todo.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 report.view.description=		Custom [View]: Default list view
 report.view.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.view.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.view.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.view.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (+UNBLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.view.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 report.zoom.description=		Custom [Zoom]: Default list view (View), condensed for reporting
 report.zoom.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.zoom.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.zoom.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
+report.zoom.filter=			((status:pending project.isnt:_data project.isnt:_journal project.isnt:.someday kind.none: (recur.none: or +TODAY or +OVERDUE) (+UNBLOCKED or +DUE or +TODAY or +OVERDUE)) or +ACTIVE)
 report.zoom.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 
 #>>>report.next.sort=			urgency-,due+,priority-,start-,project+
@@ -246,19 +246,19 @@ report.zoom.sort=			start-,due+,priority-,urgency-,project+,description+,entry+
 report.agenda.description=		Custom [Agenda]: Default list view (View), tag sorted alphabetically
 report.agenda.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.agenda.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.agenda.filter=			(status:pending tags:agenda (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
+report.agenda.filter=			(status:pending tags:agenda (recur.none: or +TODAY or +OVERDUE) (+UNBLOCKED or +DUE or +TODAY or +OVERDUE))
 report.agenda.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 report.errand.description=		Custom [Errand]: Default list view (View), tag sorted alphabetically
 report.errand.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.errand.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
-report.errand.filter=			(status:pending tags:errand (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
+report.errand.filter=			(status:pending tags:errand (recur.none: or +TODAY or +OVERDUE) (+UNBLOCKED or +DUE or +TODAY or +OVERDUE))
 report.errand.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 report.status.description=		Custom [Status]: Default list view (View), status of work actions
 report.status.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.status.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
-report.status.filter=			(status:pending area:work (recur.none: or +TODAY or +OVERDUE) (-BLOCKED or +DUE or +TODAY or +OVERDUE))
+report.status.filter=			(status:pending area:work (recur.none: or +TODAY or +OVERDUE) (+UNBLOCKED or +DUE or +TODAY or +OVERDUE))
 report.status.sort=			kind-,description+,due+,priority-,urgency-,project+,entry+
 
 ################################################################################
