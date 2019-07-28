@@ -201,6 +201,12 @@ report.note.sort=			project+,description+,entry+
 
 ########################################
 
+report.look.description=		Custom [Look]: Project filter
+report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
+report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
+report.look.filter=			(status:pending (kind.any: or (+UNBLOCKED or +DUE or +TODAY or +OVERDUE)))
+report.look.sort=			project+,kind-,priority-,depends+,description+,entry+
+
 report.read.description=		Custom [Read]: List view, unfiltered and sorted for review
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
