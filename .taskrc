@@ -166,7 +166,7 @@ report.fail.sort=			entry+
 
 ########################################
 
-report.data.description=		Custom [Data]: Reference and non-task data
+report.data.description=		Custom [Data]: All reference and non-task data
 report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.data.filter=			(project:_data or project:_journal)
@@ -207,13 +207,13 @@ report.note.sort=			project+,description+,entry+
 
 ########################################
 
-report.look.description=		Custom [Look]: Project filter
+report.look.description=		Custom [Look]: Filtered list view, unfiltered and sorted for review
 report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.look.filter=			(status:pending (kind.any: or (+UNBLOCKED or +DUE or +TODAY or +OVERDUE)))
 report.look.sort=			project+,kind-,priority-,depends+,description+,entry+
 
-report.read.description=		Custom [Read]: List view, unfiltered and sorted for review
+report.read.description=		Custom [Read]: Global list view, unfiltered and sorted for review
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
