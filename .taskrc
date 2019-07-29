@@ -172,6 +172,12 @@ report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,
 report.data.filter=			(project:_data or project:_journal)
 report.data.sort=			project+,kind-,area-,description+,entry+
 
+report.docs.description=		Custom [Docs]: Active reference and non-task data
+report.docs.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
+report.docs.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
+report.docs.filter=			(status:pending (project:_data or project:_journal))
+report.docs.sort=			project+,kind-,area-,description+,entry+
+
 report.meta.description=		Custom [Meta]: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
