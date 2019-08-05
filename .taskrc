@@ -170,19 +170,19 @@ report.data.description=		Custom [Data]: All data entries
 report.data.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.data.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.data.filter=			(project:_data or project:_journal)
-report.data.sort=			project+,kind-,area-,description+,entry+
+report.data.sort=			project+,kind-,description+,entry+
 
 report.docs.description=		Custom [Docs]: Active data and annotated entries
 report.docs.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.docs.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.docs.filter=			(status:pending ((project:_data or project:_journal) or (kind.isnt:track +ANNOTATED)))
-report.docs.sort=			project+,kind-,area-,description+,entry+
+report.docs.sort=			project+,kind-,description+,entry+
 
 report.meta.description=		Custom [Meta]: Metadata and recurring tasks
 report.meta.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.meta.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.meta.filter=			((project.isnt:_data project.isnt:_journal (kind.any: or (recur.any: mask.any: ) or tags:.research or tags:.waiting)) or +ACTIVE)
-report.meta.sort=			project+,kind-,area-,description+,entry+
+report.meta.sort=			project+,kind-,description+,entry+
 
 ########################################
 
