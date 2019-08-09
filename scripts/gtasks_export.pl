@@ -319,7 +319,7 @@ sub api_req_per_sec {
 sub api_get {
 	my $url		= shift;
 	my $fields	= shift;
-	my $output;
+	my $object;
 	my $page;
 
 #>>> BUG IN GOOGLE TASKS API!
@@ -341,25 +341,25 @@ sub api_get {
 
 		#>>> http://www.perlmonks.org/?node_id=995613
 		foreach my $key (keys(%{$out})) {
-			if (exists($output->{$key}) && $output->{$key} ne $out->{$key}) {
-				if (ref($output->{$key}) eq "ARRAY") {
-					push(@{$output->{$key}}, @{$out->{$key}});
+			if (exists($object->{$key}) && $object->{$key} ne $out->{$key}) {
+				if (ref($object->{$key}) eq "ARRAY") {
+					push(@{$object->{$key}}, @{$out->{$key}});
 				} else {
-					push(@{$output->{$API_ERROR}}, [ ${key}, $output->{$key}, $out->{$key} ]);
+					push(@{$object->{$API_ERROR}}, [ ${key}, $object->{$key}, $out->{$key} ]);
 				};
 			} else {
-				$output->{$key} = $out->{$key};
+				$object->{$key} = $out->{$key};
 			};
 		}
 
 		$page = $out->{"nextPageToken"};
 		delete($out->{"nextPageToken"});
-		delete($output->{"nextPageToken"});
-		$output->{$API_PAGES}++;
+		delete($object->{"nextPageToken"});
+		$object->{$API_PAGES}++;
 	}
 	until (!defined(${page}));
 
-	return(${output});
+	return(${object});
 };
 
 ########################################
