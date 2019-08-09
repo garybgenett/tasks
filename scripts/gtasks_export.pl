@@ -365,10 +365,21 @@ sub api_get {
 ########################################
 
 sub api_post {
-	my $selflink	= shift;
+	my $object	= shift;
 	my $fields	= shift;
+	my $selflink = $object->{"selfLink"};
+	if ($fields->{"parent"}) {
+		$selflink .= "?";
+		$selflink .= "parent=" . ($fields->{"parent"} || "");
+	};
+	if ($fields->{"previous"}) {
+		if (!$fields->{"parent"}) {	$selflink .= "?";
+		} else {			$selflink .= "&";
+		};
+		$selflink .= "previous=" . ($fields->{"previous"} || "");
+	};
 	$mech->request(HTTP::Request->new(
-		"POST", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
+		"POST", $object->{"selfLink"}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
 };
@@ -376,38 +387,31 @@ sub api_post {
 ########################################
 
 sub api_patch {
-	my $selflink	= shift;
+	my $object	= shift;
 	my $fields	= shift;
-	if (exists($fields->{"parent"}) || exists($fields->{"previous"})) {
-		my $output = &api_move(${selflink}, ${fields});
-		$selflink = $output->{"selfLink"};
+	my $selflink = $object->{"selfLink"};
+	if ($fields->{"parent"}) {
+		$selflink .= "?";
+		$selflink .= "parent=" . ($fields->{"parent"} || "");
+	};
+	if ($fields->{"previous"}) {
+		if (!$fields->{"parent"}) {	$selflink .= "?";
+		} else {			$selflink .= "&";
+		};
+		$selflink .= "previous=" . ($fields->{"previous"} || "");
 	};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) &&
-#>>> BUG IN GOOGLE API QUOTA COUNTING?
-	$API_REQUEST_COUNT++ &&
-#>>>
-	api_req_per_sec();
+	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
 };
 
 ########################################
 
-sub api_move {
-	my $selflink	= shift;
-	my $fields	= shift;
-	$selflink .= "/move?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	my $output = &api_post(${selflink}, {});
-	return(${output});
-};
-
-########################################
-
 sub api_delete {
-	my $selflink	= shift;
+	my $object	= shift;
 	$mech->request(HTTP::Request->new(
-		"DELETE", ${selflink},
+		"DELETE", $object->{"selfLink"};
 	)) && api_req_per_sec();
 #>>>	return(decode_json($mech->content()));
 	return(0);
@@ -417,7 +421,11 @@ sub api_delete {
 
 sub api_create_list {
 	my $fields = shift;
-	my $output = &api_post("${URL_API}/users/\@me/lists", ${fields});
+	my $object = {};
+#>>> THIS IS A HACK!
+	$object->{"selfLink"} = "${URL_API}/users/\@me/lists";
+#>>>
+	my $output = &api_post(${object}, ${fields});
 	return(${output});
 };
 
@@ -433,9 +441,11 @@ sub api_fetch_lists {
 sub api_create_task {
 	my $listid	= shift;
 	my $fields	= shift;
-	my $url = "${URL_API}/lists/${listid}/tasks";
-	$url .= "?parent=" . ($fields->{"parent"} || "") . "&previous=" . ($fields->{"previous"} || "");
-	my $output = &api_post(${url}, ${fields});
+	my $object	= {};
+#>>> THIS IS A HACK!
+	$object->{"selfLink"} = "${URL_API}/lists/${listid}/tasks";
+#>>>
+	my $output = &api_post(${object}, ${fields});
 	return(${output});
 };
 
@@ -486,7 +496,7 @@ sub taskwarrior_export {
 			$output = &api_fetch_tasks($tasklist->{"id"});
 
 			foreach my $task (@{$output->{"items"}}) {
-				push(@{$links}, $task->{"selfLink"});
+				push(@{$links}, ${task});
 			};
 
 			last();
@@ -660,7 +670,7 @@ sub taskwarrior_import {
 						$output = "FAILED COMMAND!\n" . ${output};
 						print STDERR ${output} . "\n";
 
-						&api_patch($task->{"selfLink"}, {
+						&api_patch(${task}), {
 							"notes"		=> ${output},
 						});
 					} else {
@@ -672,7 +682,7 @@ sub taskwarrior_import {
 							$output = "UNKNOWN OUTPUT!\n" . ${output};
 							print STDERR ${output} . "\n";
 
-							&api_patch($task->{"selfLink"}, {
+							&api_patch(${task}, {
 								"notes"		=> ${output},
 							});
 						} else {
@@ -683,7 +693,7 @@ sub taskwarrior_import {
 							$uuid = $task->{"updated"} . "\n" . ${uuid} . "\n" . ${taskid};
 							print ${uuid} . "\n";
 
-							&api_patch($task->{"selfLink"}, {
+							&api_patch(${task}, {
 								"status"	=> "completed",
 								"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
 								"notes"		=> ${uuid},
@@ -889,7 +899,7 @@ sub manage_cruft_list {
 		if ($task->{"title"} =~ "\n") {
 			$task->{"title"} =~ s/\n//g;
 			printf("%-10.10s %-50.50s %s\n", "rescuing:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch($task->{"selfLink"}, {
+			&api_patch(${task}, {
 				"title"		=> $task->{"title"},
 			});
 		};
@@ -900,7 +910,7 @@ sub manage_cruft_list {
 			!$task->{"due"}
 		) {
 			printf("%-10.10s %-50.50s %s\n", "clearing:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch($task->{"selfLink"}, {
+			&api_patch(${task}, {
 				"title"		=> "0",
 				"status"	=> "needsAction",
 				"completed"	=> undef,
@@ -915,7 +925,7 @@ sub manage_cruft_list {
 			$task->{"deleted"}
 		)) {
 			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch($task->{"selfLink"}, {
+			&api_patch(${task}, {
 				"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[" . $task->{"title"} . "]",
 				"status"	=> "needsAction",
 				"completed"	=> undef,
@@ -988,7 +998,7 @@ sub purge_lists {
 #>>> https://productforums.google.com/d/msg/gmail/yKbRwhi6hYU/2QXGlAfwQx4J
 			$output = &api_fetch_tasks($tasklist->{"id"});
 			foreach my $task (@{$output->{"items"}}) {
-				&api_patch($task->{"selfLink"}, {
+				&api_patch(${task}, {
 #>>>					"title"		=> " ",
 					"title"		=> "0",
 #>>>					"status"	=> "needsAction",
@@ -999,7 +1009,7 @@ sub purge_lists {
 					"deleted"	=> undef,
 					"notes"		=> "",
 				});
-#>>>				&api_delete($task->{"selfLink"});
+#>>>				&api_delete(${task});
 				print ".";
 			};
 #>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
@@ -1089,7 +1099,7 @@ sub purge_lists {
 		}
 		else {
 			print $tasklist->{"title"} . ": purged";
-			&api_delete($tasklist->{"selfLink"});
+			&api_delete(${tasklist});
 		};
 
 		print "\n";
@@ -1106,7 +1116,7 @@ sub purge_lists {
 sub edit_notes {
 	my $argv_list	= shift;
 	my $argv_name	= shift;
-	my $selflink;
+	my $object;
 	my $output;
 
 	if (${argv_list} eq "0") {
@@ -1121,7 +1131,7 @@ sub edit_notes {
 
 			foreach my $task (@{$output->{"items"}}) {
 				if ($task->{"title"} eq ${argv_name}) {
-					$selflink = $task->{"selfLink"};
+					$object = ${task};
 					last();
 				};
 			};
@@ -1130,17 +1140,17 @@ sub edit_notes {
 		};
 	};
 
-	if (!${selflink}) {
+	if (!${object}) {
 		print STDERR "\n";
 		print STDERR "DOES NOT EXIST!\n";
 		&EXIT(1);
 	} else {
-		$output = &api_get(${selflink});
+		$output = &api_get($object->{"selfLink"});
 		$output = &edit_notes_text($output->{"notes"});
 
 		if ($output) {
 			&refresh_tokens();
-			&api_patch(${selflink}, {
+			&api_patch(${object}, {
 				"notes"		=> ${output},
 			});
 		};
