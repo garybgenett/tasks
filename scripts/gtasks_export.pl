@@ -468,10 +468,10 @@ sub taskwarrior_export {
 	print "\n${title}: ";
 
 	if (!${tasks}) {
-		$tasks = qx(task show "default.command");	$tasks =~ m/^default[.]command[ ](.*)$/gm;		$tasks = (${1} || "");
+		$tasks = qx(task show rc.defaultwidth=0 "default.command" 2>&1);	$tasks =~ m/^default[.]command[ ](.*)$/gm;		$tasks = (${1} || "");
 	};
-	$filter = qx(task show "report.${tasks}.filter");	$filter =~ m/^report[.]${tasks}[.]filter[ ](.*)$/gm;	$filter = (${1} || "");
-	$fields = qx(task show "report.${tasks}.sort");		$fields =~ m/^report[.]${tasks}[.]sort[ ](.*)$/gm;	$fields = (${1} || "");
+	$filter = qx(task show rc.defaultwidth=0 "report.${tasks}.filter" 2>&1);	$filter =~ m/^report[.]${tasks}[.]filter[ ](.*)$/gm;	$filter = (${1} || "");
+	$fields = qx(task show rc.defaultwidth=0 "report.${tasks}.sort" 2>&1);		$fields =~ m/^report[.]${tasks}[.]sort[ ](.*)$/gm;	$fields = (${1} || "");
 	$tasks = qx(task export "${filter}" "${search}");
 	$tasks =~ s/\n//g;
 	$tasks = decode_json(${tasks});
