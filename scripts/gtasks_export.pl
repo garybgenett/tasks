@@ -367,7 +367,8 @@ sub api_get {
 
 ########################################
 
-sub api_post {
+sub api_method {
+	my $method	= shift;
 	my $object	= shift;
 	my $fields	= shift;
 	my $selflink = $object->{"selfLink"};
@@ -383,43 +384,9 @@ sub api_post {
 	};
 	$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
 	$mech->request(HTTP::Request->new(
-		"POST", $object->{"selfLink"}, ["Content-Type", "application/json"], encode_json(${fields}),
+		${method}, ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
 	return(decode_json($mech->content()));
-};
-
-########################################
-
-sub api_patch {
-	my $object	= shift;
-	my $fields	= shift;
-	my $selflink = $object->{"selfLink"};
-	if ($fields->{"parent"}) {
-		$selflink .= "?";
-		$selflink .= "parent=" . ($fields->{"parent"} || "");
-	};
-	if ($fields->{"previous"}) {
-		if (!$fields->{"parent"}) {	$selflink .= "?";
-		} else {			$selflink .= "&";
-		};
-		$selflink .= "previous=" . ($fields->{"previous"} || "");
-	};
-	$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
-	$mech->request(HTTP::Request->new(
-		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
-	)) && api_req_per_sec();
-	return(decode_json($mech->content()));
-};
-
-########################################
-
-sub api_delete {
-	my $object	= shift;
-	$mech->request(HTTP::Request->new(
-		"DELETE", $object->{"selfLink"};
-	)) && api_req_per_sec();
-#>>>	return(decode_json($mech->content()));
-	return(0);
 };
 
 ################################################################################
@@ -430,7 +397,7 @@ sub api_create_list {
 #>>> THIS IS A HACK!
 	$object->{"selfLink"} = "${URL_API}/users/\@me/lists";
 #>>>
-	my $output = &api_post(${object}, ${fields});
+	my $output = &api_method("POST", ${object}, ${fields});
 	return(${output});
 };
 
@@ -450,7 +417,7 @@ sub api_create_task {
 #>>> THIS IS A HACK!
 	$object->{"selfLink"} = "${URL_API}/lists/${listid}/tasks";
 #>>>
-	my $output = &api_post(${object}, ${fields});
+	my $output = &api_method("POST", ${object}, ${fields});
 	return(${output});
 };
 
@@ -612,7 +579,7 @@ sub taskwarrior_export {
 			"previous"	=> ${previous},
 		};
 		if (@{$links}) {
-			$output = &api_patch(shift(@{$links}), ${blob});
+			$output = &api_method("PATCH", shift(@{$links}), ${blob});
 			$previous = $output->{"id"};
 			print "=";
 		} else {
@@ -623,7 +590,7 @@ sub taskwarrior_export {
 	};
 
 	while (@{$links}) {
-		$output = &api_patch(shift(@{$links}), {
+		$output = &api_method("PATCH", shift(@{$links}), {
 			"title"		=> "0",
 			"status"	=> "needsAction",
 			"due"		=> undef,
@@ -675,7 +642,7 @@ sub taskwarrior_import {
 						$output = "FAILED COMMAND!\n" . ${output};
 						print STDERR ${output} . "\n";
 
-						&api_patch(${task}), {
+						&api_method("PATCH", ${task}, {
 							"notes"		=> ${output},
 						});
 					} else {
@@ -687,7 +654,7 @@ sub taskwarrior_import {
 							$output = "UNKNOWN OUTPUT!\n" . ${output};
 							print STDERR ${output} . "\n";
 
-							&api_patch(${task}, {
+							&api_method("PATCH", ${task}, {
 								"notes"		=> ${output},
 							});
 						} else {
@@ -698,7 +665,7 @@ sub taskwarrior_import {
 							$uuid = $task->{"updated"} . "\n" . ${uuid} . "\n" . ${taskid};
 							print ${uuid} . "\n";
 
-							&api_patch(${task}, {
+							&api_method("PATCH", ${task}, {
 								"status"	=> "completed",
 								"completed"	=> strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()),
 								"notes"		=> ${uuid},
@@ -904,7 +871,7 @@ sub manage_cruft_list {
 		if ($task->{"title"} =~ "\n") {
 			$task->{"title"} =~ s/\n//g;
 			printf("%-10.10s %-50.50s %s\n", "rescuing:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch(${task}, {
+			&api_method("PATCH", ${task}, {
 				"title"		=> $task->{"title"},
 			});
 		};
@@ -915,7 +882,7 @@ sub manage_cruft_list {
 			!$task->{"due"}
 		) {
 			printf("%-10.10s %-50.50s %s\n", "clearing:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch(${task}, {
+			&api_method("PATCH", ${task}, {
 				"title"		=> "0",
 				"status"	=> "needsAction",
 				"completed"	=> undef,
@@ -930,7 +897,7 @@ sub manage_cruft_list {
 			$task->{"deleted"}
 		)) {
 			printf("%-10.10s %-50.50s %s\n", "reviving:", $task->{"id"}, $task->{"title"} || "-");
-			&api_patch(${task}, {
+			&api_method("PATCH", ${task}, {
 				"title"		=> "[" . sprintf("%.3d", int(rand(10**3))) . "]:[" . $task->{"title"} . "]",
 				"status"	=> "needsAction",
 				"completed"	=> undef,
@@ -1003,7 +970,7 @@ sub purge_lists {
 #>>> https://productforums.google.com/d/msg/gmail/yKbRwhi6hYU/2QXGlAfwQx4J
 			$output = &api_fetch_tasks($tasklist->{"id"});
 			foreach my $task (@{$output->{"items"}}) {
-				&api_patch(${task}, {
+				&api_method("PATCH", ${task}, {
 #>>>					"title"		=> " ",
 					"title"		=> "0",
 #>>>					"status"	=> "needsAction",
@@ -1014,7 +981,7 @@ sub purge_lists {
 					"deleted"	=> undef,
 					"notes"		=> "",
 				});
-#>>>				&api_delete(${task});
+#>>>				&api_method("DELETE", ${task});
 				print ".";
 			};
 #>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
@@ -1104,14 +1071,14 @@ sub purge_lists {
 		}
 		else {
 			print $tasklist->{"title"} . ": purged";
-			&api_delete(${tasklist});
+			&api_method("DELETE", ${tasklist});
 		};
 
 		print "\n";
 	};
 
 #>>> ${web}, ${PURGE_LIST}, ${URL_WEB_POST} and ${purge_list} only exist for the hackery in &{purge_lists}!
-#	&api_delete(${purge_list});
+#	&api_method("DELETE", ${purge_list});
 #>>>
 	return(0);
 };
@@ -1155,7 +1122,7 @@ sub edit_notes {
 
 		if ($output) {
 			&refresh_tokens();
-			&api_patch(${object}, {
+			&api_method("PATCH", ${object}, {
 				"notes"		=> ${output},
 			});
 		};
