@@ -82,6 +82,9 @@ my $PROJ_LINK_OPEN	= "=";
 my $PROJ_LINK_CLOSED	= "x";
 my $PROJ_LINK_SEPARATE	= ": ";
 
+my $NOTES_APPEND	= "[...]";
+my $NOTES_LENGTH	= ((2**13) - length(${NOTES_APPEND}));
+
 my $INDENT		= " ";
 
 my $URL_WEB		= "https://mail.google.com/tasks/canvas";
@@ -378,6 +381,7 @@ sub api_post {
 		};
 		$selflink .= "previous=" . ($fields->{"previous"} || "");
 	};
+	$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
 	$mech->request(HTTP::Request->new(
 		"POST", $object->{"selfLink"}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
@@ -400,6 +404,7 @@ sub api_patch {
 		};
 		$selflink .= "previous=" . ($fields->{"previous"} || "");
 	};
+	$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
 	$mech->request(HTTP::Request->new(
 		"PATCH", ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
