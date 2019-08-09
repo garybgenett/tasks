@@ -382,7 +382,9 @@ sub api_method {
 		};
 		$selflink .= "previous=" . ($fields->{"previous"} || "");
 	};
-	$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
+	if ($fields->{"notes"}) {
+		$fields->{"notes"} = substr($fields->{"notes"} || "", 0, ${NOTES_LENGTH}) . ${NOTES_APPEND};
+	};
 	$mech->request(HTTP::Request->new(
 		${method}, ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
