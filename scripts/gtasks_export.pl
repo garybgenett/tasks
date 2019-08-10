@@ -388,7 +388,11 @@ sub api_method {
 	$mech->request(HTTP::Request->new(
 		${method}, ${selflink}, ["Content-Type", "application/json"], encode_json(${fields}),
 	)) && api_req_per_sec();
-	return(decode_json($mech->content()));
+	if (${method} eq "DELETE") {
+		return(0);
+	} else {
+		return(decode_json($mech->content()));
+	};
 };
 
 ################################################################################
