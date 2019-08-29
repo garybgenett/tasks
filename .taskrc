@@ -215,19 +215,19 @@ report.look.description=		Custom [Look]: Filtered list view (Read)
 report.look.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority
 report.look.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P
 report.look.filter=			(status:pending (kind.any: or (+UNBLOCKED or +DUE or +TODAY or +OVERDUE)))
-report.look.sort=			project+,kind-,priority-,depends+,description+,entry+
+report.look.sort=			project+,kind-,depends-,description+,entry+
 
 report.read.description=		Custom [Read]: Global list view, unfiltered and sorted for review
 report.read.columns=			id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,entry,due,end,imask
 report.read.labels=			ID,B,U,S,D,DESCRIPTION,PROJECT,KIND,AREA,TAGS,A,R,P,+STAT,+BORN,+DEAD,+DIED,+I
 report.read.filter=			#>>>
-report.read.sort=			project+,kind-,priority-,depends+,description+,entry+
+report.read.sort=			project+,kind-,depends-,description+,entry+
 
 report.skim.description=		Custom [Skim]: List view (Read), condensed for reporting
 report.skim.columns=			uuid.short,project,tags,priority,due,end,kind,description.truncated_count
 report.skim.labels=			+UUID,PROJECT,TAGS,P,+DEAD,+DIED,KIND,DESCRIPTION
 report.skim.filter=			#>>>
-report.skim.sort=			project+,kind-,priority-,depends+,description+,entry+
+report.skim.sort=			project+,kind-,depends-,description+,entry+
 
 report.sort.description=		Custom [Sort]: List view, unfiltered and sorted by dates
 report.sort.columns=			entry,modified,due,end,id,depends,urgency.integer,start.age,due.age,description.truncated_count,project,kind,area,tags,entry.age,recur,priority,status,imask
