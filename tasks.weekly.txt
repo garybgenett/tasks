@@ -1,51 +1,6 @@
 ###[ Weekly Review Steps & Commands ]###
 
 #[ Markdown Source ]
-#]#### System
-#]
-#]  * Strategic
-#]    * [Goals (.review)](#goals)
-#]    * [Roadmap (.status)](#roadmap)
-#]    * [Plan (.today)](#plan) ('.@', '.todo')
-#]    * [Timeline (tasks.timeline.html)](tasks.timeline.html)
-#]  * Tactical
-#]    * [Writing (\_imagination.md)](#writing) ('.@')
-#]    * [Journal (.legend)](#uuid-34082cc8-bf70-41e4-b3de-d60f94586ced)
-#]    * [Family & Friends](#uuid-7327628e-c2e8-4b08-b691-e64e4731b17b)
-#]    * [Travel & Gear](#uuid-3fc2209e-6600-4724-86a4-ea8bedff8479)
-#]  * Sources
-#]    * Thoughts
-#]    * Digital
-#]        * [Tasks](https://calendar.google.com) (+Inbox, '.in')
-#]        * [Notes](https://drive.google.com/file/d/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e) ([_notes.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e"]})) ([_notes.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1asjTujzIRYBiqvXdBG34RD_fCN7GQN5e))
-#]        * [Write](https://drive.google.com/file/d/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k) ([_write.md](https://drivenotepad.github.io/app/?state={"action":"open","ids":["1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k"]})) ([_write.md](https://anyfile-notepad.semaan.ca/app#edit/GoogleDrive/1_p06qeX31eFRTUJ2VKWhdfGUhaQBqF5k))
-#]        * [Drive](https://drive.google.com/drive/my-drive) ([Share](https://drive.google.com/drive/shared-with-me))
-#]        * [Mail](https://app.earthclassmail.com)
-#]    * Analog
-#]        * Wallet
-#]        * Paperwork / Folders
-#]  * Tools
-#]    * Taskwarrior
-#]    * Calendar
-#]        * Working entries
-#]        * Past, for missed
-#]        * Future, for upcoming
-#]    * Phone
-#]        * Review ('android.txt')
-#]        * Backup
-#]            * Rsync ('android.txt -r ; android.txt -b')
-#]            * SMS Backup
-#]        * Voicemails
-#]        * Texts
-#]    * Computer
-#]        * Browser
-#]        * Email
-
-#[ _task_parse_cmd :: impersonate_command ]
-
-#[ _task_parse_cmd_bash :: bash]
-
-#[ Markdown Source ]
 #]#### Weekly Review
 #]
 #]  * [System](#system)
