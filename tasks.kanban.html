@@ -15,16 +15,17 @@
 	<div class="grid_16">
 <!-- The data for the stories -->
 <textarea rows="1" id="stories" style="visibility: hidden;">
-k1_Q,uuid,project,task name [annotations]
-k1,uuid,project,task name [annotations]
-k2_Q,uuid,project,task name [annotations]
-k2,uuid,project,task name [annotations]
-k3_Q,uuid,project,task name [annotations]
-k3,uuid,project,task name [annotations]
-k4_Q,uuid,project,task name [annotations]
-k4,uuid,project,task name [annotations]
-k5_Q,uuid,project,task name [annotations]
-k5,uuid,project,task name [annotations]
+<!-- INCLUDE -->
+<!-- TEST k1_Q,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k1,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k2_Q,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k2,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k3_Q,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k3,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k4_Q,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k4,uuid,project,1970-01-01,task name [annotations] -->
+<!-- TEST k5_Q,,,,empty test -->
+<!-- TEST k5,,,,empty test -->
 </textarea>
 
 <!-- Names and shortcuts for the different states:
@@ -71,19 +72,17 @@ k5,Archive
 <!-- Layout from the 1-line Grid Framework,
      http://www.vcarrer.com/2009/06/1-line-css-grid-framework.html -->
 <style type="text/css">
-<!--
     .button { background-color: #c0c0c0; color: #a0a0a0; padding: 0.2em; text-decoration: none;}
     .placeholder {border: 1px solid black; }
      ul { list-style: none; margin: 0 0 0 0; padding: 0 0 0 0;}
 	 body { background-color: #c0c0c0; color: #000000; }
 	 .box { padding: 0.2em; border: 1px solid black; margin-bottom: 1em; margin-right: 5px;}
-//>>>	 .dp10 {width:9%;  float:left;  display: inline;  *margin-right:-1px; }
 	 .dp10 {width:19%;  float:left;  display: inline;  *margin-right:-1px; }
+<!-- FULL 	 .dp10 {width:9%;  float:left;  display: inline;  *margin-right:-1px; } -->
 	 .clear {clear:both;}
 	 .headline { font-weight: bold; height: 3em; color: #000000;}
 	 .queue_column .headline { font-weight: bold; height: 3em; color: #404040;}
 	 .footer { color: #404040; padding-top: 5em;}
-	 -->
 </style>
 <script language="JavaScript">
 /*
@@ -134,7 +133,7 @@ var init_board = function(stories) {
 	for ( var i=0, len=stories.length; i<len; i++ ) {
 		var story = stories[i].split(",");
 		var state = story[0];
-		if (story.length == 4) {
+		if (story.length == 5) {
 			if (! board[state]) {
 				board[state] = [];
 			}
@@ -148,7 +147,7 @@ var create_list = function(board, state) {
 	   var list = $("<ul class=\"state\" id=\"" + state + "\"></ul>");
        if (board[state]) {
          for (var i=0, len=board[state].length; i<len; i++) {
-            var story_element = $("<li><div class=\"box box_" + state  + "\">" + board[state][i][1] + " (" + board[state][i][2] + ")" + "<br/>" + board[state][i][3] + "<br/>" + "</div></li>");
+            var story_element = $("<li><div class=\"box box_" + state  + "\">" + board[state][i][1] + " (" + board[state][i][2] + ")" + " [" + board[state][i][3] + "]" + "<br/>" + board[state][i][4] + "<br/>" + "</div></li>");
             story_element.data("story",  board[state][i]);
 			list.append(story_element);
      	 }
@@ -172,9 +171,8 @@ var create_board = function(app_data) {
 		if (! /_Q$/.test(state)) {
 			var queue_state = state + "_Q";
 			ids += "#" + queue_state + ",";
-//>>>
-//		    var queue_state_column = create_column(app_data.board, queue_state, "(" + app_data.states[state] + ")")
-//			table.append(queue_state_column)
+<!-- FULL 		    var queue_state_column = create_column(app_data.board, queue_state, "(" + app_data.states[state] + ")") -->
+<!-- FULL 			table.append(queue_state_column) -->
 
 			ids += "#" + state + ","
 			var state_column = create_column(app_data.board, state, app_data.states[state])
@@ -215,15 +213,15 @@ $("#data_link").click(function () {
 
 var state_data = init_states($("#states").text().split("\n"));
 var app_data = { board: init_board($("#stories").text().split("\n")), states: state_data.states, states_order: state_data.states_order}
-//>>>
+<!-- INTERNAL /* -->
 $.get("tasks.kanban.csv", function(csv) {
 app_data = { board: init_board(csv.split("\n")), states: state_data.states, states_order: state_data.states_order}
-//>>>
+<!-- INTERNAL */ -->
 $("#output").empty();
 $("#output").append(create_board(app_data));
-//>>>
+<!-- INTERNAL /* -->
 });
-//>>>
+<!-- INTERNAL */ -->
 
 </script>
 
