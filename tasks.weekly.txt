@@ -13,8 +13,8 @@
 #]        * Recurring (`read status:recurring`, `+task-recur status:recurring`, `read status.isnt:recurring mask.any:`, `+task-recur status.isnt:recurring mask.any:`)
 #]    * Projects (`projects`)
 #]        * Active (`projects status:pending`)
-#]        * Iterate (`+for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; task-depends project.is:${FILE} -PARENT -CHILD; done`)
-#]    * Tasks (`view status:pending project.none:; task-depends status:pending project.none:`)
+#]        * Iterate (`+for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; task-depends -r project.is:${FILE} -PARENT -CHILD; done`)
+#]    * Tasks (`view status:pending project.none:; task-depends -r status:pending project.none:`)
 #]        * UDAs (`udas`)
 #]            * Kinds (`+for FILE in $(task status:pending _unique kind); do task read status:pending kind.is:${FILE}; done`)
 #]            * Areas (`+for FILE in $(task status:pending _unique area); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done`)
@@ -36,8 +36,8 @@
 #|+task-recur status.isnt:recurring mask.any:
 #|projects
 #|projects status:pending
-#|+for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; task-depends project.is:${FILE} -PARENT -CHILD; done
-#|view status:pending project.none:; task-depends status:pending project.none:
+#|+for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; task-depends -r project.is:${FILE} -PARENT -CHILD; done
+#|view status:pending project.none:; task-depends -r status:pending project.none:
 #|udas
 #|+for FILE in $(task status:pending _unique kind); do task read status:pending kind.is:${FILE}; done
 #|+for FILE in $(task status:pending _unique area); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done
@@ -59,8 +59,8 @@ task read status.isnt:recurring mask.any:;
 eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-recur status.isnt:recurring mask.any:;
 task projects;
 task projects status:pending;
-for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends project.is:${FILE} -PARENT -CHILD; done;
-task view status:pending project.none:; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends status:pending project.none:;
+for FILE in $(task status:pending _unique project); do task read project.is:${FILE} -PARENT -CHILD; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends -r project.is:${FILE} -PARENT -CHILD; done;
+task view status:pending project.none:; eval ${MARKER}; IMPERSONATE_NAME=task .bashrc task-depends -r status:pending project.none:;
 task udas;
 for FILE in $(task status:pending _unique kind); do task read status:pending kind.is:${FILE}; done;
 for FILE in $(task status:pending _unique area); do task tags status:pending area.is:${FILE}; task read status:pending area.is:${FILE}; done;
