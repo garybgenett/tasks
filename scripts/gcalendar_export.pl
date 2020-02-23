@@ -37,6 +37,9 @@ sub mech_fail {
 	&confess();
 };
 
+use JSON::XS;
+my $json = JSON::XS->new();
+
 use Archive::Zip qw(:ERROR_CODES);
 use File::Temp qw(tempfile);
 use File::Copy;
@@ -51,14 +54,30 @@ my $C_FILE		= "calendar";
 my $D_FILE		= "drive";
 my $EXTENSION		= ".ics";
 
-my $REQ_PER_SEC		= "1";
-my $REQ_PER_SEC_SLEEP	= "15";
+my $URL_WEB		= "https://calendar.google.com";
+my $URL_OAUTH_AUTH	= "https://accounts.google.com/o/oauth2/auth";
+my $URL_OAUTH_TOKEN	= "https://accounts.google.com/o/oauth2/token";
+my $URL_SCOPE		= "https://www.googleapis.com/auth/calendar";
+my $URL_API		= "https://www.googleapis.com/calendar/v3";
+
+#>>>my $REQ_PER_SEC		= "1";
+#>>>my $REQ_PER_SEC_SLEEP	= "15";
+my $REQ_PER_SEC		= "3";
+my $REQ_PER_SEC_SLEEP	= "2";
 
 ########################################
 
 our $USERNAME;
 our $PASSWORD;
-do("./.auth") || die();
+our $CLIENTID;
+our $CLSECRET;
+our $REDIRECT;
+do("./.auth-calendar") || die();
+
+our $CODE;
+our $REFRESH;
+our $ACCESS;
+do("./.token-calendar") || die();
 
 ################################################################################
 
@@ -72,20 +91,77 @@ sub EXIT {
 
 ########################################
 
-sub authenticate {
-	$mech->get("https://www.google.com/calendar");
+sub auth_login {
+	my $mech_auth	= shift;
 
-#>>>	$mech->get("https://accounts.google.com/ServiceLogin");
-	$mech->form_id("gaia_loginform");
-	$mech->field("Email",	${USERNAME});
-	$mech->field("Passwd",	${PASSWORD});
-	$mech->submit();
+	$mech_auth->get(${URL_WEB});
 
-#>>>	$mech->get("https://accounts.google.com/AccountLoginInfo");
-	$mech->form_id("gaia_loginform");
-	$mech->field("Email",	${USERNAME});
-	$mech->field("Passwd",	${PASSWORD});
-	$mech->submit();
+#>>>	$mech_auth->get("https://accounts.google.com/ServiceLogin");
+	$mech_auth->form_id("gaia_loginform");
+	$mech_auth->field("Email",	${USERNAME});
+	$mech_auth->field("Passwd",	${PASSWORD});
+	$mech_auth->submit();
+
+#>>>	$mech_auth->get("https://accounts.google.com/AccountLoginInfo");
+	$mech_auth->form_id("gaia_loginform");
+	$mech_auth->field("Email",	${USERNAME});
+	$mech_auth->field("Passwd",	${PASSWORD});
+	$mech_auth->submit();
+
+	return(${mech_auth});
+};
+
+########################################
+
+sub refresh_tokens {
+	if (!${CODE} || !${REFRESH}) {
+		$mech = &auth_login(${mech});
+
+		$mech->get(${URL_OAUTH_AUTH}
+			. "?client_id=${CLIENTID}"
+			. "&redirect_uri=${REDIRECT}"
+			. "&scope=${URL_SCOPE}"
+			. "&response_type=code"
+		);
+		$mech->submit_form(
+			"form_id"	=> "connect-approve",
+			"fields"	=> {"submit_access" => "true"},
+		);
+		$CODE = $mech->content();
+		$CODE =~ s|^.*<input id="code" type="text" readonly="readonly" value="||s;
+		$CODE =~ s|".*$||s;
+
+		$mech->post(${URL_OAUTH_TOKEN}, {
+			"code"			=> ${CODE},
+			"client_id"		=> ${CLIENTID},
+			"client_secret"		=> ${CLSECRET},
+			"redirect_uri"		=> ${REDIRECT},
+			"grant_type"		=> "authorization_code",
+		});
+		$REFRESH = decode_json($mech->content());
+		$REFRESH = $REFRESH->{"refresh_token"};
+
+		open(OUTPUT, ">", ".token") || die();
+		print OUTPUT "our \$CODE    = '${CODE}';\n";
+		print OUTPUT "our \$REFRESH = '${REFRESH}';\n";
+		close(OUTPUT) || die();
+	};
+
+	$mech->post(${URL_OAUTH_TOKEN}, {
+		"refresh_token"		=> ${REFRESH},
+		"client_id"		=> ${CLIENTID},
+		"client_secret"		=> ${CLSECRET},
+		"grant_type"		=> "refresh_token",
+	});
+	$ACCESS = decode_json($mech->content());
+	$ACCESS = $ACCESS->{"access_token"};
+
+	print "CODE:    ${CODE}\n";
+	print "REFRESH: ${REFRESH}\n";
+	print "ACCESS:  ${ACCESS}\n";
+	print "\n";
+
+	$mech->add_header("Authorization" => "Bearer ${ACCESS}");
 
 	return(0);
 };
@@ -100,25 +176,30 @@ sub get_calendar {
 	print "${name} :: ${id}\n";
 
 	my($TEMPFILE, $tempfile) = tempfile(".${C_FILE}.XXXX", "UNLINK" => "1");
+
 	my $zip = Archive::Zip->new();
 
 	if ((${REQUEST_COUNT} % ${REQ_PER_SEC}) == 0) {
 		sleep(${REQ_PER_SEC_SLEEP});
 	};
-	$mech->get("https://www.google.com/calendar/exporticalzip?cexp=${id}") && $REQUEST_COUNT++;
-	$mech->save_content($tempfile);
+#>>>	$mech->get("https://calendar.google.com/calendar/exporticalzip?cexp=${id}") && $REQUEST_COUNT++;
+	$mech->get("https://apidata.googleusercontent.com/caldav/v2/${id}/events") && $REQUEST_COUNT++;
+#>>>
+	$mech->save_content($tempfile, binmode => ":raw:utf8");
 #>>>	&DUMPER(${mech});
 
-	if ($zip->read($tempfile) != AZ_OK) { die(); };
-#>>>	&DUMPER($zip);
-	my @files = $zip->memberNames();
-	my $files = \@files;
-#>>>	&DUMPER($files);
-	foreach my $file (@{$files}) {
-		print "\t${tempfile} -> ${file} -> ${name}\n";
-		if ($zip->extractMember(${file}) != AZ_OK) { die(); };
-		move(${file}, ${name});
-	};
+#>>>	if ($zip->read($tempfile) != AZ_OK) { die(); };
+#>>>#>>>	&DUMPER($zip);
+#>>>	my @files = $zip->memberNames();
+#>>>	my $files = \@files;
+#>>>#>>>	&DUMPER($files);
+#>>>	foreach my $file (@{$files}) {
+#>>>		print "\t${tempfile} -> ${file} -> ${name}\n";
+#>>>		if ($zip->extractMember(${file}) != AZ_OK) { die(); };
+#>>>		move(${file}, ${name});
+#>>>	};
+	move($tempfile, ${name});
+#>>>
 
 	close(${TEMPFILE}) || die();
 
@@ -154,7 +235,7 @@ sub get_drive {
 ################################################################################
 
 if (@{ARGV}) {
-	&authenticate();
+	&refresh_tokens();
 
 	foreach my $calendar (@{ARGV}) {
 		my($type, $data) = split(/[|]/, ${calendar});
