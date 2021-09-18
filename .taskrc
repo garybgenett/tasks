@@ -143,7 +143,7 @@ uda.kind.values=			notes,track,
 
 uda.area.label=				Area
 uda.area.type=				string
-uda.area.values=			_gtd,computer,family,gear,health,money,people,self,travel,work,work-em,work.bz,work.cn,work.em,work.f5,work.hs,work.jb,work.me,work.tk,work.vn,writing,
+uda.area.values=			_gtd,computer,family,gear,health,money,people,self,travel,work,work-em,work.bz,work.cn,work.em,work.f5,work.gg,work.hs,work.jb,work.jl,work.me,work.tk,work.vn,writing,
 
 uda.priority.label=			Priority
 uda.priority.type=			string
