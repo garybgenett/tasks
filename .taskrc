@@ -159,11 +159,11 @@ uda.priority.values=			H,M,L,
 # k4: complete				read rc.context=k4
 # k5: archive				read rc.context=k5
 
-context.k1=				project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or +BLOCKED )
-context.k2=				project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or priority.any: ) area.isnt:computer tags.isnt:errand tags.isnt:home +BLOCKED
-context.k3=				project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or priority.any: ) area.isnt:computer tags.isnt:errand tags.isnt:home +UNBLOCKED
-context.k4=				project.isnt:_gtd ( status.isnt:pending end.after:today-1weeks )
-context.k5=				project.isnt:_gtd ( status.is:pending modified.after:today-1weeks )
+context.k1.read=			project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or +BLOCKED )
+context.k2.read=			project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or priority.any: ) area.isnt:computer tags.isnt:errand tags.isnt:home +BLOCKED
+context.k3.read=			project.isnt:_gtd ( +OVERDUE or +TODAY or +DUE or priority.any: ) area.isnt:computer tags.isnt:errand tags.isnt:home +UNBLOCKED
+context.k4.read=			project.isnt:_gtd ( status.isnt:pending end.after:today-1weeks )
+context.k5.read=			project.isnt:_gtd ( status.is:pending modified.after:today-1weeks )
 
 ########################################
 
