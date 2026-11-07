@@ -6632,7 +6632,8 @@ function task-export-text {
 		if (-f "${ENV{COMPOSER}}" && "${name}" ne "0") {
 			my $compose = "make all"
 				. " -C ${ENV{PIMDIR}}"
-				. " COMPOSER_DEBUGIT=1"
+				. " COMPOSER_DEBUGIT=\"1\""
+				. " COMPOSER_FAILIFW=\"\""
 				. " COMPOSER_KEEPING=\"\""
 				;
 			if (system(${compose}) != 0) { die(); };
