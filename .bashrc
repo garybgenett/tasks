@@ -626,7 +626,7 @@ if [[ ${UNAME} == "Windows" ]]; then
 		${RM} ${HOME}/{Desktop,Downloads}
 		${LN} --relative "/mnt/c/Users/${USER}/Desktop" ${HOME}/
 		${LN} --relative "/mnt/c/Users/${USER}/Downloads" ${HOME}/
-		${LN} --relative ${HOME}/Desktop/_wsl/{.Xdefaults,.bash_profile,.htoprc.bak,.screenrc,.vimrc} ${HOME}/
+		${LN} --relative ${HOME}/Desktop/_wsl/{.Xdefaults,.bash_profile,.composer.mk,.htoprc.bak,.screenrc,.vimrc} ${HOME}/
 		${LN} --relative ${HOME}/Desktop/_wsl/.bashrc ${HOME}/.bash_aliases
 		sudo ${RM} /root/.ssh && \
 		sudo ${LN} --relative ${HOME}/.ssh /root/
@@ -634,7 +634,7 @@ if [[ ${UNAME} == "Windows" ]]; then
 	}
 	function wsl {
 		${RSYNC_U} \
-			root@server.garybgenett.net:{/.g/_data/zactive/{.setup/{_misc/playlist*,_tools/putty{,.reg}},.static/{.X*,.bash*,.htop*,.screen*,.vim*,scripts/updebian}},${COMPOSER_SRC}} \
+			root@server.garybgenett.net:{/.g/_data/zactive/{.setup/{_misc/playlist*,_tools/putty{,.reg}},.static/{.X*,.bash*,.composer*,.htop*,.screen*,.vim*,scripts/updebian}},${COMPOSER_SRC}} \
 			${HOME}/Desktop/_wsl/
 		if [[ -d ${HOME}/Desktop/composer ]]; then
 			${RSYNC_U} ${HOME}/Desktop/_wsl/Makefile ${HOME}/Desktop/composer/
